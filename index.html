@@ -329,6 +329,63 @@
       font-size: 0.92rem;
     }
 
+    .faq-list {
+      display: grid;
+      gap: 0.8rem;
+    }
+
+    details {
+      background: rgba(30, 41, 59, 0.75);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      border-radius: var(--radius);
+      padding: 0.7rem 0.9rem;
+      cursor: pointer;
+    }
+
+    details[open] {
+      border-color: rgba(34, 211, 238, 0.6);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.6);
+    }
+
+    summary {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.8rem;
+      font-weight: 500;
+      color: var(--white);
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .summary-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      display: grid;
+      place-items: center;
+      font-size: 0.8rem;
+      color: var(--accent);
+      flex-shrink: 0;
+      transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    }
+
+    details[open] .summary-icon {
+      transform: rotate(90deg);
+      background: rgba(34, 211, 238, 0.15);
+      border-color: rgba(34, 211, 238, 0.8);
+    }
+
+    details p {
+      margin: 0.6rem 0 0.1rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
     .cta {
       background: linear-gradient(130deg, rgba(34, 211, 238, 0.12), rgba(56, 189, 248, 0.05));
       border: 1px solid rgba(34, 211, 238, 0.3);
@@ -391,6 +448,7 @@
         <a href="#advantages">Преимущества</a>
         <a href="#roadmap">Как учимся</a>
         <a href="#reviews">Отзывы</a>
+        <a href="#faq">FAQ</a>
       </nav>
       <a href="#join" class="btn btn-primary">Присоединиться</a>
     </div>
@@ -519,6 +577,35 @@
             <p>«Самое ценное — регулярная обратная связь от менторов и проекты, которые не стыдно показывать работодателю.»</p>
             <cite>— Артём, выпускник Product Analytics</cite>
           </blockquote>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq">
+      <div class="container">
+        <h2 class="section-title">Частые вопросы</h2>
+        <div class="faq-list">
+          <details>
+            <summary>
+              <span>Сколько времени в неделю нужно уделять обучению?</span>
+              <span class="summary-icon">›</span>
+            </summary>
+            <p>В среднем наши студенты занимаются от 6 до 10 часов в неделю. Формат гибкий — можно совмещать с работой или учёбой.</p>
+          </details>
+          <details>
+            <summary>
+              <span>Подойдёт ли мне программа, если я совсем с нуля?</span>
+              <span class="summary-icon">›</span>
+            </summary>
+            <p>Да, на старте ты проходишь диагностику, и мы помогаем выбрать трек: с нуля или с упором на прокачку текущих навыков.</p>
+          </details>
+          <details>
+            <summary>
+              <span>Помогаете ли вы с трудоустройством?</span>
+              <span class="summary-icon">›</span>
+            </summary>
+            <p>Да, у нас есть карьерный блок: помогаем собрать портфолио, резюме, подготовиться к собеседованиям и выйти на новые офферы.</p>
+          </details>
         </div>
       </div>
     </section>
