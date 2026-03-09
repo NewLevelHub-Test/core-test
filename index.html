@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Level Hub — Главная</title>
+  <meta name="description" content="New Level Hub — обучающая платформа для роста в digital-направлениях: разработка, дизайн, аналитика и продукт.">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --bg-soft: #111c36;
+      --card: #1e293b;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #22d3ee;
+      --accent-2: #38bdf8;
+      --success: #34d399;
+      --white: #ffffff;
+      --shadow: 0 10px 30px rgba(2, 6, 23, 0.35);
+      --radius: 14px;
+      --container: 1120px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+      background: linear-gradient(180deg, var(--bg) 0%, #0b1222 100%);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: min(100% - 2rem, var(--container));
+      margin-inline: auto;
+    }
+
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(10px);
+      background: rgba(15, 23, 42, 0.8);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 70px;
+      gap: 1rem;
+    }
+
+    .brand {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .brand-badge {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+      display: grid;
+      place-items: center;
+      color: #062031;
+      font-weight: 900;
+      font-size: 0.95rem;
+    }
+
+    .nav {
+      display: flex;
+      gap: 1.2rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .nav a:hover {
+      color: var(--white);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      padding: 0.7rem 1rem;
+      font-weight: 600;
+      border: 1px solid transparent;
+      transition: 0.2s ease;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: linear-gradient(120deg, var(--accent) 0%, var(--accent-2) 100%);
+      color: #05263a;
+      box-shadow: var(--shadow);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+
+    .btn-ghost {
+      border-color: rgba(148, 163, 184, 0.4);
+      color: var(--text);
+      background: transparent;
+    }
+
+    .btn-ghost:hover {
+      border-color: rgba(148, 163, 184, 0.9);
+    }
+
+    .hero {
+      padding: 5.5rem 0 4rem;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .kicker {
+      color: var(--accent);
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      margin-bottom: 0.7rem;
+      font-size: 0.95rem;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0 0 1rem;
+      line-height: 1.2;
+      color: var(--white);
+    }
+
+    h1 {
+      font-size: clamp(2rem, 4vw, 3.2rem);
+    }
+
+    h2 {
+      font-size: clamp(1.5rem, 2.8vw, 2.1rem);
+    }
+
+    .subtitle {
+      margin: 0 0 1.8rem;
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 60ch;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.7rem;
+    }
+
+    .stat {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 12px;
+      padding: 0.8rem;
+      text-align: center;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.15rem;
+      color: var(--white);
+      margin-bottom: 0.2rem;
+    }
+
+    .stat span {
+      font-size: 0.86rem;
+      color: var(--muted);
+    }
+
+    .hero-card {
+      background: linear-gradient(160deg, var(--bg-soft) 0%, rgba(30, 41, 59, 0.95) 100%);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
+    }
+
+    .hero-card h3 {
+      margin-bottom: 0.7rem;
+    }
+
+    .checklist {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 0.7rem;
+      color: var(--text);
+    }
+
+    .checklist li {
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid rgba(148, 163, 184, 0.15);
+      border-radius: 10px;
+      padding: 0.7rem 0.8rem;
+    }
+
+    .checklist li::before {
+      content: "✓";
+      color: var(--success);
+      margin-right: 0.45rem;
+      font-weight: 700;
+    }
+
+    section {
+      padding: 3.5rem 0;
+    }
+
+    .section-title {
+      margin-bottom: 1.5rem;
+      max-width: 60ch;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .card {
+      background: rgba(30, 41, 59, 0.75);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+
+    .card h3 {
+      font-size: 1.05rem;
+      margin-bottom: 0.45rem;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 0.9rem;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.8rem;
+      align-items: start;
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 12px;
+      padding: 0.9rem;
+    }
+
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: rgba(34, 211, 238, 0.18);
+      color: var(--accent);
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-top: 2px;
+    }
+
+    .step p {
+      margin: 0.2rem 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .testimonials {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    blockquote {
+      margin: 0;
+      background: rgba(30, 41, 59, 0.75);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 1rem;
+      color: var(--text);
+    }
+
+    blockquote p {
+      margin: 0 0 0.7rem;
+    }
+
+    blockquote cite {
+      color: var(--muted);
+      font-style: normal;
+      font-size: 0.92rem;
+    }
+
+    .cta {
+      background: linear-gradient(130deg, rgba(34, 211, 238, 0.12), rgba(56, 189, 248, 0.05));
+      border: 1px solid rgba(34, 211, 238, 0.3);
+      border-radius: var(--radius);
+      padding: 1.4rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .footer {
+      border-top: 1px solid rgba(148, 163, 184, 0.2);
+      padding: 1.4rem 0 2.4rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 940px) {
+      .hero-grid,
+      .cards,
+      .testimonials {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        padding-top: 4rem;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .header-inner {
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 0.7rem 0;
+      }
+
+      .nav {
+        width: 100%;
+        justify-content: center;
+        order: 3;
+      }
+
+      .hero-stats {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <a href="#" class="brand" aria-label="New Level Hub">
+        <span class="brand-badge">NL</span>
+        <span>New Level Hub</span>
+      </a>
+      <nav class="nav" aria-label="Основная навигация">
+        <a href="#courses">Направления</a>
+        <a href="#advantages">Преимущества</a>
+        <a href="#roadmap">Как учимся</a>
+        <a href="#reviews">Отзывы</a>
+      </nav>
+      <a href="#join" class="btn btn-primary">Присоединиться</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <p class="kicker">Платформа развития в digital</p>
+          <h1>Выходи на новый уровень вместе с New Level Hub</h1>
+          <p class="subtitle">
+            Практические программы с наставниками из индустрии: учимся на реальных задачах,
+            собираем портфолио и доходим до трудоустройства в комфортном темпе.
+          </p>
+          <div class="hero-actions">
+            <a href="#join" class="btn btn-primary">Начать обучение</a>
+            <a href="#courses" class="btn btn-ghost">Посмотреть направления</a>
+          </div>
+          <div class="hero-stats" aria-label="Ключевые показатели платформы">
+            <div class="stat">
+              <strong>1 500+</strong>
+              <span>студентов</span>
+            </div>
+            <div class="stat">
+              <strong>48</strong>
+              <span>менторов</span>
+            </div>
+            <div class="stat">
+              <strong>87%</strong>
+              <span>доходят до оффера</span>
+            </div>
+          </div>
+        </div>
+
+        <aside class="hero-card" aria-label="Почему New Level Hub">
+          <h3>Что получишь на старте</h3>
+          <ul class="checklist">
+            <li>Личный трек обучения под твою цель</li>
+            <li>Обратная связь от практикующих специалистов</li>
+            <li>Комьюнити и еженедельные разборы кейсов</li>
+            <li>Карьерное сопровождение и подготовка к собеседованиям</li>
+          </ul>
+        </aside>
+      </div>
+    </section>
+
+    <section id="courses">
+      <div class="container">
+        <h2 class="section-title">Популярные направления</h2>
+        <div class="cards">
+          <article class="card">
+            <h3>Frontend Development</h3>
+            <p>HTML, CSS, JavaScript, React и командная разработка от брифов до релиза.</p>
+          </article>
+          <article class="card">
+            <h3>UX/UI Design</h3>
+            <p>Исследования, прототипы, дизайн-системы и защита решений перед заказчиком.</p>
+          </article>
+          <article class="card">
+            <h3>Product Analytics</h3>
+            <p>Метрики, SQL, визуализация данных и принятие продуктовых решений на цифрах.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="advantages">
+      <div class="container">
+        <h2 class="section-title">Почему выбирают нас</h2>
+        <div class="cards">
+          <article class="card">
+            <h3>Обучение через практику</h3>
+            <p>Каждый модуль заканчивается проектом, который можно добавить в портфолио.</p>
+          </article>
+          <article class="card">
+            <h3>Поддержка менторов</h3>
+            <p>Разбор ошибок, регулярные Q&amp;A-сессии и персональные рекомендации по росту.</p>
+          </article>
+          <article class="card">
+            <h3>Карьерный фокус</h3>
+            <p>Резюме, LinkedIn, mock-интервью и сопровождение до выхода на новую роль.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="roadmap">
+      <div class="container">
+        <h2 class="section-title">Как проходит обучение</h2>
+        <div class="timeline">
+          <article class="step">
+            <div class="step-num">1</div>
+            <div>
+              <strong>Диагностика и цель</strong>
+              <p>Определяем текущий уровень, цель и подходящий учебный трек.</p>
+            </div>
+          </article>
+          <article class="step">
+            <div class="step-num">2</div>
+            <div>
+              <strong>Модули и практика</strong>
+              <p>Изучаешь материал в удобном темпе и закрепляешь его на задачах из индустрии.</p>
+            </div>
+          </article>
+          <article class="step">
+            <div class="step-num">3</div>
+            <div>
+              <strong>Портфолио и карьерный блок</strong>
+              <p>Собираешь кейсы, готовишься к интервью и выходишь на рынок уверенно.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="reviews">
+      <div class="container">
+        <h2 class="section-title">Отзывы студентов</h2>
+        <div class="testimonials">
+          <blockquote>
+            <p>«За 5 месяцев полностью сменила сферу и получила оффер на позицию junior frontend-разработчика.»</p>
+            <cite>— Марина, выпускница Frontend трека</cite>
+          </blockquote>
+          <blockquote>
+            <p>«Самое ценное — регулярная обратная связь от менторов и проекты, которые не стыдно показывать работодателю.»</p>
+            <cite>— Артём, выпускник Product Analytics</cite>
+          </blockquote>
+        </div>
+      </div>
+    </section>
+
+    <section id="join">
+      <div class="container">
+        <div class="cta">
+          <div>
+            <h2>Готов к следующему шагу?</h2>
+            <p class="subtitle">Оставь заявку, и команда New Level Hub поможет выбрать оптимальный старт.</p>
+          </div>
+          <a href="mailto:hello@newlevelhub.com" class="btn btn-primary">Оставить заявку</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      © 2026 New Level Hub. Все права защищены.
+    </div>
+  </footer>
+</body>
+</html>
