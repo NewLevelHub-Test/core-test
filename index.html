@@ -4,19 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>New Level Hub — Главная</title>
-  <meta name="description" content="New Level Hub — обучающая платформа для роста в digital-направлениях.">
+  <meta name="description" content="New Level Hub — обучающая платформа для роста в digital-направлениях: разработка, дизайн, аналитика и продукт.">
   <style>
     :root {
-      --bg: #0f172a;
-      --bg-soft: #111c36;
-      --card: #1e293b;
-      --text: #e2e8f0;
-      --muted: #94a3b8;
-      --accent: #22d3ee;
-      --accent-2: #38bdf8;
-      --success: #34d399;
-      --white: #ffffff;
-      --shadow: 0 10px 30px rgba(2, 6, 23, 0.35);
+      --bg: #050506;
+      --bg-soft: #111111;
+      --card: #18181b;
+      --text: #e5e5e5;
+      --muted: #a3a3a3;
+      --accent: #d4d4d4;
+      --accent-2: #e5e5e5;
+      --success: #22c55e;
+      --white: #fafafa;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
       --radius: 14px;
       --container: 1120px;
     }
@@ -26,7 +26,7 @@
     body {
       margin: 0;
       font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
-      background: linear-gradient(180deg, var(--bg) 0%, #0b1222 100%);
+      background: radial-gradient(circle at top left, #27272a 0%, var(--bg) 35%, #020617 100%);
       color: var(--text);
       line-height: 1.6;
     }
@@ -43,8 +43,8 @@
       top: 0;
       z-index: 20;
       backdrop-filter: blur(10px);
-      background: rgba(15, 23, 42, 0.8);
-      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+      background: rgba(15, 15, 15, 0.9);
+      border-bottom: 1px solid rgba(82, 82, 91, 0.6);
     }
 
     .header-inner {
@@ -66,9 +66,9 @@
     .brand-badge {
       width: 34px; height: 34px;
       border-radius: 10px;
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+      background: radial-gradient(circle at 20% 20%, #fafafa 0%, var(--accent-2) 45%, #a3a3a3 100%);
       display: grid; place-items: center;
-      color: #062031; font-weight: 900;
+      color: #18181b; font-weight: 900;
     }
 
     .nav { display: flex; gap: 1.2rem; color: var(--muted); }
@@ -81,13 +81,16 @@
     }
 
     .btn-primary {
-      background: linear-gradient(120deg, var(--accent) 0%, var(--accent-2) 100%);
-      color: #05263a; border: none;
+      background: linear-gradient(135deg, #fafafa 0%, var(--accent-2) 45%, #d4d4d4 100%);
+      color: #18181b;
+      border: 1px solid rgba(163, 163, 163, 0.6);
+      box-shadow: var(--shadow);
     }
 
     .hero { padding: 5.5rem 0 4rem; }
     h1 { font-size: clamp(2rem, 4vw, 3.2rem); color: var(--white); margin-bottom: 1rem;}
-    .subtitle { color: var(--muted); font-size: 1.05rem; margin-bottom: 1.8rem; }
+    .subtitle { color: var(--muted); font-size: 1.05rem; margin-bottom: 1.2rem; max-width: 60ch; }
+    .subtitle + .subtitle { margin-top: 0.2rem; }
     
     .cards {
       display: grid;
@@ -97,14 +100,15 @@
     }
 
     .card {
-      background: rgba(30, 41, 59, 0.75);
-      border: 1px solid rgba(148, 163, 184, 0.2);
+      background: rgba(24, 24, 27, 0.9);
+      border: 1px solid rgba(63, 63, 70, 0.9);
       border-radius: var(--radius);
       padding: 1.5rem;
+      box-shadow: var(--shadow);
     }
 
     .footer {
-      border-top: 1px solid rgba(148, 163, 184, 0.2);
+      border-top: 1px solid rgba(63, 63, 70, 0.9);
       padding: 2rem 0; color: var(--muted); text-align: center;
     }
   </style>
@@ -128,7 +132,14 @@
     <section class="hero">
       <div class="container">
         <h1>Выходи на новый уровень вместе с New Level Hub</h1>
-        <p class="subtitle">Практические программы с наставниками из индустрии: учимся на реальных задачах и доходим до трудоустройства.</p>
+        <p class="subtitle">
+          Практические программы с наставниками из индустрии: учимся на реальных задачах, собираем уверенное портфолио
+          и шагаем к новой карьере в комфортном темпе, без стресса и выгорания.
+        </p>
+        <p class="subtitle">
+          Мы помогаем на каждом этапе — от выбора направления до подготовки к собеседованиям, чтобы твой переход в digital
+          был осознанным и результативным.
+        </p>
         <a href="#join" class="btn btn-primary">Начать обучение</a>
       </div>
     </section>
@@ -139,15 +150,26 @@
         <div class="cards">
           <div class="card">
             <h3 style="color: white; margin-top: 0;">Frontend Development</h3>
-            <p>HTML, CSS, JavaScript, React и командная разработка.</p>
+            <p>
+              HTML, CSS, JavaScript, React и командная разработка в реальных сценариях: от первых прототипов до
+              полноценных интерфейсов. Учишься писать чистый и понятный код, работать с дизайном и бэкендом,
+              а в итоге собираешь проекты, которые не стыдно показать работодателю.
+            </p>
           </div>
           <div class="card">
             <h3 style="color: white; margin-top: 0;">UX/UI Design</h3>
-            <p>Исследования, прототипы и защита решений.</p>
+            <p>
+              Исследования пользователей, прототипы, дизайн-системы и презентация решений. Разбираем, как выстраивать
+              логику интерфейса, чтобы продукт был не только красивым, но и удобным, и как уверенно защищать свои идеи
+              перед заказчиком или командой.
+            </p>
           </div>
           <div class="card">
             <h3 style="color: white; margin-top: 0;">Product Analytics</h3>
-            <p>Метрики, SQL и принятие решений на цифрах.</p>
+            <p>
+              Метрики продукта, SQL, визуализация данных и принятие решений на основе цифр. Учимся находить узкие места
+              в воронке, формулировать гипотезы и проверять их данными, чтобы продукт рос, а решения были аргументированными.
+            </p>
           </div>
         </div>
       </div>
