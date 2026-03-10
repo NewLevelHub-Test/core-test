@@ -12,7 +12,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Run build (placeholder)
         run: echo "Build successful"
 
@@ -24,18 +23,18 @@ jobs:
       - name: Send Slack notification
         uses: slackapi/slack-github-action@v1.27.0
         with:
-        payload: |
-                    {
-                      "blocks": [
-                        {
-                          "type": "section",
-                          "text": {
-                            "type": "mrkdwn",
-                            "text": "${{ needs.build.result == 'success' && '✅ SUCCESS' || '❌ FAILURE' }} *${{ github.repository }}*\n*Branch:* `${{ github.ref_name }}`\n*Actor:* ${{ github.actor }}${{ github.event_name == 'pull_request' && format('\n*PR:* {0} by {1}', github.event.pull_request.title, github.event.pull_request.user.login) || '' }}\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>"
-                          }
-                        }
-                      ]
-                    }
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "${{ needs.build.result == 'success' && '✅ SUCCESS' || '❌ FAILURE' }} *${{ github.repository }}*\n*Branch:* `${{ github.ref_name }}`\n*Actor:* ${{ github.actor }}${{ github.event_name == 'pull_request' && format('\n*PR:* {0} by {1}', github.event.pull_request.title, github.event.pull_request.user.login) || '' }}\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>"
+                  }
+                }
+              ]
+            }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
