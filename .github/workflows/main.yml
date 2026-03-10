@@ -7,15 +7,26 @@ on:
     branches: ["**"]
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run build (placeholder)
+        run: echo "Build successful"
+
   notify:
     runs-on: ubuntu-latest
+    needs: [build]
+    if: always()
     steps:
       - name: Send Slack notification
         uses: slackapi/slack-github-action@v1.27.0
         with:
           payload: |
             {
-              "text": "🔔 *${{ github.repository }}* pushed to `${{ github.ref_name }}` by ${{ github.actor }}\n${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+              "text": "${{ needs.build.result == 'success' && '✅ SUCCESS' || '❌ FAILURE' }} *${{ github.repository }}*\n*Branch:* `${{ github.ref_name }}`\n*Actor:* ${{ github.actor }}${{ github.event_name == 'pull_request' && format('\n*PR:* {0} by {1}', github.event.pull_request.title, github.event.pull_request.user.login) || '' }}\n*Run:* ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
