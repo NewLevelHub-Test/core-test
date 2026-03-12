@@ -145,6 +145,11 @@
 
         </div>
     </main>
-
+    <script src="api.js"></script>
+    <script>
+        if (!window.roChessApi.isAuthenticated()) {
+            window.location.href = 'h1.html';
+        }
+    </script>
 </body>
 </html>
