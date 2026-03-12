@@ -1,0 +1,61 @@
+from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
+
+from app.services.test_service import TestService
+
+test_bp = Blueprint('tests', __name__)
+
+
+@test_bp.route('/', methods=['GET'])
+@jwt_required()
+def get_tests():
+    result, status = TestService.get_tests()
+    return jsonify(result), status
+
+
+@test_bp.route('/<int:test_id>', methods=['GET'])
+@jwt_required()
+def get_test(test_id):
+    result, status = TestService.get_test(test_id)
+    return jsonify(result), status
+
+
+@test_bp.route('/<int:test_id>/start', methods=['POST'])
+@jwt_required()
+def start_test(test_id):
+    user_id = get_jwt_identity()
+    result, status = TestService.start_test(user_id, test_id)
+    return jsonify(result), status
+
+
+@test_bp.route('/<int:test_id>/submit', methods=['POST'])
+@jwt_required()
+def submit_test(test_id):
+    user_id = get_jwt_identity()
+    data = request.get_json()
+    result, status = TestService.submit_test(user_id, test_id, data)
+    return jsonify(result), status
+
+
+@test_bp.route('/attempts', methods=['GET'])
+@jwt_required()
+def get_attempts():
+    user_id = get_jwt_identity()
+    result, status = TestService.get_user_attempts(user_id)
+    return jsonify(result), status
+
+
+@test_bp.route('/attempts/<int:attempt_id>', methods=['GET'])
+@jwt_required()
+def get_attempt_detail(attempt_id):
+    user_id = get_jwt_identity()
+    result, status = TestService.get_attempt_detail(user_id, attempt_id)
+    return jsonify(result), status
+
+
+@test_bp.route('/level', methods=['GET'])
+@jwt_required()
+def get_level():
+    user_id = get_jwt_identity()
+    result, status = TestService.get_level_info(user_id)
+    return jsonify(result), status
