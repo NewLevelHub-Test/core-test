@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roblox Chess - Desktop History</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            background: radial-gradient(circle at center, #ffffff 0%, #f8fafc 100%); 
+            min-height: 100vh;
+        }
+        .roblox-font { font-family: 'Montserrat', sans-serif; }
+        
+        .desktop-sidebar {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-right: 2px solid white;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.03);
+        }
+
+        .match-card-lux {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 32px;
+            border: 2px solid white;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.04), 0 8px 0 #e2e8f0;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .match-card-lux:hover { 
+            transform: scale(1.02) translateY(-5px); 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.06), 0 8px 0 #e2e8f0;
+        }
+
+        .win-gradient { border-left: 12px solid #22c55e; }
+        .loss-gradient { border-left: 12px solid #ef4444; }
+        
+        .view-btn-lux {
+            background: linear-gradient(180deg, #4dabf7 0%, #3b82f6 100%);
+            box-shadow: 0 6px 0 #1971c2, 0 10px 20px rgba(59, 130, 246, 0.2);
+            transition: all 0.1s;
+        }
+        .view-btn-lux:active { transform: translateY(4px); box-shadow: 0 2px 0 #1971c2; }
+    </style>
+</head>
+<body class="flex">
+
+    <aside class="w-72 desktop-sidebar h-screen sticky top-0 flex flex-col p-8 z-50">
+        <div class="mb-12 text-center">
+            <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-2xl px-4 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block transform -rotate-2">
+                RO-CHESS
+            </div>
+        </div>
+        <nav class="space-y-4 flex-1">
+            <a href="Dashboard.html" class="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all">
+                <span class="text-2xl">🏠</span> Дом
+            </a>
+            <a href="profile.html" class="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all">
+                <span class="text-2xl">👤</span> Профиль
+            </a>
+            <a href="hist.html" class="flex items-center gap-4 p-4 bg-purple-50 rounded-2xl text-purple-600 font-black uppercase text-xs tracking-widest border-b-4 border-purple-100">
+                <span class="text-2xl">📜</span> История
+            </a>
+        </nav>
+    </aside>
+
+    <main class="flex-1 p-12 max-w-[1200px] mx-auto">
+        
+        <header class="flex justify-between items-end mb-12 px-4">
+            <div>
+                <h1 class="roblox-font italic uppercase text-slate-800 text-4xl tracking-tighter">Твои Баттлы 🏆</h1>
+                <p class="text-slate-400 font-black text-xs uppercase mt-2 tracking-[0.3em]">История твоих великих побед</p>
+            </div>
+            <div class="bg-indigo-50 px-6 py-3 rounded-2xl border-2 border-white shadow-sm flex items-center gap-3">
+                <span class="text-2xl">🧠</span>
+                <span class="text-indigo-600 font-black text-[10px] uppercase tracking-widest leading-tight">Мудрость: +50 XP за разбор</span>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-2 gap-8">
+            
+            <div class="match-card-lux win-gradient p-8 flex items-center justify-between">
+                <div class="flex items-center gap-6">
+                    <div class="w-16 h-16 bg-emerald-50 rounded-[1.5rem] flex items-center justify-center text-4xl shadow-inner border border-white">🥇</div>
+                    <div>
+                        <h3 class="font-black text-emerald-600 text-lg uppercase italic tracking-tighter">Победа!</h3> 
+                        <p class="text-slate-400 text-xs font-bold uppercase mt-1 tracking-widest">10 Марта 2026 • 15:15</p>
+                    </div>
+                </div>
+                <a href="analysis.html" class="view-btn-lux text-white px-8 py-4 rounded-2xl font-black uppercase italic roblox-font text-xs tracking-widest">
+                    Разбор 👁️
+                </a>
+            </div>
+
+            <div class="match-card-lux loss-gradient p-8 flex items-center justify-between">
+                <div class="flex items-center gap-6">
+                    <div class="w-16 h-16 bg-rose-50 rounded-[1.5rem] flex items-center justify-center text-4xl shadow-inner border border-white">🥈</div>
+                    <div>
+                        <h3 class="font-black text-rose-500 text-lg uppercase italic tracking-tighter">Поражение</h3> 
+                        <p class="text-slate-400 text-xs font-bold uppercase mt-1 tracking-widest">09 Марта 2026 • 18:40</p>
+                    </div>
+                </div>
+                <a href="analysis.html" class="view-btn-lux text-white px-8 py-4 rounded-2xl font-black uppercase italic roblox-font text-xs tracking-widest">
+                    Разбор 👁️
+                </a>
+            </div>
+
+            <div class="match-card-lux win-gradient p-8 flex items-center justify-between opacity-80">
+                <div class="flex items-center gap-6">
+                    <div class="w-16 h-16 bg-slate-50 rounded-[1.5rem] flex items-center justify-center text-4xl shadow-inner border border-white">🥇</div>
+                    <div>
+                        <h3 class="font-black text-emerald-600 text-lg uppercase italic tracking-tighter">Победа!</h3>
+                        <p class="text-slate-400 text-xs font-bold uppercase mt-1 tracking-widest">07 Марта 2026 • 12:00</p>
+                    </div>
+                </div>
+                <a href="analysis.html" class="view-btn-lux text-white px-8 py-4 rounded-2xl font-black uppercase italic roblox-font text-xs tracking-widest">
+                    Разбор 👁️
+                </a>
+            </div>
+
+            <div class="match-card-lux win-gradient p-8 flex items-center justify-between opacity-80">
+                <div class="flex items-center gap-6">
+                    <div class="w-16 h-16 bg-slate-50 rounded-[1.5rem] flex items-center justify-center text-4xl shadow-inner border border-white">🥇</div>
+                    <div>
+                        <h3 class="font-black text-emerald-600 text-lg uppercase italic tracking-tighter">Победа!</h3>
+                        <p class="text-slate-400 text-xs font-bold uppercase mt-1 tracking-widest">05 Марта 2026 • 10:20</p>
+                    </div>
+                </div>
+                <a href="analysis.html" class="view-btn-lux text-white px-8 py-4 rounded-2xl font-black uppercase italic roblox-font text-xs tracking-widest">
+                    Разбор 👁️
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+</body>
+</html>

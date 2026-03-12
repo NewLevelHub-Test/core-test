@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roblox Chess - Desktop Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            background: radial-gradient(circle at center, #ffffff 0%, #f8fafc 100%); 
+            min-height: 100vh;
+        }
+        .roblox-font { font-family: 'Montserrat', sans-serif; }
+        
+        .desktop-sidebar {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-right: 2px solid white;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.03);
+        }
+
+        .analysis-board {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            width: 100%;
+            max-width: 600px;
+            aspect-ratio: 1 / 1;
+            border: 12px solid #393b3d;
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.1), 0 15px 0 #d1d5db;
+            background: white;
+        }
+        .sq { display: flex; justify-content: center; align-items: center; font-size: 3.5rem; position: relative; }
+        .sq-w { background-color: #ffffff; }
+        .sq-b { background-color: #3b82f6; }
+
+        .bad-move { 
+            background-color: #ff6b6b !important; 
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.15);
+            animation: pulse-red 2s infinite; 
+        } 
+        .best-move { 
+            background-color: #51cf66 !important; 
+            border: 6px dashed rgba(255,255,255,0.7);
+            box-shadow: 0 0 20px rgba(81, 207, 102, 0.4);
+        }
+
+        @keyframes pulse-red {
+            0%, 100% { background-color: #ff6b6b; }
+            50% { background-color: #fa5252; }
+        }
+
+        .explainer-panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(15px);
+            border-radius: 40px;
+            border-left: 12px solid #3b82f6;
+            border-top: 2px solid white;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.05), 0 8px 0 #e2e8f0;
+        }
+
+        .btn-action {
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-bottom: 6px solid #e2e8f0;
+        }
+        .btn-action:hover { transform: translateY(-3px); }
+        .btn-action:active { transform: translateY(4px); border-bottom-width: 2px; }
+    </style>
+</head>
+<body class="flex">
+
+    <aside class="w-72 desktop-sidebar h-screen sticky top-0 flex flex-col p-8 z-50">
+        <div class="mb-12 text-center">
+            <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-2xl px-4 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block transform -rotate-2">
+                RO-CHESS
+            </div>
+        </div>
+        <nav class="space-y-4 flex-1">
+            <a href="Dashboard.html" class="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all">
+                <span class="text-2xl">🏠</span> Дом
+            </a>
+            <a href="profile.html" class="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all">
+                <span class="text-2xl">👤</span> Профиль
+            </a>
+            <a href="analysis.html" class="flex items-center gap-4 p-4 bg-blue-50 rounded-2xl text-blue-600 font-black uppercase text-xs tracking-widest border-b-4 border-blue-100">
+                <span class="text-2xl">🔍</span> Анализ
+            </a>
+        </nav>
+    </aside>
+
+    <main class="flex-1 p-12 max-w-[1400px] mx-auto">
+        
+        <header class="flex justify-between items-center mb-10 px-4">
+            <div class="flex items-center gap-6">
+                <h1 class="roblox-font italic uppercase text-slate-800 text-3xl tracking-tighter">Разбор Партии <span class="text-blue-500">PRO</span></h1>
+            </div>
+            <a href="Dashboard.html" class="bg-white px-8 py-3 rounded-2xl border-b-4 border-slate-200 active:translate-y-2 active:shadow-none font-black text-slate-400 uppercase italic roblox-font text-sm tracking-widest transition-all">
+                Вернуться в лобби
+            </a>
+        </header>
+
+        <div class="grid grid-cols-12 gap-12 items-center">
+            
+            <div class="col-span-7 flex justify-center">
+                <div class="analysis-board" id="analysisBoard">
+                    <script>
+                        const board = document.getElementById('analysisBoard');
+                        for (let i = 0; i < 64; i++) {
+                            const row = Math.floor(i / 8);
+                            const col = i % 8;
+                            const div = document.createElement('div');
+                            div.className = `sq ${(row + col) % 2 === 0 ? 'sq-w' : 'sq-b'}`;
+                            
+                            if (i === 27) { 
+                                div.innerHTML = '<span class="drop-shadow-xl">♘</span>'; 
+                                div.classList.add('bad-move');
+                            }
+                            if (i === 18) { 
+                                div.classList.add('best-move');
+                            }
+                            if (i === 10) div.innerHTML = "♟";
+                            
+                            board.appendChild(div);
+                        }
+                    </script>
+                </div>
+            </div>
+
+            <div class="col-span-5 space-y-8">
+                
+                <section class="explainer-panel p-10">
+                    <div class="flex items-center gap-5 mb-6">
+                        <div class="w-14 h-14 bg-blue-50 rounded-[1.2rem] flex items-center justify-center text-3xl shadow-inner border border-white">💡</div>
+                        <h3 class="font-black text-blue-600 uppercase text-xs tracking-[0.3em]">Вердикт Тренера</h3>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <p class="text-slate-700 font-bold text-xl leading-tight">
+                            Ой-ой! Твой <span class="text-red-500 italic">Белый Конь</span> совершил ошибку, прыгнув на <span class="bg-red-50 px-2 py-1 rounded-lg">D5</span>.
+                        </p>
+                        <div class="h-[2px] bg-slate-100 rounded-full"></div>
+                        <p class="text-slate-500 font-bold text-base leading-relaxed italic">
+                            Пешка противника уже целится в эту клетку! Лучшим решением был бы отход на <span class="text-emerald-500 uppercase font-black">C3</span>. Это сохранило бы твою позицию в безопасности.
+                        </p>
+                    </div>
+                </section>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <button class="btn-action bg-white p-6 rounded-[2rem] font-black text-slate-400 uppercase text-xs tracking-widest">
+                        ⬅ К ошибке
+                    </button>
+                    <button class="btn-action bg-blue-500 p-6 rounded-[2rem] font-black text-white uppercase text-xs tracking-widest shadow-xl border-blue-700">
+                        След. ход ➡
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>

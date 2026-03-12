@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roblox Chess - Desktop Scanner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            background: radial-gradient(circle at center, #ffffff 0%, #f8fafc 100%); 
+            min-height: 100vh;
+        }
+        .roblox-font { font-family: 'Montserrat', sans-serif; }
+        
+        .desktop-sidebar {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-right: 2px solid white;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.03);
+        }
+
+        .preview-box-lux {
+            border: 4px dashed #3b82f6;
+            border-radius: 40px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .check-board-lux {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            width: 300px;
+            height: 300px;
+            border: 10px solid #393b3d;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+        .sq-w { background: #fff; }
+        .sq-b { background: #3b82f6; }
+
+        .luxury-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(15px);
+            border: 2px solid white;
+            border-radius: 40px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.05), 0 8px 0 #e2e8f0;
+        }
+
+        .btn-confirm {
+            background: linear-gradient(180deg, #00cd81 0%, #00b06f 100%);
+            box-shadow: 0 10px 0 #008a57, 0 20px 40px rgba(0, 176, 111, 0.2);
+            transition: all 0.2s;
+        }
+        .btn-confirm:active { transform: translateY(8px); box-shadow: 0 2px 0 #008a57; }
+    </style>
+</head>
+<body class="flex">
+
+    <aside class="w-72 desktop-sidebar h-screen sticky top-0 flex flex-col p-8 z-50">
+        <div class="mb-12 text-center">
+            <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-2xl px-4 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block transform -rotate-2">
+                RO-CHESS
+            </div>
+        </div>
+        <nav class="space-y-4 flex-1">
+            <a href="Dashboard.html" class="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all">
+                <span class="text-2xl">🏠</span> Дом
+            </a>
+            <a href="position.html" class="flex items-center gap-4 p-4 bg-blue-50 rounded-2xl text-blue-600 font-black uppercase text-xs tracking-widest border-b-4 border-blue-100">
+                <span class="text-2xl">📸</span> Сканер
+            </a>
+            <a href="profile.html" class="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all">
+                <span class="text-2xl">👤</span> Профиль
+            </a>
+        </nav>
+    </aside>
+
+    <main class="flex-1 p-12 max-w-[1200px] mx-auto">
+        
+        <header class="flex justify-between items-end mb-12">
+            <div>
+                <h1 class="roblox-font italic uppercase text-slate-800 text-4xl tracking-tighter">Сканер Позиций 📸</h1>
+                <p class="text-slate-400 font-black text-xs uppercase mt-2 tracking-[0.3em]">Перенеси реальность в RO-CHESS</p>
+            </div>
+            <a href="Dashboard.html" class="bg-white px-6 py-3 rounded-2xl border-b-4 border-slate-100 font-black text-slate-400 uppercase text-[10px] tracking-widest active:translate-y-1 transition-all">Отмена</a>
+        </header>
+
+        <div class="grid grid-cols-12 gap-10 items-stretch">
+            
+            <div class="col-span-4">
+                <label class="preview-box-lux h-full flex flex-col items-center justify-center cursor-pointer p-10 text-center border-t-2 border-white">
+                    <input type="file" class="hidden">
+                    <div class="w-20 h-20 bg-blue-50 rounded-[2rem] flex items-center justify-center mb-6 shadow-inner border-2 border-white">
+                        <span class="text-5xl">📤</span>
+                    </div>
+                    <h2 class="font-black text-slate-700 uppercase text-lg tracking-wide">Выбрать фото</h2>
+                    <div class="mt-8 bg-blue-100/50 px-4 py-2 rounded-xl text-blue-500 font-black text-[10px] uppercase tracking-widest">AI SCAN</div>
+                </label>
+            </div>
+
+            <div class="col-span-8">
+                <section class="luxury-card p-10 h-full flex flex-col items-center">
+                    <h3 class="font-black text-slate-400 uppercase text-[10px] mb-8 tracking-[0.4em]">Оцифрованная доска</h3>
+                    
+                    <div class="flex items-center justify-center gap-10 w-full">
+                        <div class="w-40 h-40 bg-slate-50 rounded-3xl border-4 border-dashed border-slate-200 flex flex-col items-center justify-center p-6 shadow-inner text-center">
+                            <span class="text-2xl mb-2 opacity-30">🖼️</span>
+                            <p class="text-[8px] text-slate-300 font-black uppercase">Оригинал</p>
+                        </div>
+
+                        <div class="text-4xl text-blue-300 animate-pulse">➔</div>
+
+                        <div class="check-board-lux">
+                            <script>
+                                const b = document.querySelector('.check-board-lux');
+                                for (let i = 0; i < 64; i++) {
+                                    const div = document.createElement('div');
+                                    const row = Math.floor(i / 8);
+                                    const col = i % 8;
+                                    div.className = (row + col) % 2 === 0 ? 'sq-w' : 'sq-b';
+                                    div.style.display = 'flex';
+                                    div.style.justifyContent = 'center';
+                                    div.style.alignItems = 'center';
+                                    div.style.fontSize = '2.2rem';
+                                    if (i === 12) div.innerHTML = '♟';
+                                    if (i === 52) div.innerHTML = '♙';
+                                    b.appendChild(div);
+                                }
+                            </script>
+                        </div>
+                    </div>
+
+                    <div class="mt-auto pt-10 w-full">
+                        <button class="btn-confirm w-full text-white roblox-font italic uppercase py-7 rounded-[2.5rem] text-3xl tracking-widest">
+                            Подтвердить ✅
+                        </button>
+                    </div>
+                </section>
+            </div>
+
+        </div>
+    </main>
+
+</body>
+</html>
