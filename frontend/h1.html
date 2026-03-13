@@ -102,24 +102,33 @@
             </div>
         </div>
     </div>
+    <script src="state.js"></script>
     <script src="api.js"></script>
-<script>
-    const loginBtn = document.querySelector('.btn-green-lux');
+
+    <script>
+        const loginBtn = document.querySelector('.btn-green-lux');
+        
+        loginBtn.addEventListener('click', async (e) => {
+            e.preventDefault(); 
     
-    loginBtn.addEventListener('click', async (e) => {
-        e.preventDefault(); 
-
-        const username = document.querySelector('input[type="text"]').value;
-        const password = document.querySelector('input[type="password"]').value;
-
-        if (username === "admin" && password === "1234") {
-            localStorage.setItem('jwt_token', 'test_token_12345');
-            alert('Вход выполнен успешно! (Режим эмуляции)');
-            window.location.href = 'Dashboard.html';
-        } else {
-            alert('Неверный логин или пароль! (Попробуй admin / 1234)');
-        }
-    });
-</script>
+            const username = document.querySelector('input[type="text"]').value;
+            const password = document.querySelector('input[type="password"]').value;
+    
+            if (username === "admin" && password === "1234") {
+                
+                window.roChessState.setTokens('test_token_12345', 'refresh_test_6789');
+                window.roChessState.setUser({ 
+                    name: "Anel", 
+                    level: 5,
+                    role: "Гроссмейстер" 
+                });
+    
+                alert('Вход выполнен успешно!');
+                window.location.href = 'Dashboard.html';
+            } else {
+                alert('Неверный логин или пароль! (admin / 1234)');
+            }
+        });
+    </script>
 </body>
 </html>
