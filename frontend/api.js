@@ -8,7 +8,9 @@ const API_CONFIG = {
 const api = {
 
     async fetchWithAuth(endpoint, options = {}) {
-        const token = localStorage.getItem('jwt_token');
+        const token = window.roChessState.isLoggedIn() 
+              ? localStorage.getItem('access_token') 
+              : null;
         
         const defaultHeaders = {
             'Content-Type': 'application/json',
@@ -60,8 +62,7 @@ const api = {
     },
 
     logout() {
-        localStorage.removeItem('jwt_token');
-        window.location.href = API_CONFIG.AUTH_PAGE;
+        window.roChessState.logout();
     },
 
     isAuthenticated() {
