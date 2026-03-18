@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox Chess - Desktop Welcome</title>
+    <title>Roblox Chess - Welcome</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
     <style>
@@ -11,7 +11,6 @@
             font-family: 'Nunito', sans-serif; 
             background: radial-gradient(circle at 20% 30%, #ffffff 0%, #e2e8f0 100%); 
             min-height: 100vh;
-            overflow: hidden;
         }
         .roblox-font { font-family: 'Montserrat', sans-serif; }
         
@@ -46,7 +45,7 @@
         }
     </style>
 </head>
-<body class="flex items-center justify-center relative">
+<body class="flex items-center justify-center relative p-6">
 
     <div class="floating-shape w-96 h-96 bg-blue-300 -top-20 -left-20"></div>
     <div class="floating-shape w-80 h-80 bg-emerald-300 -bottom-20 -right-20" style="animation-delay: -5s;"></div>
@@ -60,73 +59,143 @@
             <p class="text-slate-400 font-black uppercase text-xs tracking-[0.4em] ml-2">Premium Desktop Portal</p>
         </div>
 
-        <form class="space-y-8">
-            <div class="space-y-2">
-                <label class="text-slate-400 text-xs font-black uppercase tracking-widest ml-4">Логин / Email</label>
-                <div class="relative group">
-                    <input type="text" placeholder="Введите ваш ник..." 
-                        class="w-full bg-slate-50/50 border-2 border-transparent rounded-[1.5rem] p-6 text-slate-700 font-bold placeholder-slate-300 outline-none focus:border-[#00b06f] focus:bg-white transition-all shadow-inner text-lg">
-                    <span class="absolute right-6 top-6 opacity-20 text-3xl group-focus-within:opacity-100 transition-opacity">👤</span>
+        <div id="login-section">
+            <form class="space-y-8">
+                <div class="space-y-2">
+                    <label class="text-slate-400 text-xs font-black uppercase tracking-widest ml-4">Логин</label>
+                    <div class="relative group">
+                        <input type="text" id="login-username" placeholder="Введите ваш ник..." 
+                            class="w-full bg-slate-50/50 border-2 border-transparent rounded-[1.5rem] p-6 text-slate-700 font-bold placeholder-slate-300 outline-none focus:border-[#00b06f] focus:bg-white transition-all shadow-inner text-lg">
+                        <span class="absolute right-6 top-6 opacity-20 text-3xl group-focus-within:opacity-100 transition-opacity">👤</span>
+                    </div>
                 </div>
-            </div>
 
-            <div class="space-y-2">
-                <label class="text-slate-400 text-xs font-black uppercase tracking-widest ml-4">Пароль</label>
-                <div class="relative group">
-                    <input type="password" placeholder="••••••••" 
-                        class="w-full bg-slate-50/50 border-2 border-transparent rounded-[1.5rem] p-6 text-slate-700 font-bold placeholder-slate-300 outline-none focus:border-[#00b06f] focus:bg-white transition-all shadow-inner text-lg">
-                    <span class="absolute right-6 top-6 opacity-20 text-3xl group-focus-within:opacity-100 transition-opacity">🔑</span>
+                <div class="space-y-2">
+                    <label class="text-slate-400 text-xs font-black uppercase tracking-widest ml-4">Пароль</label>
+                    <div class="relative group">
+                        <input type="password" id="login-password" placeholder="••••••••" 
+                            class="w-full bg-slate-50/50 border-2 border-transparent rounded-[1.5rem] p-6 text-slate-700 font-bold placeholder-slate-300 outline-none focus:border-[#00b06f] focus:bg-white transition-all shadow-inner text-lg">
+                        <span class="absolute right-6 top-6 opacity-20 text-3xl group-focus-within:opacity-100 transition-opacity">🔑</span>
+                    </div>
                 </div>
-            </div>
 
-            <a href="Dashboard.html" class="btn-green-lux block w-full text-white font-black py-6 rounded-[2.5rem] text-center uppercase italic roblox-font tracking-[0.2em] text-3xl">
-                Играть! ➔
-            </a>
+                <button type="button" class="btn-green-lux btn-login block w-full text-white font-black py-6 rounded-[2.5rem] text-center uppercase italic roblox-font tracking-[0.2em] text-3xl">
+                    Играть! ➔
+                </button>
 
-            <div class="flex items-center gap-8 py-2">
-                <div class="h-[2px] bg-slate-100 flex-1 shadow-sm"></div>
-                <span class="text-slate-300 font-black text-xs tracking-tighter">ЕЩЕ НЕТ АККАУНТА?</span>
-                <div class="h-[2px] bg-slate-100 flex-1 shadow-sm"></div>
-            </div>
+                <div class="flex items-center gap-8 py-2">
+                    <div class="h-[2px] bg-slate-100 flex-1 shadow-sm"></div>
+                    <span class="text-slate-300 font-black text-xs tracking-tighter">ЕЩЕ НЕТ АККАУНТА?</span>
+                    <div class="h-[2px] bg-slate-100 flex-1 shadow-sm"></div>
+                </div>
 
-            <a href="admin.html" class="block w-full text-slate-400 hover:text-indigo-500 font-black py-2 text-center uppercase italic roblox-font tracking-widest text-sm transition-colors">
-                Создать новый профиль
-            </a>
-        </form>
+                <p id="to-register" class="block w-full text-slate-400 hover:text-indigo-500 font-black py-2 text-center uppercase italic roblox-font tracking-widest text-sm transition-colors cursor-pointer">
+                    Создать новый профиль
+                </p>
+            </form>
+        </div>
+
+        <div id="register-section" class="hidden">
+            <h2 class="roblox-font italic uppercase text-slate-700 text-xl mb-6 text-center">Создать аккаунт 🆕</h2>
+            <form class="space-y-4">
+                <input type="text" id="reg-username" placeholder="Никнейм" class="w-full p-4 rounded-2xl bg-white border-2 border-slate-100 outline-none focus:border-emerald-400 transition-all font-bold">
+                <input type="email" id="reg-email" placeholder="Email" class="w-full p-4 rounded-2xl bg-white border-2 border-slate-100 outline-none focus:border-emerald-400 transition-all font-bold">
+                <input type="tel" id="reg-phone" placeholder="Телефон (например, +77001234567)" class="w-full p-4 rounded-2xl bg-white border-2 border-slate-100 outline-none focus:border-emerald-400 transition-all font-bold">
+                <input type="password" id="reg-password" placeholder="Пароль" class="w-full p-4 rounded-2xl bg-white border-2 border-slate-100 outline-none focus:border-emerald-400 transition-all font-bold">
+                <input type="number" id="reg-age" placeholder="Возраст" class="w-full p-4 rounded-2xl bg-white border-2 border-slate-100 outline-none focus:border-emerald-400 transition-all font-bold">
+                
+                <button type="button" id="register-button" class="w-full bg-emerald-500 text-white font-black py-5 rounded-[2rem] uppercase italic roblox-font tracking-widest shadow-[0_8px_0_#059669] active:translate-y-2 active:shadow-none transition-all">
+                    Зарегистрироваться
+                </button>
+
+                <p id="to-login" class="text-center text-slate-400 font-black text-xs uppercase tracking-widest mt-4 cursor-pointer hover:text-blue-500">
+                    Уже есть аккаунт? Войти
+                </p>
+            </form>
+        </div>
 
         <div class="mt-12 p-5 bg-white rounded-[2rem] border-2 border-slate-50 flex items-center gap-5 shadow-sm">
             <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-2xl">🛡️</div>
             <div class="flex-1">
                 <p class="text-blue-500 text-[10px] font-black uppercase leading-tight tracking-widest">Безопасность</p>
-                <p class="text-slate-400 text-[9px] font-bold mt-1 leading-tight">Ваши данные защищены по стандартам Roblox Security.</p>
+                <p class="text-slate-400 text-[9px] font-bold mt-1 leading-tight">Данные защищены по стандартам Roblox Security.</p>
             </div>
         </div>
     </div>
+
     <script src="state.js"></script>
     <script src="api.js"></script>
 
     <script>
-        const loginBtn = document.querySelector('.btn-green-lux');
-        
+        const loginSection = document.getElementById('login-section');
+        const registerSection = document.getElementById('register-section');
+        const toRegisterBtn = document.getElementById('to-register');
+        const toLoginBtn = document.getElementById('to-login');
+    
+        toRegisterBtn.addEventListener('click', () => {
+            loginSection.classList.add('hidden');
+            registerSection.classList.remove('hidden');
+        });
+    
+        toLoginBtn.addEventListener('click', () => {
+            registerSection.classList.add('hidden');
+            loginSection.classList.remove('hidden');
+        });
+    
+        const loginBtn = document.querySelector('.btn-login');
         loginBtn.addEventListener('click', async (e) => {
             e.preventDefault(); 
+            
+            const loginValue = document.getElementById('login-username').value.trim();
+            const passwordValue = document.getElementById('login-password').value;
     
-            const username = document.querySelector('input[type="text"]').value;
-            const password = document.querySelector('input[type="password"]').value;
+            const credentials = {
+                password: passwordValue
+            };
     
-            if (username === "admin" && password === "1234") {
-                
-                window.roChessState.setTokens('test_token_12345', 'refresh_test_6789');
-                window.roChessState.setUser({ 
-                    name: "Anel", 
-                    level: 5,
-                    role: "Гроссмейстер" 
-                });
-    
-                alert('Вход выполнен успешно!');
-                window.location.href = 'Dashboard.html';
+            if (loginValue.includes('@')) {
+                credentials.email = loginValue;
             } else {
-                alert('Неверный логин или пароль! (admin / 1234)');
+                credentials.phone = loginValue;
+            }
+    
+            try {
+                await window.roChessApi.login(credentials);
+            } catch (error) {
+                alert('Ошибка входа: ' + error.message);
+            }
+        });
+    
+        const regBtn = document.getElementById('register-button');
+        regBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+    
+            const userData = {
+                username: document.getElementById('reg-username').value.trim(),
+                email: document.getElementById('reg-email').value.trim(),
+                phone: document.getElementById('reg-phone').value.trim(),
+                password: document.getElementById('reg-password').value, 
+                age: Number(document.getElementById('reg-age').value) || 0,
+                role: 'student'
+            };
+
+            if (!userData.username || !userData.password || !userData.phone) {
+                alert("Никнейм, телефон и пароль обязательны!");
+                return;
+            }
+    
+            if (userData.password.length < 6) {
+                alert("Пароль должен быть не короче 6 символов!");
+                return;
+            }
+    
+            try {
+                const response = await window.roChessApi.register(userData);
+                console.log("Успех!", response);
+                alert('Регистрация прошла успешно!');
+                window.location.href = 'Dashboard.html';
+            } catch (error) {
+                alert('Ошибка сервера: ' + error.message);
             }
         });
     </script>

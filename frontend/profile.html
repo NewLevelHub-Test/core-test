@@ -68,63 +68,66 @@
     </aside>
 
     <main class="flex-1 p-12 max-w-[1100px] mx-auto">
-        
         <div class="grid grid-cols-12 gap-10">
-            
             <div class="col-span-5">
                 <div class="luxury-card p-10 text-center sticky top-12">
                     <div class="relative mb-8 inline-block">
                         <div class="absolute -inset-4 luxury-gradient rounded-[3.5rem] blur-xl opacity-20 animate-pulse"></div>
-                        <div class="relative w-48 h-48 bg-white rounded-[3rem] border-8 border-white shadow-2xl overflow-hidden ring-4 ring-indigo-50">
-                            <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed=ChessMaster77" alt="Avatar" class="w-full h-full object-cover">
-                        </div>
+                        
+                        <label class="relative block w-48 h-48 bg-white rounded-[3rem] border-8 border-white shadow-2xl overflow-hidden ring-4 ring-indigo-50 cursor-pointer group">
+                            <img id="profile-avatar" src="https://api.dicebear.com/7.x/pixel-art/svg?seed=Chess" alt="Avatar" class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <span class="text-white text-3xl">📸</span>
+                            </div>
+                            <input type="file" id="avatar-input" class="hidden" accept="image/*">
+                        </label>
+    
                         <div class="absolute bottom-2 right-2 bg-emerald-500 text-white text-xs font-black px-5 py-2 rounded-full border-4 border-white uppercase shadow-lg">
                             Online
                         </div>
                     </div>
                     
-                    <h1 class="text-4xl font-black roblox-font italic uppercase tracking-tighter text-slate-800 leading-none mb-3">
-                        ChessMaster_77
+                    <h1 id="profile-username" class="text-4xl font-black roblox-font italic uppercase tracking-tighter text-slate-800 leading-none mb-3">
+                        Загрузка...
                     </h1>
-                    <p class="text-indigo-400 font-black text-sm uppercase tracking-[0.3em] mb-8">@ProPlayer_2026</p>
-
+                    <p id="profile-email" class="text-indigo-400 font-black text-sm uppercase tracking-[0.2em] mb-8">@email</p>
+    
                     <div class="space-y-4">
                         <a href="admin.html" class="block w-full bg-slate-800 text-white font-black py-5 rounded-[1.5rem] text-center uppercase italic roblox-font tracking-widest text-sm hover:bg-black transition-all shadow-xl">
                             Редактировать ⚙️
                         </a>
-                        <button class="block w-full bg-white text-slate-400 font-black py-4 rounded-[1.5rem] text-center uppercase text-[10px] tracking-widest border-2 border-slate-50 hover:bg-slate-50 transition-all">
-                            Выйти из аккаунта
+                        <button id="logout-btn" class="block w-full bg-white text-rose-400 font-black py-4 rounded-[1.5rem] text-center uppercase text-[10px] tracking-widest border-2 border-slate-50 hover:bg-rose-50 hover:text-rose-600 transition-all">
+                            Выйти из аккаунта 🚪
                         </button>
                     </div>
                 </div>
             </div>
-
+    
             <div class="col-span-7 space-y-8">
-                
                 <div class="grid grid-cols-2 gap-6">
                     <div class="luxury-card p-8 flex flex-col items-center">
                         <span class="text-slate-400 text-[11px] font-black uppercase mb-2 tracking-widest">Твой возраст</span>
-                        <span class="text-3xl font-black text-slate-700 roblox-font italic">10 ЛЕТ</span>
+                        <span id="profile-age" class="text-3xl font-black text-slate-700 roblox-font italic">-- ЛЕТ</span>
                     </div>
                     <div class="luxury-card p-8 flex flex-col items-center border-l-8 border-l-indigo-500">
                         <span class="text-indigo-400 text-[11px] font-black uppercase mb-2 tracking-widest">Текущий ранг</span>
-                        <span class="text-3xl font-black text-indigo-600 roblox-font italic">GOLD V</span>
+                        <span id="profile-rank" class="text-3xl font-black text-indigo-600 roblox-font italic">Загрузка</span>
                     </div>
                 </div>
-
+    
                 <div class="luxury-card p-10">
                     <div class="flex justify-between items-end mb-5 px-2">
                         <h3 class="font-black text-slate-800 uppercase text-xs tracking-widest">Уровень мастерства (XP)</h3>
-                        <span class="text-indigo-600 font-black text-sm italic bg-indigo-50 px-4 py-2 rounded-2xl">2,450 / 3,000</span>
+                        <span id="xp-text" class="text-indigo-600 font-black text-sm italic bg-indigo-50 px-4 py-2 rounded-2xl">0 / 0</span>
                     </div>
                     <div class="w-full bg-slate-100 h-12 rounded-[1.5rem] p-2 shadow-inner relative overflow-hidden border-2 border-white">
-                        <div class="luxury-gradient h-full rounded-xl shadow-[0_0_20px_rgba(99,102,241,0.3)] relative z-10" style="width: 75%">
+                        <div id="xp-bar" class="luxury-gradient h-full rounded-xl shadow-[0_0_20px_rgba(99,102,241,0.3)] relative z-10 transition-all duration-1000" style="width: 0%">
                             <div class="absolute top-0 left-0 w-full h-1/2 bg-white/20 rounded-full"></div>
                         </div>
                     </div>
-                    <p class="mt-4 text-[11px] text-slate-400 text-center font-bold uppercase italic tracking-widest">Следующее звание: PLATINUM I 🏆</p>
+                    <p id="next-rank-text" class="mt-4 text-[11px] text-slate-400 text-center font-bold uppercase italic tracking-widest">Следующее звание: PLATINUM I 🏆</p>
                 </div>
-
+    
                 <div class="luxury-card p-10">
                     <h3 class="text-slate-400 font-black text-xs uppercase mb-8 tracking-[0.4em] text-center">Заработанные награды</h3>
                     <div class="grid grid-cols-3 gap-6">
@@ -132,26 +135,73 @@
                             <span class="text-5xl">🏆</span>
                             <span class="text-[9px] font-black text-slate-400 uppercase">Чемпион</span>
                         </div>
-                        <div class="badge-slot p-6 flex flex-col items-center gap-3">
+                        <div class="badge-slot p-6 flex flex-col items-center gap-3 opacity-30 grayscale">
                             <span class="text-5xl">🧠</span>
                             <span class="text-[9px] font-black text-slate-400 uppercase">Тактик</span>
                         </div>
-                        <div class="badge-slot p-6 flex flex-col items-center gap-3">
+                        <div class="badge-slot p-6 flex flex-col items-center gap-3 opacity-30 grayscale">
                             <span class="text-5xl">🔥</span>
                             <span class="text-[9px] font-black text-slate-400 uppercase">В огне</span>
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </main>
+    
     <script src="state.js"></script>
     <script src="api.js"></script>
     <script>
         if (!window.roChessApi.isAuthenticated()) {
             window.location.href = 'h1.html';
         }
+    
+        async function loadUserProfile() {
+            try {
+                const response = await window.roChessApi.getUserProfile();
+                const user = response.user;
+    
+                document.getElementById('profile-username').textContent = user.username;
+                document.getElementById('profile-email').textContent = `@${user.email.split('@')[0]}`;
+                document.getElementById('profile-age').textContent = `${user.age || '--'} ЛЕТ`;
+                document.getElementById('profile-rank').textContent = user.level >= 10 ? 'GOLD V' : 'SILVER I';
+                
+                if (user.avatar_url) {
+                    document.getElementById('profile-avatar').src = user.avatar_url;
+                }
+    
+                const currentXP = user.xp || 500;
+                const targetXP = 3000;
+                const progress = (currentXP / targetXP) * 100;
+                document.getElementById('xp-text').textContent = `${currentXP.toLocaleString()} / ${targetXP.toLocaleString()}`;
+                document.getElementById('xp-bar').style.width = `${progress}%`;
+    
+            } catch (error) {
+                console.error("Ошибка при загрузке профиля:", error.message);
+            }
+        }
+    
+        document.getElementById('avatar-input').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+    
+            try {
+                const response = await window.roChessApi.uploadAvatar(file);
+                document.getElementById('profile-avatar').src = response.avatar_url;
+                alert('Аватар успешно обновлен! 📸');
+            } catch (error) {
+                alert('Ошибка загрузки: ' + error.message);
+            }
+        });
+    
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            if(confirm("Выйти из аккаунта?")) {
+                window.roChessApi.logout();
+            }
+        });
+    
+        loadUserProfile();
     </script>
+
 </body>
 </html>
