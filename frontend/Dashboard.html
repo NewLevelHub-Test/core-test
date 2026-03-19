@@ -30,7 +30,6 @@
             transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .luxury-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.08), 0 8px 0 #e2e8f0; }
-        .luxury-card:active { transform: translateY(4px); box-shadow: 0 4px 0 #e2e8f0; }
 
         .quest-gradient {
             background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
@@ -72,7 +71,7 @@
         <a href="profile.html" class="mt-auto flex items-center gap-3 p-4 bg-white rounded-3xl border-2 border-slate-50 shadow-sm hover:scale-105 transition-transform">
             <div class="w-10 h-10 bg-sky-400 rounded-xl flex items-center justify-center text-xl shadow-md">😎</div>
             <div class="leading-none">
-                <p class="font-black text-[10px] text-slate-800 uppercase tracking-tighter">Гроссмейстер</p>
+                <p id="sidebar-user-name" class="font-black text-[10px] text-slate-800 uppercase tracking-tighter">Загрузка...</p>
                 <p class="text-[9px] text-emerald-500 font-bold uppercase mt-1">LVL 5 ⭐</p>
             </div>
         </a>
@@ -84,7 +83,9 @@
             <section class="col-span-2 quest-gradient rounded-[3rem] p-10 relative overflow-hidden text-white border-2 border-white/20 flex flex-col justify-center">
                 <div class="relative z-10 max-w-md">
                     <span class="bg-white/20 backdrop-blur-md text-[10px] font-black px-4 py-2 rounded-full uppercase mb-4 inline-block border border-white/30 tracking-widest">Цель Дня</span>
-                    <h3 class="text-5xl font-black roblox-font italic uppercase mb-6 leading-[0.9] tracking-tighter">Атака конем <br><span class="text-blue-200">начинается!</span></h3>
+                    <h3 id="daily-goal-text" class="text-5xl font-black roblox-font italic uppercase mb-6 leading-[0.9] tracking-tighter">
+                        Загрузка цели...
+                    </h3>
                     <a href="study.html" class="inline-block bg-white text-blue-600 font-black px-10 py-4 rounded-[1.5rem] shadow-[0_8px_0_#e2e8f0] uppercase italic text-sm active:translate-y-2 active:shadow-none transition-all">Начать Урок 🚀</a>
                 </div>
                 <div class="absolute -right-10 -bottom-10 text-[18rem] opacity-20 floating">🐴</div>
@@ -95,14 +96,14 @@
                 <div class="relative w-32 h-32 mx-auto mb-4">
                     <svg class="w-full h-full transform -rotate-90">
                         <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="12" fill="transparent" class="text-slate-100" />
-                        <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="12" fill="transparent" class="text-emerald-400" stroke-dasharray="364.4" stroke-dashoffset="127.5" stroke-linecap="round" />
+                        <circle id="roadmap-svg-circle" cx="64" cy="64" r="58" stroke="currentColor" stroke-width="12" fill="transparent" class="text-emerald-400 transition-all duration-1000" stroke-dasharray="364.4" stroke-dashoffset="364.4" stroke-linecap="round" />
                     </svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
-                        <span class="text-3xl font-black text-slate-800">65%</span>
+                        <span id="roadmap-percent" class="text-3xl font-black text-slate-800">0%</span>
                         <span class="text-[8px] font-black text-slate-400 uppercase">Опыт</span>
                     </div>
                 </div>
-                <p class="text-[10px] font-bold text-slate-400 uppercase italic">До нового ранга: 350 XP</p>
+                <p id="xp-left-text" class="text-[10px] font-bold text-slate-400 uppercase italic">До нового ранга: ...</p>
             </section>
         </div>
 
@@ -129,7 +130,7 @@
             <h3 class="text-center text-indigo-300 font-black text-xs uppercase mb-12 tracking-[0.5em] italic">Карта Пути Чемпиона</h3>
             <div class="flex items-center justify-around relative">
                 <div class="absolute h-2 bg-slate-100 left-10 right-10 top-1/2 -translate-y-1/2 -z-10 rounded-full">
-                    <div class="h-full bg-emerald-400 rounded-full" style="width: 50%"></div>
+                    <div id="roadmap-horizontal-bar" class="h-full bg-emerald-400 rounded-full transition-all duration-1000" style="width: 0%"></div>
                 </div>
 
                 <div class="flex flex-col items-center gap-4">
@@ -146,14 +147,56 @@
                 </div>
             </div>
         </section>
-
     </main>
+
     <script src="state.js"></script>
     <script src="api.js"></script>
     <script>
         if (!window.roChessApi.isAuthenticated()) {
             window.location.href = 'h1.html';
         }
+
+        async function initDashboard() {
+            try {
+                const data = await window.roChessApi.getDashboardData();
+                console.log("Данные Dashboard:", data);
+
+                const sidebarName = document.getElementById('sidebar-user-name');
+                if (sidebarName && data.user) {
+                    sidebarName.textContent = data.user.username;
+                }
+
+                const goalText = document.getElementById('daily-goal-text');
+                if (goalText && data.recommendation) {
+                    goalText.textContent = data.recommendation.text;
+                }
+
+                const roadmapCircle = document.getElementById('roadmap-svg-circle');
+                const progressPercent = document.getElementById('roadmap-percent');
+                
+                if (data.roadmap_widget) {
+                    const percentage = data.roadmap_widget.completed_percentage || 0;
+                    
+                    if (progressPercent) progressPercent.textContent = `${percentage}%`;
+                    
+                    if (roadmapCircle) {
+                        const radius = 58;
+                        const circumference = 2 * Math.PI * radius; 
+                        const offset = circumference - (percentage / 100) * circumference;
+                        roadmapCircle.style.strokeDashoffset = offset;
+                    }
+
+                    const horizontalBar = document.getElementById('roadmap-horizontal-bar');
+                    if (horizontalBar) horizontalBar.style.width = `${percentage}%`;
+                }
+
+            } catch (error) {
+                console.error("Ошибка загрузки дашборда:", error);
+                if (error.message.includes('401')) window.location.href = 'h1.html';
+            }
+        }
+        
+        initDashboard();
     </script>
 </body>
 </html>
