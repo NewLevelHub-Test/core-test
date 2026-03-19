@@ -23,7 +23,7 @@ def create_app(config_name=None):
     db.init_app(app)
     jwt.init_app(app)
     migrate.init_app(app, db)
-    CORS(app)
+    CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
@@ -48,5 +48,29 @@ def create_app(config_name=None):
     app.register_blueprint(photo_bp, url_prefix='/api/photo')
     app.register_blueprint(roadmap_bp, url_prefix='/api/roadmap')
     app.register_blueprint(admin_bp, url_prefix='/api/admin')
+
+    import logging
+    from flask import jsonify
+
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger(__name__)
+
+    @app.errorhandler(400)
+    def bad_request(error):
+        return jsonify({"error": "Bad Request", "message": str(error.description)}), 400
+
+    @app.errorhandler(404)
+    def not_found(error):
+        return jsonify({"error": "Not Found", "message": "Ресурс не найден"}), 404
+
+    @app.errorhandler(500)
+    def internal_error(error):
+        logger.error(f"Server Error: {error}")
+        return jsonify({"error": "Internal Server Error", "message": "Внутренняя ошибка сервера"}), 500
+
+    @app.errorhandler(Exception)
+    def handle_unexpected_error(error):
+        logger.exception("Unexpected error occurred")
+        return jsonify({"error": "Unexpected Error", "message": "Что-то пошло не так"}), 500
 
     return app

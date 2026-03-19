@@ -37,8 +37,8 @@ class AuthService:
         db.session.add(user)
         db.session.commit()
 
-        access_token = create_access_token(identity=user.id)
-        refresh_token = create_refresh_token(identity=user.id)
+        access_token = create_access_token(identity=str(user.id))
+        refresh_token = create_refresh_token(identity=str(user.id))
 
         return {
             'user': user.to_dict(),
@@ -60,8 +60,8 @@ class AuthService:
         if not user or not user.check_password(data.get('password', '')):
             return {'error': 'Неверные учётные данные'}, 401
 
-        access_token = create_access_token(identity=user.id)
-        refresh_token = create_refresh_token(identity=user.id)
+        access_token = create_access_token(identity=str(user.id))
+        refresh_token = create_refresh_token(identity=str(user.id))
 
         return {
             'user': user.to_dict(),
@@ -128,8 +128,8 @@ class AuthService:
         user.sms_code_expires = None
         db.session.commit()
 
-        access_token = create_access_token(identity=user.id)
-        refresh_token = create_refresh_token(identity=user.id)
+        access_token = create_access_token(identity=str(user.id))
+        refresh_token = create_refresh_token(identity=str(user.id))
 
         return {
             'user': user.to_dict(),
