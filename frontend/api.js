@@ -1,48 +1,32 @@
 const API_CONFIG = {
-    BASE_URL: 'http://192.168.8.53:5000/api', 
+    BASE_URL: 'http://192.168.8.17:5000/api', 
     AUTH_PAGE: 'h1.html'
 };
 
 const api = {
     async fetchWithAuth(endpoint, options = {}) {
-        const token = localStorage.getItem('access_token'); 
-        
+        const token = localStorage.getItem('access_token');
         const defaultHeaders = {
             'Content-Type': 'application/json',
             ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         };
-
-        const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-
+    
+        const baseUrl = API_CONFIG.BASE_URL.replace(/\/+$/, ''); 
+        const cleanEndpoint = endpoint.replace(/^\/+/, '');    
+        const url = `${baseUrl}/${cleanEndpoint}`;
+    
         const config = {
             ...options,
-            headers: {
-                ...defaultHeaders,
-                ...options.headers
-            }
+            headers: { ...defaultHeaders, ...options.headers }
         };
-
+    
         try {
-            const response = await fetch(`${API_CONFIG.BASE_URL}${cleanEndpoint}`, config);
-
-            if (response.status === 401) {
-                console.warn('Сессия истекла. Перенаправление...');
-                this.logout();
-                return;
-            }
-
+            const response = await fetch(url, config);
+            if (response.status === 401) { this.logout(); return; }
             const responseData = await response.json().catch(() => ({}));
-
-            if (!response.ok) {
-                const errorMessage = responseData.error || responseData.message || `Ошибка API: ${response.status}`;
-                throw new Error(errorMessage);
-            }
-
+            if (!response.ok) throw new Error(responseData.error || `Ошибка: ${response.status}`);
             return responseData;
-        } catch (error) {
-            console.error('API Error:', error.message);
-            throw error;
-        }
+        } catch (error) { throw error; }
     },
 
     async login(credentials) {
@@ -123,6 +107,58 @@ const api = {
         return await this.fetchWithAuth('/dashboard/', {
             method: 'GET'
         });
+    },
+
+    async getRoadmap() {
+        return await this.fetchWithAuth('/roadmap/', {
+            method: 'GET'
+        });
+    },
+
+    async generateRoadmap() {
+        return await this.fetchWithAuth('/roadmap/generate', {
+            method: 'POST'
+        });
+    },
+
+    async completeRoadmapTask(taskId) {
+        return await this.fetchWithAuth(`/roadmap/tasks/${taskId}/complete`, {
+            method: 'POST'
+        });
+    },
+
+    async getTestsList() {
+        return await this.fetchWithAuth('/tests/', {
+            method: 'GET'
+        });
+    },
+
+    async startTest(testId) {
+        return await this.fetchWithAuth(`/tests/${testId}/start`, {
+            method: 'POST'
+        });
+    },
+
+    async submitTest(testId, answers) {
+        return await this.fetchWithAuth(`/tests/${testId}/submit`, {
+            method: 'POST',
+            body: JSON.stringify({
+                answers: answers 
+            }) 
+        });
+    },
+    
+    
+    async getTopics() {
+        return await this.fetchWithAuth('/lessons/topics');
+    },
+
+    async getLessonsByTopic(topicId) {
+        return await this.fetchWithAuth(`/lessons/topics/${topicId}`);
+    },
+
+    async getLessonContent(lessonId) {
+        return await this.fetchWithAuth(`/lessons/${lessonId}`);
     },
 
     logout() {
