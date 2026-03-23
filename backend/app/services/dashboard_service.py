@@ -6,6 +6,7 @@ from app.models.roadmap import Roadmap
 from app.models.roadmap_week import RoadmapWeek
 from app.models.daily_task import DailyTask
 from app.models.lesson import Lesson
+from app import db
 
 
 class DashboardService:
@@ -77,6 +78,22 @@ class DashboardService:
                 'description': 'Мы подберём для тебя программу обучения',
             }}, 200
 
+        if user.weak_topics and len(user.weak_topics) > 0:
+            for topic_id in user.weak_topics:
+                next_weak_lesson = Lesson.query.filter_by(topic_id=topic_id).filter(
+                    ~Lesson.id.in_(
+                        db.session.query(Progress.lesson_id).filter_by(user_id=user_id, status='completed')
+                    )
+                ).order_by(Lesson.order).first()
+
+                if next_weak_lesson:
+                    return {'recommendation': {
+                        'action': 'lesson',
+                        'title': f'Работа над темой: {next_weak_lesson.title}',
+                        'description': 'Мы заметили ошибки в этой теме. Давай закрепим материал!',
+                        'reference_id': next_weak_lesson.id,
+                    }}, 200
+
         roadmap = Roadmap.query.filter_by(user_id=user_id).first()
         if roadmap:
             current_week = RoadmapWeek.query.filter_by(
@@ -95,21 +112,31 @@ class DashboardService:
                         'reference_id': pending_task.reference_id,
                     }}, 200
 
-        last_lesson = Progress.query.filter_by(
-            user_id=user_id, status='completed'
-        ).filter(Progress.lesson_id.isnot(None)).order_by(Progress.completed_at.desc()).first()
-
-        if last_lesson:
-            next_lesson = Lesson.query.filter(
-                Lesson.topic_id == Lesson.query.get(last_lesson.lesson_id).topic_id if last_lesson.lesson_id else True,
-                Lesson.order > (Lesson.query.get(last_lesson.lesson_id).order if last_lesson.lesson_id else 0)
-            ).order_by(Lesson.order).first()
-            if next_lesson:
+        last_activity = Progress.query.filter_by(user_id=user_id).order_by(Progress.created_at.desc()).first()
+        
+        if last_activity and last_activity.lesson_id:
+            current_lesson = Lesson.query.get(last_activity.lesson_id)
+            if last_activity.status != 'completed':
                 return {'recommendation': {
                     'action': 'lesson',
-                    'title': f'Продолжи: {next_lesson.title}',
-                    'description': 'Следующий урок ждёт тебя',
-                    'reference_id': next_lesson.id,
+                    'title': f'Продолжи урок: {current_lesson.title}',
+                    'description': 'Ты остановился на полпути, пора закончить!',
+                    'reference_id': current_lesson.id,
+                    'type': 'continue'
+                }}, 200
+            
+            next_step = Lesson.query.filter(
+                Lesson.topic_id == current_lesson.topic_id,
+                Lesson.order > current_lesson.order
+            ).order_by(Lesson.order).first()
+            
+            if next_step:
+                return {'recommendation': {
+                    'action': 'lesson',
+                    'title': f'Следующий урок: {next_step.title}',
+                    'description': 'Отличный темп! Идем дальше по программе.',
+                    'reference_id': next_step.id,
+                    'type': 'next'
                 }}, 200
 
         return {'recommendation': {

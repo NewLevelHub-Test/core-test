@@ -69,33 +69,66 @@ class TestService:
         if not attempt:
             return {'error': 'Активная попытка не найдена'}, 404
 
-        answers = data.get('answers', {})
+        if isinstance(data, list):
+            answers_list = data
+        elif isinstance(data, dict):
+            answers_list = data.get('answers', data)
+        else:
+            answers_list = {}
+
         score = 0
         wrong_topics = []
         details = []
+        saved_answers = {}
 
-        for qid_str, user_answer in answers.items():
-            question = TestQuestion.query.get(int(qid_str))
-            if not question:
-                continue
+        if isinstance(answers_list, list):
+            for item in answers_list:
+                qid = item.get('question_id')
+                user_answer = item.get('selected_option')
+                if qid is None: continue
+                
+                question = TestQuestion.query.get(int(qid))
+                if not question: continue
 
-            is_correct = question.correct_answer == user_answer
-            if is_correct:
-                score += 1
-            else:
-                test = Test.query.get(question.test_id)
-                if test and test.topic_id and test.topic_id not in wrong_topics:
-                    wrong_topics.append(test.topic_id)
+                is_correct = str(question.correct_answer) == str(user_answer)
+                if is_correct:
+                    score += 1
+                else:
+                    test_obj = Test.query.get(question.test_id)
+                    if test_obj and test_obj.topic_id and test_obj.topic_id not in wrong_topics:
+                        wrong_topics.append(test_obj.topic_id)
 
-            details.append({
-                'question_id': question.id,
-                'user_answer': user_answer,
-                'correct_answer': question.correct_answer,
-                'is_correct': is_correct,
-                'explanation': question.explanation,
-            })
+                saved_answers[str(qid)] = user_answer
+                details.append({
+                    'question_id': question.id,
+                    'user_answer': user_answer,
+                    'correct_answer': question.correct_answer,
+                    'is_correct': is_correct,
+                    'explanation': question.explanation,
+                })
+        else:
+            for qid_str, user_answer in answers_list.items():
+                question = TestQuestion.query.get(int(qid_str))
+                if not question: continue
 
-        attempt.answers = answers
+                is_correct = str(question.correct_answer) == str(user_answer)
+                if is_correct:
+                    score += 1
+                else:
+                    test_obj = Test.query.get(question.test_id)
+                    if test_obj and test_obj.topic_id and test_obj.topic_id not in wrong_topics:
+                        wrong_topics.append(test_obj.topic_id)
+
+                saved_answers[qid_str] = user_answer
+                details.append({
+                    'question_id': question.id,
+                    'user_answer': user_answer,
+                    'correct_answer': question.correct_answer,
+                    'is_correct': is_correct,
+                    'explanation': question.explanation,
+                })
+
+        attempt.answers = saved_answers
         attempt.score = score
         attempt.finished_at = datetime.utcnow()
 
@@ -109,7 +142,7 @@ class TestService:
         user = User.query.get(user_id)
         if user:
             user.level = level
-            user.weak_topics = wrong_topics
+            user.weak_topics = list(set((user.weak_topics or []) + wrong_topics))
 
         db.session.commit()
 

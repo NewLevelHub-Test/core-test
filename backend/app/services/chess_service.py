@@ -15,14 +15,14 @@ class ChessService:
             return False
 
     @staticmethod
-    def get_best_move(fen, depth=15):
-        engine = StockfishEngine()
-        return engine.get_best_move(fen, depth)
+    def get_best_move(fen, bot_level=5):
+        pool = StockfishEngine() 
+        return pool.get_best_move(fen, bot_level)
 
     @staticmethod
-    def evaluate_position(fen, depth=15):
+    def evaluate_position(fen, bot_level=20):
         engine = StockfishEngine()
-        return engine.evaluate(fen, depth)
+        return engine.evaluate(fen, bot_level=bot_level)
 
     @staticmethod
     def get_legal_moves(fen):

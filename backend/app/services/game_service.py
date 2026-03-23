@@ -1,5 +1,4 @@
 from datetime import datetime
-
 import chess
 
 from app import db
@@ -39,6 +38,7 @@ class GameService:
 
         result = {'game': game.to_dict()}
 
+        
         if mode == 'ai' and player_color == 'black':
             ai_result, _ = GameService._ai_move(game)
             if ai_result:
@@ -52,7 +52,7 @@ class GameService:
         if not game:
             return {'error': 'Игра не найдена'}, 404
 
-        moves = [m.to_dict() for m in game.moves.all()]
+        moves = [m.to_dict() for m in game.moves.order_by(Move.move_number).all()]
         return {'game': game.to_dict(), 'moves': moves}, 200
 
     @staticmethod
@@ -107,7 +107,7 @@ class GameService:
 
     @staticmethod
     def _ai_move(game):
-        best = ChessService.get_best_move(game.fen, depth=game.bot_level)
+        best = ChessService.get_best_move(game.fen, bot_level=game.bot_level)
         if not best:
             return None, 200
 
@@ -133,23 +133,74 @@ class GameService:
         return ai_move.to_dict(), 200
 
     @staticmethod
-    def _finish_game(game, game_over, last_move_number):
+    def _finish_game(game, game_over, last_move_number=None):
         game.status = 'finished'
         game.finished_at = datetime.utcnow()
-        if game_over['is_checkmate']:
+
+        
+        if game_over.get('is_resign'):
+            winner_id = game_over['winner_id']
+            game.result = '1-0' if winner_id == game.white_id else '0-1'
+        elif game_over.get('is_checkmate'):
             game.result = '1-0' if last_move_number % 2 == 1 else '0-1'
-        else:
+        elif game_over.get('is_draw'):
             game.result = '1/2-1/2'
+        else:
+            game.result = '1-0' if last_move_number % 2 == 1 else '0-1'
+
+       
+        moves = game.moves.order_by(Move.move_number).all()
+        white_user = User.query.get(game.white_id)
+        black_user = User.query.get(game.black_id) if game.black_id else None
+
+        headers = {
+            'Event': 'Шахматная платформа - Партия',
+            'Date': game.created_at.strftime('%Y.%m.%d'),
+            'White': white_user.username if white_user else 'Игрок 1',
+            'Black': black_user.username if black_user else f'Бот (Уровень {game.bot_level})',
+            'Result': game.result,
+        }
+
+        move_data = [{'notation': m.notation} for m in moves]
+        game.pgn = moves_to_pgn(move_data, headers)
+
+        # Обновление ЭЛО
+        from app.utils.helpers import elo_update
+
+        if game.mode == 'ai':
+            is_white_player = (game.player_color == 'white')
+            player_user = white_user if is_white_player else black_user
+
+            if player_user:
+                if game.result == '1/2-1/2':
+                    player_score = 0.5
+                elif (game.result == '1-0' and is_white_player) or (game.result == '0-1' and not is_white_player):
+                    player_score = 1.0
+                else:
+                    player_score = 0.0
+
+                ai_rating = 1000 + (game.bot_level * 50)
+                new_player_elo, _ = elo_update(player_user.elo_rating, ai_rating, player_score)
+                player_user.elo_rating = new_player_elo
+
+        elif game.mode == 'pvp' and white_user and black_user:
+            score_white = 1.0 if game.result == '1-0' else (0.0 if game.result == '0-1' else 0.5)
+            new_w, new_b = elo_update(white_user.elo_rating, black_user.elo_rating, score_white)
+            white_user.elo_rating = new_w
+            black_user.elo_rating = new_b
 
     @staticmethod
     def resign(user_id, game_id):
         game = Game.query.get(game_id)
-        if not game:
-            return {'error': 'Игра не найдена'}, 404
+        if not game or game.status != 'in_progress':
+            return {'error': 'Игра не найдена или уже завершена'}, 400
 
-        game.status = 'finished'
-        game.finished_at = datetime.utcnow()
-        game.result = '0-1' if game.white_id == user_id else '1-0'
+ 
+        loser_id = user_id
+        winner_id = game.white_id if user_id == game.black_id else game.black_id
+
+        
+        GameService._finish_game(game, {'is_resign': True, 'winner_id': winner_id})
         db.session.commit()
 
         return {'game': game.to_dict()}, 200
@@ -188,7 +239,7 @@ class GameService:
         black = User.query.get(game.black_id) if game.black_id else None
 
         headers = {
-            'Event': 'Chess Learning Platform',
+            'Event': 'Шахматная платформа',
             'Date': game.created_at.strftime('%Y.%m.%d'),
             'White': white.username if white else 'Bot',
             'Black': black.username if black else 'Bot',

@@ -1,3 +1,4 @@
+import random
 from app import db
 from app.models.roadmap import Roadmap
 from app.models.roadmap_week import RoadmapWeek
@@ -6,17 +7,36 @@ from app.models.topic import Topic
 from app.models.lesson import Lesson
 from app.models.user import User
 
+WEEK_TEMPLATES = [
+    [
+        {'day': 1, 'type': 'lesson', 'title': 'Введение в тему'},
+        {'day': 2, 'type': 'exercise', 'title': 'Закрепление основ'},
+        {'day': 3, 'type': 'lesson', 'title': 'Углубленное изучение'},
+        {'day': 4, 'type': 'exercise', 'title': 'Практика на мат'},
+        {'day': 5, 'type': 'game', 'title': 'Партия с ботом'},
+        {'day': 6, 'type': 'exercise', 'title': 'Поиск ошибок'},
+        {'day': 7, 'type': 'test', 'title': 'Тест недели'},
+    ],
 
-DAYS_PER_WEEK = 7
+    [
+        {'day': 1, 'type': 'lesson', 'title': 'Краткий обзор'},
+        {'day': 2, 'type': 'exercise', 'title': 'Тактический тренажер'},
+        {'day': 3, 'type': 'exercise', 'title': 'Решение этюдов'},
+        {'day': 4, 'type': 'game', 'title': 'Тренировочный матч'},
+        {'day': 5, 'type': 'lesson', 'title': 'Разбор стратегий'},
+        {'day': 6, 'type': 'game', 'title': 'Реванш с ботом'},
+        {'day': 7, 'type': 'test', 'title': 'Проверка навыков'},
+    ],
 
-DAILY_TEMPLATE = [
-    {'day': 1, 'type': 'lesson', 'title': 'Изучи новую тему'},
-    {'day': 2, 'type': 'exercise', 'title': 'Реши задачи по теме'},
-    {'day': 3, 'type': 'lesson', 'title': 'Продолжи урок'},
-    {'day': 4, 'type': 'exercise', 'title': 'Практика: задачи'},
-    {'day': 5, 'type': 'game', 'title': 'Сыграй партию с ботом'},
-    {'day': 6, 'type': 'exercise', 'title': 'Повторение и задачи'},
-    {'day': 7, 'type': 'test', 'title': 'Мини-тест недели'},
+    [
+        {'day': 1, 'type': 'lesson', 'title': 'Теория и примеры'},
+        {'day': 2, 'type': 'game', 'title': 'Легкая разминка'},
+        {'day': 3, 'type': 'exercise', 'title': 'Задачи на время'},
+        {'day': 4, 'type': 'lesson', 'title': 'Мастер-класс'},
+        {'day': 5, 'type': 'game', 'title': 'Серьезная игра'},
+        {'day': 6, 'type': 'exercise', 'title': 'Анализ позиции'},
+        {'day': 7, 'type': 'test', 'title': 'Экзамен'},
+    ]
 ]
 
 
@@ -36,55 +56,63 @@ class RoadmapService:
 
     @staticmethod
     def generate_roadmap(user_id, level=None):
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         if not user:
             return {'error': 'Пользователь не найден'}, 404
 
-        if not level:
-            level = user.level or 'beginner'
+        level = level or user.level or 'beginner'
 
         existing = Roadmap.query.filter_by(user_id=user_id).first()
         if existing:
             db.session.delete(existing)
             db.session.flush()
 
-        topics = Topic.query.order_by(Topic.order).all()
-        total_weeks = max(len(topics), 12)
+        all_topics = Topic.query.order_by(Topic.order).all()
+        user_weak_ids = user.weak_topics if user.weak_topics else []
+        
+        weak_topics = [t for t in all_topics if t.id in user_weak_ids]
+        other_topics = [t for t in all_topics if t.id not in user_weak_ids]
+        sorted_topics = weak_topics + other_topics
 
         roadmap = Roadmap(
             user_id=user_id,
             level=level,
-            total_weeks=total_weeks,
+            total_weeks=len(sorted_topics),
             current_week=1,
+            title=f'План обучения: {level.capitalize()}'
         )
         db.session.add(roadmap)
         db.session.flush()
 
-        for i, topic in enumerate(topics, start=1):
-            lessons = Lesson.query.filter_by(topic_id=topic.id).order_by(Lesson.order).all()
-
+        for i, topic in enumerate(sorted_topics, start=1):
+            is_weak = topic.id in user_weak_ids
+            
             week = RoadmapWeek(
                 roadmap_id=roadmap.id,
                 week_number=i,
                 title=f'Неделя {i}: {topic.name}',
-                description=topic.description,
+                description=f'{"[ПРИОРИТЕТ] " if is_weak else ""}Изучаем: {topic.description}',
                 topics=[topic.id],
             )
             db.session.add(week)
             db.session.flush()
 
-            for tmpl in DAILY_TEMPLATE:
+            lessons = Lesson.query.filter_by(topic_id=topic.id).order_by(Lesson.order).all()
+            
+            template = random.choice(WEEK_TEMPLATES)
+
+            for tmpl in template:
                 ref_id = None
                 if tmpl['type'] == 'lesson' and lessons:
-                    idx = min(tmpl['day'] // 2, len(lessons) - 1)
-                    ref_id = lessons[idx].id
+                    lesson_idx = (tmpl['day'] // 2) % len(lessons)
+                    ref_id = lessons[lesson_idx].id
 
                 task = DailyTask(
                     week_id=week.id,
                     day_number=tmpl['day'],
                     task_type=tmpl['type'],
                     title=tmpl['title'],
-                    description=f'{topic.name} — {tmpl["title"]}',
+                    description=f'{topic.name}: {tmpl["title"]}',
                     reference_id=ref_id,
                 )
                 db.session.add(task)
@@ -103,7 +131,7 @@ class RoadmapService:
             return {'error': 'Неделя не найдена'}, 404
 
         roadmap = Roadmap.query.get(week.roadmap_id)
-        if roadmap.user_id != user_id:
+        if int(roadmap.user_id) != int(user_id):
             return {'error': 'Доступ запрещён'}, 403
 
         return {'week': week.to_dict()}, 200
@@ -115,7 +143,7 @@ class RoadmapService:
             return {'error': 'Неделя не найдена'}, 404
 
         roadmap = Roadmap.query.get(week.roadmap_id)
-        if roadmap.user_id != user_id:
+        if int(roadmap.user_id) != int(user_id):
             return {'error': 'Доступ запрещён'}, 403
 
         week.is_completed = True
@@ -134,7 +162,7 @@ class RoadmapService:
 
         week = RoadmapWeek.query.get(task.week_id)
         roadmap = Roadmap.query.get(week.roadmap_id)
-        if roadmap.user_id != user_id:
+        if int(roadmap.user_id) != int(user_id):
             return {'error': 'Доступ запрещён'}, 403
 
         task.is_completed = True

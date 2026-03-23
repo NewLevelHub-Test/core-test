@@ -121,3 +121,34 @@ class LessonService:
 
         db.session.commit()
         return {'message': 'Урок завершён', 'progress': progress.to_dict()}, 200
+
+    @staticmethod
+    def get_topic_lessons(user_id, topic_id):
+        from app.models.topic import Topic
+        from app.models.lesson import Lesson
+        from app.models.progress import Progress
+
+        topic = Topic.query.get(topic_id)
+        if not topic:
+            return {'error': 'Тема не найдена'}, 404
+
+        lessons = Lesson.query.filter_by(topic_id=topic_id).order_by(Lesson.order).all()
+
+        completed_progress = Progress.query.filter_by(
+            user_id=user_id, 
+            status='completed',
+            exercise_id=None
+        ).all()
+        completed_ids = {p.lesson_id for p in completed_progress}
+
+        lessons_list = []
+        for l in lessons:
+            lesson_dict = l.to_dict()
+            lesson_dict['is_completed'] = l.id in completed_ids
+            lessons_list.append(lesson_dict)
+
+        return {
+            'topic_id': topic.id,
+            'topic_title': getattr(topic, 'title', getattr(topic, 'name', '')),
+            'lessons': lessons_list
+        }, 200

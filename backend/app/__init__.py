@@ -1,10 +1,13 @@
 import os
-
-from flask import Flask
+import re
+import logging
+from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 from app.config import config_by_name
 
@@ -12,6 +15,12 @@ db = SQLAlchemy()
 jwt = JWTManager()
 migrate = Migrate()
 
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=["2000 per day", "500 per hour"],
+    storage_uri="memory://",
+    strategy="fixed-window"
+)
 
 def create_app(config_name=None):
     if config_name is None:
@@ -23,7 +32,16 @@ def create_app(config_name=None):
     db.init_app(app)
     jwt.init_app(app)
     migrate.init_app(app, db)
-    CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
+    limiter.init_app(app)
+
+    CORS(app, resources={
+        r"/api/*": {
+            "origins": re.compile(r"https?://(localhost|127\.0\.0\.1)(:\d+)?"),
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"],
+            "supports_credentials": True
+        }
+    })
 
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
@@ -49,11 +67,7 @@ def create_app(config_name=None):
     app.register_blueprint(roadmap_bp, url_prefix='/api/roadmap')
     app.register_blueprint(admin_bp, url_prefix='/api/admin')
 
-    import logging
-    from flask import jsonify
-
     logging.basicConfig(level=logging.INFO)
-    logger = logging.getLogger(__name__)
 
     @app.errorhandler(400)
     def bad_request(error):
@@ -65,12 +79,12 @@ def create_app(config_name=None):
 
     @app.errorhandler(500)
     def internal_error(error):
-        logger.error(f"Server Error: {error}")
+        app.logger.error(f"Server Error: {error}")
         return jsonify({"error": "Internal Server Error", "message": "Внутренняя ошибка сервера"}), 500
 
     @app.errorhandler(Exception)
     def handle_unexpected_error(error):
-        logger.exception("Unexpected error occurred")
+        app.logger.exception("Unexpected error occurred")
         return jsonify({"error": "Unexpected Error", "message": "Что-то пошло не так"}), 500
 
     return app

@@ -27,4 +27,4 @@ def elo_update(rating_a, rating_b, score_a, k=32):
     new_a = round(rating_a + k * (score_a - expected_a))
     new_b = round(rating_b + k * (score_b - expected_b))
 
-    return new_a, new_b
+    return new_a, new_b  
