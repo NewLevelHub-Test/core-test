@@ -2,144 +2,137 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox Chess - Desktop History</title>
+    <title>История сражений - Ro-Chess</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
     <style>
-        body { 
-            font-family: 'Nunito', sans-serif; 
-            background: radial-gradient(circle at center, #ffffff 0%, #f8fafc 100%); 
-            min-height: 100vh;
-        }
+        body { font-family: 'Nunito', sans-serif; background: radial-gradient(circle at center, #ffffff 0%, #f8fafc 100%); min-height: 100vh; }
         .roblox-font { font-family: 'Montserrat', sans-serif; }
+        .glass-panel { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(15px); border-radius: 32px; border: 2px solid white; box-shadow: 0 15px 35px rgba(0,0,0,0.05); }
         
-        .desktop-sidebar {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(20px);
-            border-right: 2px solid white;
-            box-shadow: 10px 0 30px rgba(0,0,0,0.03);
+        .history-card {
+            transition: all 0.2s ease;
+            border-bottom: 6px solid #f1f5f9;
         }
-
-        .match-card-lux {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 32px;
-            border: 2px solid white;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.04), 0 8px 0 #e2e8f0;
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .match-card-lux:hover { 
-            transform: scale(1.02) translateY(-5px); 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.06), 0 8px 0 #e2e8f0;
-        }
-
-        .win-gradient { border-left: 12px solid #22c55e; }
-        .loss-gradient { border-left: 12px solid #ef4444; }
+        .history-card:hover { transform: translateY(-4px); border-bottom-color: #3b82f6; }
         
-        .view-btn-lux {
-            background: linear-gradient(180deg, #4dabf7 0%, #3b82f6 100%);
-            box-shadow: 0 6px 0 #1971c2, 0 10px 20px rgba(59, 130, 246, 0.2);
-            transition: all 0.1s;
-        }
-        .view-btn-lux:active { transform: translateY(4px); box-shadow: 0 2px 0 #1971c2; }
+        .status-win { color: #10b981; background: #ecfdf5; }
+        .status-loss { color: #ef4444; background: #fef2f2; }
+        .status-draw { color: #64748b; background: #f1f5f9; }
     </style>
 </head>
 <body class="flex">
 
-    <aside class="w-72 desktop-sidebar h-screen sticky top-0 flex flex-col p-8 z-50">
+    <aside class="w-72 h-screen sticky top-0 flex flex-col p-8 border-r-2 border-white bg-white/50 z-50">
         <div class="mb-12 text-center">
-            <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-2xl px-4 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block transform -rotate-2">
-                RO-CHESS
-            </div>
+            <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-2xl px-4 py-2 rounded-xl shadow-lg transform -rotate-2">RO-CHESS</div>
         </div>
-        <nav class="space-y-4 flex-1">
-            <a href="Dashboard.html" class="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all">
-                <span class="text-2xl">🏠</span> Дом
-            </a>
-            <a href="profile.html" class="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all">
-                <span class="text-2xl">👤</span> Профиль
-            </a>
-            <a href="hist.html" class="flex items-center gap-4 p-4 bg-purple-50 rounded-2xl text-purple-600 font-black uppercase text-xs tracking-widest border-b-4 border-purple-100">
-                <span class="text-2xl">📜</span> История
-            </a>
+        <nav class="space-y-4">
+            <a href="Dashboard.html" class="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all">🏠 Дом</a>
+            <a href="wbots.html" class="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all">⚔️ Баттл</a>
+            <a href="hist.html" class="flex items-center gap-4 p-4 bg-blue-50 rounded-2xl text-blue-600 font-black uppercase text-xs tracking-widest border-b-4 border-blue-100">📜 История</a>
         </nav>
     </aside>
 
-    <main class="flex-1 p-12 max-w-[1200px] mx-auto">
-        
-        <header class="flex justify-between items-end mb-12 px-4">
+    <main class="flex-1 p-12">
+        <header class="flex justify-between items-center mb-12">
             <div>
-                <h1 class="roblox-font italic uppercase text-slate-800 text-4xl tracking-tighter">Твои Баттлы 🏆</h1>
-                <p class="text-slate-400 font-black text-xs uppercase mt-2 tracking-[0.3em]">История твоих великих побед</p>
+                <h1 class="roblox-font italic uppercase text-4xl text-slate-800">Твои Сражения 📜</h1>
+                <p class="text-slate-400 font-black uppercase text-[10px] tracking-[0.2em] mt-2">Архив всех шахматных битв</p>
             </div>
-            <div class="bg-indigo-50 px-6 py-3 rounded-2xl border-2 border-white shadow-sm flex items-center gap-3">
-                <span class="text-2xl">🧠</span>
-                <span class="text-indigo-600 font-black text-[10px] uppercase tracking-widest leading-tight">Мудрость: +50 XP за разбор</span>
+            <div class="glass-panel px-8 py-4 text-center">
+                <p class="text-[10px] font-black text-slate-400 uppercase">Всего игр</p>
+                <p id="total-games" class="text-2xl font-black text-indigo-600">0</p>
             </div>
         </header>
 
-        <div class="grid grid-cols-2 gap-8">
-            
-            <div class="match-card-lux win-gradient p-8 flex items-center justify-between">
-                <div class="flex items-center gap-6">
-                    <div class="w-16 h-16 bg-emerald-50 rounded-[1.5rem] flex items-center justify-center text-4xl shadow-inner border border-white">🥇</div>
-                    <div>
-                        <h3 class="font-black text-emerald-600 text-lg uppercase italic tracking-tighter">Победа!</h3> 
-                        <p class="text-slate-400 text-xs font-bold uppercase mt-1 tracking-widest">10 Марта 2026 • 15:15</p>
-                    </div>
-                </div>
-                <a href="analysis.html" class="view-btn-lux text-white px-8 py-4 rounded-2xl font-black uppercase italic roblox-font text-xs tracking-widest">
-                    Разбор 👁️
-                </a>
+        <div id="history-grid" class="space-y-6 max-w-5xl">
+            <div class="animate-pulse flex flex-col gap-4">
+                <div class="h-24 bg-slate-200 rounded-3xl w-full"></div>
+                <div class="h-24 bg-slate-200 rounded-3xl w-full"></div>
             </div>
+        </div>
 
-            <div class="match-card-lux loss-gradient p-8 flex items-center justify-between">
-                <div class="flex items-center gap-6">
-                    <div class="w-16 h-16 bg-rose-50 rounded-[1.5rem] flex items-center justify-center text-4xl shadow-inner border border-white">🥈</div>
-                    <div>
-                        <h3 class="font-black text-rose-500 text-lg uppercase italic tracking-tighter">Поражение</h3> 
-                        <p class="text-slate-400 text-xs font-bold uppercase mt-1 tracking-widest">09 Марта 2026 • 18:40</p>
-                    </div>
-                </div>
-                <a href="analysis.html" class="view-btn-lux text-white px-8 py-4 rounded-2xl font-black uppercase italic roblox-font text-xs tracking-widest">
-                    Разбор 👁️
-                </a>
-            </div>
-
-            <div class="match-card-lux win-gradient p-8 flex items-center justify-between opacity-80">
-                <div class="flex items-center gap-6">
-                    <div class="w-16 h-16 bg-slate-50 rounded-[1.5rem] flex items-center justify-center text-4xl shadow-inner border border-white">🥇</div>
-                    <div>
-                        <h3 class="font-black text-emerald-600 text-lg uppercase italic tracking-tighter">Победа!</h3>
-                        <p class="text-slate-400 text-xs font-bold uppercase mt-1 tracking-widest">07 Марта 2026 • 12:00</p>
-                    </div>
-                </div>
-                <a href="analysis.html" class="view-btn-lux text-white px-8 py-4 rounded-2xl font-black uppercase italic roblox-font text-xs tracking-widest">
-                    Разбор 👁️
-                </a>
-            </div>
-
-            <div class="match-card-lux win-gradient p-8 flex items-center justify-between opacity-80">
-                <div class="flex items-center gap-6">
-                    <div class="w-16 h-16 bg-slate-50 rounded-[1.5rem] flex items-center justify-center text-4xl shadow-inner border border-white">🥇</div>
-                    <div>
-                        <h3 class="font-black text-emerald-600 text-lg uppercase italic tracking-tighter">Победа!</h3>
-                        <p class="text-slate-400 text-xs font-bold uppercase mt-1 tracking-widest">05 Марта 2026 • 10:20</p>
-                    </div>
-                </div>
-                <a href="analysis.html" class="view-btn-lux text-white px-8 py-4 rounded-2xl font-black uppercase italic roblox-font text-xs tracking-widest">
-                    Разбор 👁️
-                </a>
-            </div>
-
+        <div class="flex justify-center gap-4 mt-12">
+            <button id="prev-page" onclick="changePage(-1)" class="p-4 bg-white rounded-2xl font-black text-xs uppercase border-b-4 border-slate-200 disabled:opacity-30">Назад</button>
+            <span id="page-info" class="flex items-center font-black text-slate-400 uppercase text-xs">Страница 1</span>
+            <button id="next-page" onclick="changePage(1)" class="p-4 bg-white rounded-2xl font-black text-xs uppercase border-b-4 border-slate-200 disabled:opacity-30">Вперед</button>
         </div>
     </main>
-    <script src="state.js"></script>
+
     <script src="api.js"></script>
     <script>
-        if (!window.roChessApi.isAuthenticated()) {
-            window.location.href = 'h1.html';
+        let currentPage = 1;
+        const limit = 10;
+
+        async function loadHistory(page = 1) {
+            const grid = document.getElementById('history-grid');
+            try {
+                const data = await window.roChessApi.fetchWithAuth(`games/history?page=${page}&limit=${limit}`);
+                const games = data.games || data;
+                
+                document.getElementById('total-games').innerText = data.total || games.length;
+                document.getElementById('page-info').innerText = `Страница ${page}`;
+                
+                if (games.length === 0) {
+                    grid.innerHTML = '<p class="text-center p-20 font-black text-slate-300 uppercase">Тут пока пусто... Время начать баттл! ⚔️</p>';
+                    return;
+                }
+
+                grid.innerHTML = '';
+                games.forEach(game => {
+                    const card = document.createElement('div');
+                    card.className = "glass-panel p-6 history-card flex items-center justify-between";
+                    
+                    let resClass = "status-draw";
+                    let resText = "Ничья";
+                    if (game.result === 'win') { resClass = "status-win"; resText = "Победа 🏆"; }
+                    if (game.result === 'loss') { resClass = "status-loss"; resText = "Поражение 💀"; }
+
+                    card.innerHTML = `
+                        <div class="flex items-center gap-8">
+                            <div class="px-6 py-2 rounded-2xl font-black uppercase text-[10px] ${resClass}">${resText}</div>
+                            <div>
+                                <p class="text-[10px] font-black text-slate-400 uppercase">Дата</p>
+                                <p class="font-bold text-slate-700">${new Date(game.created_at).toLocaleDateString()}</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-black text-slate-400 uppercase">Бот</p>
+                                <p class="font-bold text-slate-700 italic">Lvl: ${game.difficulty}</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <button onclick="downloadPGN(${game.id})" class="p-4 bg-slate-100 hover:bg-slate-200 rounded-2xl text-slate-600 font-black text-[10px] uppercase transition-all">PGN 📥</button>
+                            <button onclick="goToAnalysis(${game.id})" class="p-4 bg-blue-500 hover:bg-blue-600 rounded-2xl text-white font-black text-[10px] uppercase shadow-lg shadow-blue-200 transition-all">Разбор 📊</button>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            } catch (err) {
+                console.error(err);
+                grid.innerHTML = '<p class="text-red-500">Ошибка загрузки истории ❌</p>';
+            }
         }
+
+        function goToAnalysis(id) {
+            window.location.href = `analysis.html?id=${id}`;
+        }
+
+        async function downloadPGN(id) {
+            try {
+                const blob = await window.roChessApi.fetchWithAuth(`games/${id}/pgn`, { responseType: 'blob' });
+                const url = `${window.roChessApi.BASE_URL}/games/${id}/pgn`;
+                window.open(url, '_blank');
+            } catch (err) { console.error(err); }
+        }
+
+        function changePage(step) {
+            currentPage += step;
+            if (currentPage < 1) currentPage = 1;
+            loadHistory(currentPage);
+        }
+
+        loadHistory();
     </script>
 </body>
 </html>
