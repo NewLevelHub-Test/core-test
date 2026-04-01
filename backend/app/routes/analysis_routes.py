@@ -30,7 +30,9 @@ def analyze_position():
 @jwt_required()
 def get_mistakes():
     user_id = get_jwt_identity()
-    result, status = AnalysisService.get_user_mistakes(user_id)
+    page = request.args.get('page', 1, type=int)
+    
+    result, status = AnalysisService.get_user_mistakes(user_id, page=page)
     return jsonify(result), status
 
 @analysis_bp.route('/mistakes/<int:mistake_id>/exercises', methods=['GET'])

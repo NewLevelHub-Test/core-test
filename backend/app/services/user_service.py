@@ -101,27 +101,43 @@ class UserService:
         }, 200
 
     @staticmethod
-    def get_learning_progress(user_id):
-        completed = Progress.query.filter_by(
+    def get_learning_progress(user_id, page=1):
+        pagination = Progress.query.filter_by(
             user_id=user_id, status='completed'
-        ).all()
+        ).order_by(Progress.completed_at.desc()).paginate(
+            page=page, per_page=15, error_out=False
+        )
 
         return {
-            'progress': [p.to_dict() for p in completed],
-            'total_completed': len(completed),
+            'progress': [p.to_dict() for p in pagination.items],
+            'total': pagination.total,
+            'page': pagination.page,
+            'pages': pagination.pages
         }, 200
 
     @staticmethod
-    def get_activity_history(user_id):
-        games = Game.query.filter(
-            (Game.white_id == user_id) | (Game.black_id == user_id)
-        ).order_by(Game.created_at.desc()).limit(30).all()
+    def get_activity_history(user_id, page=1):
+        pagination = Progress.query.filter_by(
+            user_id=user_id, status='completed'
+        ).order_by(Progress.completed_at.desc()).paginate(
+            page=page, per_page=15, error_out=False
+        )
+
+        return {
+            'progress': [p.to_dict() for p in pagination.items],
+            'total': pagination.total,
+            'page': pagination.page,
+            'pages': pagination.pages
+        }, 200
 
         tests = TestAttempt.query.filter_by(
             user_id=user_id
-        ).order_by(TestAttempt.started_at.desc()).limit(10).all()
+        ).order_by(TestAttempt.started_at.desc()).limit(5).all()
 
         return {
-            'games': [g.to_dict() for g in games],
-            'tests': [t.to_dict() for t in tests],
+            'games': [g.to_dict() for g in pagination.items],
+            'total_games': pagination.total,
+            'page': pagination.page,
+            'pages': pagination.pages,
+            'recent_tests': [t.to_dict() for t in tests],
         }, 200

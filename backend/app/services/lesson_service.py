@@ -10,22 +10,40 @@ from app.models.progress import Progress
 class LessonService:
 
     @staticmethod
-    def get_topics():
-        topics = Topic.query.order_by(Topic.order).all()
+    def get_topics(page=1):
+        pagination = Topic.query.order_by(Topic.order).paginate(
+        page=page, per_page=15, error_out=False
+    )
+        
         result = []
-        for t in topics:
+        for t in pagination.items:
             d = t.to_dict()
             d['lesson_count'] = Lesson.query.filter_by(topic_id=t.id).count()
             result.append(d)
-        return {'topics': result}, 200
+            
+        return {
+            'topics': result,
+            'total': pagination.total,
+            'pages': pagination.pages,
+            'current_page': pagination.page
+        }, 200
 
     @staticmethod
-    def get_lessons(topic_id=None):
+    def get_lessons(topic_id=None, page=1):
         query = Lesson.query
         if topic_id:
             query = query.filter_by(topic_id=topic_id)
-        lessons = query.order_by(Lesson.order).all()
-        return {'lessons': [l.to_dict() for l in lessons]}, 200
+            
+        pagination = query.order_by(Lesson.order).paginate(
+            page=page, per_page=20, error_out=False
+        )
+        
+        return {
+            'lessons': [l.to_dict() for l in pagination.items],
+            'total': pagination.total,
+            'pages': pagination.pages,
+            'current_page': pagination.page
+        }, 200
 
     @staticmethod
     def get_lesson_full(lesson_id):

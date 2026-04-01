@@ -11,7 +11,7 @@ def auth_headers(client):
     user_data = {
         "username": "student_test",
         "email": "student_final@chess.com",
-        "password": "password123",
+        "password": "Password123",
         "phone": "87071234567"
     }
     client.post('/api/auth/register', json=user_data)

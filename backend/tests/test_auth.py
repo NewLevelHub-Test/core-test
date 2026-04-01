@@ -7,7 +7,7 @@ def generate_user_data():
     return {
         "username": f"tester_{unique_id}",
         "email": f"test_{unique_id}@mail.com",
-        "password": "password123",
+        "password": "Password123",
         "phone": "77777777777",
         "role": "student"
     }

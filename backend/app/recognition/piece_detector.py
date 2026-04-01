@@ -1,54 +1,52 @@
-import cv2
 import numpy as np
-
+from roboflow import Roboflow
 
 class PieceDetector:
-    """
-    Detects chess pieces on a board image.
-    Splits the board into 8x8 cells and classifies each cell.
-    """
-
-    PIECE_MAP = {
-        'white_king': 'K', 'white_queen': 'Q', 'white_rook': 'R',
-        'white_bishop': 'B', 'white_knight': 'N', 'white_pawn': 'P',
-        'black_king': 'k', 'black_queen': 'q', 'black_rook': 'r',
-        'black_bishop': 'b', 'black_knight': 'n', 'black_pawn': 'p',
-        'empty': '.',
-    }
+    API_KEY = "WcAZeJc1UxlwVpJKm4B2"
+    PROJECT_NAME = "ctv"
+    VERSION = 1
 
     @staticmethod
-    def detect(board_image):
-        h, w = board_image.shape[:2]
-        cell_h, cell_w = h // 8, w // 8
+    def detect(image_path):
+        rf = Roboflow(api_key=PieceDetector.API_KEY)
+        # Указываем воркспейс из твоей ссылки
+        project = rf.workspace("chess-nypgo").project(PieceDetector.PROJECT_NAME)
+        model = project.version(PieceDetector.VERSION).model
+        
+        result = model.predict(image_path, confidence=30).json()
+        predictions = result.get('predictions', [])
+        
+        grid = [['.' for _ in range(8)] for _ in range(8)]
+        if not predictions:
+            return grid
 
-        grid = []
-        for row in range(8):
-            rank = []
-            for col in range(8):
-                x1, y1 = col * cell_w, row * cell_h
-                x2, y2 = x1 + cell_w, y1 + cell_h
-                cell = board_image[y1:y2, x1:x2]
-                piece = PieceDetector._classify_cell(cell, row, col)
-                rank.append(piece)
-            grid.append(rank)
+        coords = np.array([[p['x'], p['y']] for p in predictions])
+        x_min, y_min = coords.min(axis=0)
+        x_max, y_max = coords.max(axis=0)
+        
+        width = x_max - x_min
+        height = y_max - y_min
+
+        predictions = sorted(predictions, key=lambda x: x['confidence'], reverse=True)
+
+        for p in predictions:
+            rel_x = (p['x'] - x_min) / width if width > 0 else 0
+            rel_y = (p['y'] - y_min) / height if height > 0 else 0
+
+            col = int(rel_x * 7.99)
+            row = int(rel_y * 7.99)
+            
+            if grid[row][col] == '.':
+                grid[row][col] = PieceDetector._label_to_fen(p['class'])
 
         return grid
 
     @staticmethod
-    def _classify_cell(cell, row, col):
-        gray = cv2.cvtColor(cell, cv2.COLOR_BGR2GRAY)
-        mean_val = np.mean(gray)
-        std_val = np.std(gray)
-
-        is_light_square = (row + col) % 2 == 0
-        base = 180 if is_light_square else 120
-
-        if std_val < 15:
-            return '.'
-
-        if mean_val > base + 30:
-            return 'P'
-        elif mean_val < base - 30:
-            return 'p'
-
-        return '.'
+    def _label_to_fen(label):
+        label = label.upper().strip()
+        # Маппинг строго по твоим тегам: WKN/BKN для коней
+        mapping = {
+            'WK': 'K', 'WQ': 'Q', 'WR': 'R', 'WB': 'B', 'WKN': 'N', 'WP': 'P',
+            'BK': 'k', 'BQ': 'q', 'BR': 'r', 'BB': 'b', 'BKN': 'n', 'BP': 'p'
+        }
+        return mapping.get(label, '.')

@@ -1,5 +1,4 @@
 from datetime import datetime
-
 from app import db
 from app.models.test import Test
 from app.models.test_question import TestQuestion
@@ -7,20 +6,25 @@ from app.models.test_attempt import TestAttempt
 from app.models.topic import Topic
 from app.models.user import User
 
-
 LEVEL_THRESHOLDS = {
     'beginner': (0, 40),
     'intermediate': (41, 70),
     'advanced': (71, 100),
 }
 
-
 class TestService:
 
     @staticmethod
-    def get_tests():
-        tests = Test.query.all()
-        return {'tests': [t.to_dict() for t in tests]}, 200
+    def get_tests(page=1):
+        pagination = Test.query.order_by(Test.id).paginate(
+            page=page, per_page=10, error_out=False
+        )
+        return {
+            'tests': [t.to_dict() for t in pagination.items],
+            'total': pagination.total,
+            'page': pagination.page,
+            'pages': pagination.pages
+        }, 200
 
     @staticmethod
     def get_test(test_id):
@@ -155,12 +159,17 @@ class TestService:
         }, 200
 
     @staticmethod
-    def get_user_attempts(user_id):
-        attempts = TestAttempt.query.filter_by(
-            user_id=user_id
-        ).order_by(TestAttempt.started_at.desc()).all()
-
-        return {'attempts': [a.to_dict() for a in attempts]}, 200
+    def get_user_attempts(user_id, page=1):
+        # Исправлено: используем TestAttempt вместо Test
+        pagination = TestAttempt.query.filter_by(user_id=user_id).order_by(TestAttempt.started_at.desc()).paginate(
+            page=page, per_page=10, error_out=False
+        )
+        return {
+            'attempts': [a.to_dict() for a in pagination.items],
+            'total': pagination.total,
+            'page': pagination.page,
+            'pages': pagination.pages
+        }, 200
 
     @staticmethod
     def get_attempt_detail(user_id, attempt_id):

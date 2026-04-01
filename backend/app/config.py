@@ -10,11 +10,14 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'jwt-secret-change-in-production')
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=15)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
 
     UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'uploads')
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 MB
+    JWT_ERROR_MESSAGE_KEY = "message"
+    JWT_BLACKLIST_ENABLED = True 
+    JWT_BLACKLIST_TOKEN_CHECKS = ['access', 'refresh']
 
 
     STOCKFISH_PATH = os.environ.get('STOCKFISH_PATH', 'bin/stockfish.exe')
