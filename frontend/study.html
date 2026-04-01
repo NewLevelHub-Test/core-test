@@ -7,18 +7,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
     <style>
-        body { 
-            font-family: 'Nunito', sans-serif; 
-            background: radial-gradient(circle at center, #ffffff 0%, #f8fafc 100%); 
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: radial-gradient(circle at center, #ffffff 0%, #f8fafc 100%);
             min-height: 100vh;
         }
 
-        .roblox-font { 
-            font-family: 'Montserrat', sans-serif; 
+        .roblox-font {
+            font-family: 'Montserrat', sans-serif;
         }
-        
+
         .desktop-sidebar {
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.82);
             backdrop-filter: blur(20px);
             border-right: 2px solid white;
             box-shadow: 10px 0 30px rgba(0,0,0,0.03);
@@ -31,6 +31,7 @@
             box-shadow: 0 10px 0 #e2e8f0;
             transition: all 0.2s ease;
             cursor: pointer;
+            min-height: 180px;
         }
 
         .topic-card:hover {
@@ -39,17 +40,19 @@
             border-color: #3b82f6;
         }
 
-        .chess-grid { 
+        .chess-grid {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
-            width: 100%;
-            max-width: 500px;
-            aspect-ratio: 1 / 1;
+            width: min(92vw, 500px);
+            height: min(92vw, 500px);
+            min-width: 240px;
+            min-height: 240px;
             border: 12px solid #393b3d;
             border-radius: 32px;
             overflow: hidden;
             box-shadow: 0 25px 50px rgba(0,0,0,0.1), 0 15px 0 #d1d5db;
             user-select: none;
+            background: white;
         }
 
         .sq-l { background-color: #ffffff; }
@@ -59,13 +62,14 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 3.5rem;
+            font-size: clamp(22px, 4vw, 56px);
             width: 100%;
             height: 100%;
+            line-height: 1;
         }
 
         .luxury-card {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.92);
             border: 2px solid white;
             border-radius: 32px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.04);
@@ -75,6 +79,8 @@
             position: relative;
             cursor: pointer;
             transition: transform 0.15s ease;
+            min-height: 48px;
+            min-width: 48px;
         }
 
         .board-square:hover {
@@ -96,93 +102,348 @@
         .last-move-to {
             box-shadow: inset 0 0 0 4px #ec4899;
         }
+
+        .skeleton {
+            position: relative;
+            overflow: hidden;
+            background: #e2e8f0;
+        }
+
+        .skeleton::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            transform: translateX(-100%);
+            background: linear-gradient(
+                90deg,
+                rgba(255,255,255,0) 0%,
+                rgba(255,255,255,0.6) 50%,
+                rgba(255,255,255,0) 100%
+            );
+            animation: shimmer 1.25s infinite;
+        }
+
+        .inline-message {
+            border-radius: 20px;
+            padding: 14px 16px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            animation: fadeInUp 0.22s ease;
+        }
+
+        .inline-message.error {
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 2px solid #fecaca;
+        }
+
+        .inline-message.success {
+            background: #ecfdf5;
+            color: #047857;
+            border: 2px solid #a7f3d0;
+        }
+
+        .inline-message.info {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 2px solid #bfdbfe;
+        }
+
+        .empty-state {
+            background: rgba(248,250,252,0.92);
+            border: 2px dashed #cbd5e1;
+            border-radius: 24px;
+            padding: 24px;
+            text-align: center;
+            color: #64748b;
+            font-weight: 800;
+            animation: fadeInUp 0.22s ease;
+        }
+
+        .error-state {
+            background: linear-gradient(180deg, rgba(254,242,242,0.95), rgba(255,255,255,0.98));
+            border: 2px solid #fecaca;
+            border-radius: 24px;
+            padding: 24px;
+            text-align: center;
+            color: #991b1b;
+            font-weight: 800;
+            animation: fadeInUp 0.22s ease;
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255,255,255,0.35);
+            border-top-color: white;
+            border-radius: 999px;
+            animation: spin 0.75s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: 24px;
+            transform: translateX(-50%);
+            z-index: 120;
+            background: rgba(15, 23, 42, 0.94);
+            color: white;
+            border-radius: 18px;
+            padding: 14px 18px;
+            font-weight: 800;
+            box-shadow: 0 14px 30px rgba(0,0,0,0.18);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            max-width: calc(100vw - 32px);
+            text-align: center;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-4px);
+        }
+
+        .focus-ring:focus-visible,
+        button:focus-visible,
+        a:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible,
+        [tabindex]:focus-visible {
+            outline: 3px solid #60a5fa;
+            outline-offset: 3px;
+        }
+
+        .fade-swap {
+            animation: fadeIn 0.2s ease;
+        }
+
+        .page-transition {
+            animation: fadeInUp 0.22s ease;
+        }
+
+        .btn-min {
+            min-height: 48px;
+            min-width: 48px;
+        }
+
+        .lesson-row {
+            min-height: 72px;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0,0,0,0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes shimmer {
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 1279px) {
+            .desktop-sidebar {
+                box-shadow: 20px 0 40px rgba(0,0,0,0.12);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .topic-card,
+            .luxury-card {
+                border-radius: 24px;
+            }
+
+            .chess-grid {
+                width: min(84vw, 460px);
+                height: min(84vw, 460px);
+                border-width: 10px;
+                border-radius: 24px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .topic-card,
+            .luxury-card {
+                border-radius: 22px;
+            }
+
+            .chess-grid {
+                width: min(94vw, 360px);
+                height: min(94vw, 360px);
+                min-width: 220px;
+                min-height: 220px;
+                border-width: 8px;
+                border-radius: 20px;
+            }
+
+            .piece {
+                font-size: clamp(18px, 5vw, 34px);
+            }
+
+            .inline-message,
+            .empty-state,
+            .error-state {
+                border-radius: 18px;
+            }
+        }
     </style>
 </head>
-<body class="flex">
+<body class="bg-slate-50 xl:flex">
+    <div id="live-region" class="sr-only" aria-live="polite"></div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-    <aside class="w-72 desktop-sidebar h-screen sticky top-0 flex flex-col p-8 z-50">
+    <!-- MOBILE HEADER -->
+    <header class="xl:hidden sticky top-0 z-[90] bg-white/90 backdrop-blur-xl border-b border-slate-100 px-4 py-3 flex items-center justify-between">
+        <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-lg px-3 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block">
+            RO-CHESS
+        </div>
+
+        <button id="mobile-menu-btn" class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl btn-min" aria-label="Открыть меню" type="button">
+            ☰
+        </button>
+    </header>
+
+    <div id="mobile-overlay" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-[80] xl:hidden"></div>
+
+    <aside id="sidebar" class="w-72 desktop-sidebar h-screen fixed xl:sticky top-0 left-0 flex flex-col p-8 z-[85] -translate-x-full xl:translate-x-0 transition-transform duration-300">
         <div class="mb-12 text-center">
             <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-2xl px-4 py-2 rounded-xl shadow-lg transform -rotate-2">
                 RO-CHESS
             </div>
         </div>
 
-        <nav class="space-y-4 flex-1">
-            <a href="Dashboard.html" class="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all">
+        <nav class="space-y-4 flex-1" aria-label="Основная навигация">
+            <a href="Dashboard.html" class="flex items-center gap-4 p-4 min-h-[52px] hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all" aria-label="Перейти на главную">
                 <span>🏠</span> Дом
             </a>
 
-            <a href="study.html" class="flex items-center gap-4 p-4 bg-indigo-50 rounded-2xl text-indigo-600 font-black uppercase text-xs tracking-widest border-b-4 border-indigo-100">
+            <a href="study.html" class="flex items-center gap-4 p-4 min-h-[52px] bg-indigo-50 rounded-2xl text-indigo-600 font-black uppercase text-xs tracking-widest border-b-4 border-indigo-100" aria-label="Текущая страница: обучение">
                 <span>🎓</span> Обучение
             </a>
         </nav>
     </aside>
 
-    <main class="flex-1 p-12">
-        
+    <main class="flex-1 p-4 md:p-6 xl:p-12 max-w-[1400px] mx-auto w-full">
+        <div id="page-message" class="hidden mb-5" aria-live="polite"></div>
+
         <section id="topics-section">
-            <div class="flex justify-between items-center mb-10">
-                <h1 class="roblox-font italic uppercase text-slate-800 text-3xl">Академия Гроссмейстеров 🎓</h1>
+            <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8 md:mb-10">
+                <h1 class="roblox-font italic uppercase text-slate-800 text-2xl md:text-3xl">
+                    Академия Гроссмейстеров 🎓
+                </h1>
             </div>
-            <div id="topics-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8"></div>
+
+            <div id="topics-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 md:gap-6 xl:gap-8" aria-live="polite"></div>
         </section>
 
         <section id="lessons-section" class="hidden">
-            <button onclick="goBack()" class="text-indigo-500 font-black uppercase text-xs mb-6">← Назад к темам</button>
-            <h2 id="current-topic-title" class="roblox-font italic uppercase text-2xl mb-8 text-slate-800">Уроки</h2>
-            <div id="lessons-grid" class="max-w-3xl space-y-4"></div>
+            <button onclick="goBack()" class="text-indigo-500 font-black uppercase text-xs mb-6 min-h-[48px]" aria-label="Назад к темам" type="button">← Назад к темам</button>
+            <h2 id="current-topic-title" class="roblox-font italic uppercase text-xl md:text-2xl mb-6 md:mb-8 text-slate-800">
+                Уроки
+            </h2>
+            <div id="lessons-grid" class="max-w-3xl space-y-4" aria-live="polite"></div>
         </section>
 
         <section id="content-section" class="hidden flex flex-col items-center">
-            <div class="w-full max-w-5xl flex justify-between items-center mb-8">
-                <button onclick="goBack()" class="text-slate-400 font-black uppercase text-xs tracking-widest">← К списку уроков</button>
-                <h2 id="lesson-title" class="roblox-font italic uppercase text-slate-800 text-xl tracking-tighter">Теория</h2>
+            <div class="w-full max-w-6xl flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6 md:mb-8">
+                <button onclick="goBack()" class="text-slate-400 font-black uppercase text-xs tracking-widest w-fit min-h-[48px]" aria-label="К списку уроков" type="button">
+                    ← К списку уроков
+                </button>
+                <h2 id="lesson-title" class="roblox-font italic uppercase text-slate-800 text-lg md:text-xl tracking-tighter">
+                    Теория
+                </h2>
             </div>
 
-            <div class="grid grid-cols-12 gap-12 w-full max-w-6xl">
-                <div class="col-span-5 space-y-6">
-                    <div id="theory-container" class="luxury-card p-8 min-h-[250px] flex items-start"></div>
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 md:gap-8 xl:gap-12 w-full max-w-6xl">
+                <div class="xl:col-span-5 space-y-5 md:space-y-6 order-2 xl:order-1">
+                    <div id="theory-container" class="luxury-card p-5 md:p-8 min-h-[220px] md:min-h-[250px] flex items-start" aria-live="polite"></div>
 
-                    <div class="flex gap-4">
+                    <div class="grid grid-cols-2 gap-4">
                         <button
                             id="prev-btn"
                             onclick="prevTheoryCard()"
-                            class="flex-1 p-6 bg-white rounded-3xl shadow-sm font-black uppercase text-xs border-b-4 border-slate-100 active:translate-y-1 active:border-b-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="p-4 md:p-6 bg-white rounded-2xl md:rounded-3xl shadow-sm font-black uppercase text-[10px] md:text-xs border-b-4 border-slate-100 active:translate-y-1 active:border-b-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed min-h-[52px]"
+                            type="button"
+                            aria-label="Предыдущий урок"
                         >
                             Назад
                         </button>
-                        
+
                         <button
                             id="next-btn"
                             onclick="nextTheoryCard()"
-                            class="flex-1 p-6 bg-indigo-500 text-white rounded-3xl shadow-md font-black uppercase text-xs border-b-4 border-indigo-700 active:translate-y-1 active:border-b-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="p-4 md:p-6 bg-indigo-500 text-white rounded-2xl md:rounded-3xl shadow-md font-black uppercase text-[10px] md:text-xs border-b-4 border-indigo-700 active:translate-y-1 active:border-b-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed min-h-[52px]"
+                            type="button"
+                            aria-label="Следующий урок или упражнения"
                         >
                             Вперед
                         </button>
                     </div>
+                    <button
+                        id="ask-ai-lesson-btn"
+                        onclick="askAILesson()"
+                        class="w-full p-4 md:p-5 bg-indigo-500 text-white rounded-2xl md:rounded-3xl shadow-md font-black uppercase text-[10px] md:text-xs border-b-4 border-indigo-700 active:translate-y-1 active:border-b-0 transition-all min-h-[52px]"
+                        type="button"
+                        aria-label="Спросить ИИ про этот урок"
+                    >
+                        Спросить ИИ 🤖
+                    </button>
                 </div>
 
-                <div class="col-span-7 flex justify-center">
-                    <div id="chess-board" class="chess-grid"></div>
+                <div class="xl:col-span-7 flex justify-center order-1 xl:order-2">
+                    <div id="chess-board" class="chess-grid" aria-label="Демонстрационная шахматная доска"></div>
                 </div>
             </div>
         </section>
 
         <section id="exercise-section" class="hidden flex flex-col items-center">
-            <div class="w-full max-w-6xl flex justify-between items-center mb-8">
-                <button onclick="backToTheory()" class="text-slate-400 font-black uppercase text-xs tracking-widest">← К теории</button>
-                <h2 id="exercise-title" class="roblox-font italic uppercase text-slate-800 text-xl tracking-tighter">Упражнения</h2>
+            <div class="w-full max-w-6xl flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6 md:mb-8">
+                <button onclick="backToTheory()" class="text-slate-400 font-black uppercase text-xs tracking-widest w-fit min-h-[48px]" aria-label="Назад к теории" type="button">
+                    ← К теории
+                </button>
+                <h2 id="exercise-title" class="roblox-font italic uppercase text-slate-800 text-lg md:text-xl tracking-tighter">
+                    Упражнения
+                </h2>
             </div>
 
-            <div class="grid grid-cols-12 gap-12 w-full max-w-6xl">
-                <div class="col-span-5 space-y-6">
-                    <div class="luxury-card p-8 min-h-[320px]">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-slate-800 text-2xl font-black">Практика</h3>
-                            <span id="exercise-counter" class="text-slate-400 text-sm font-black uppercase"></span>
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 md:gap-8 xl:gap-12 w-full max-w-6xl">
+                <div class="xl:col-span-5 space-y-5 md:space-y-6 order-2 xl:order-1">
+                    <div class="luxury-card p-5 md:p-8 min-h-[300px] md:min-h-[320px]">
+                        <div class="flex items-center justify-between mb-4 gap-3 flex-wrap">
+                            <h3 class="text-slate-800 text-xl md:text-2xl font-black">Практика</h3>
+                            <span id="exercise-counter" class="text-slate-400 text-xs md:text-sm font-black uppercase" aria-live="polite"></span>
                         </div>
 
-                        <p id="exercise-description" class="text-slate-700 text-xl font-bold leading-relaxed mb-6">
+                        <p id="exercise-description" class="text-slate-700 text-lg md:text-xl font-bold leading-relaxed mb-6">
                             Загрузка упражнения...
                         </p>
 
@@ -192,15 +453,17 @@
                                 <p id="move-preview" class="text-slate-700 font-black text-lg">—</p>
                             </div>
 
-                            <div id="exercise-feedback" class="hidden rounded-2xl p-4 text-sm font-bold"></div>
+                            <div id="exercise-feedback" class="hidden rounded-2xl p-4 text-sm font-bold" aria-live="polite"></div>
                         </div>
                     </div>
 
-                    <div class="flex gap-4">
+                    <div class="grid grid-cols-2 gap-4">
                         <button
                             id="reset-move-btn"
                             onclick="resetMoveSelection()"
-                            class="flex-1 p-5 bg-white rounded-3xl shadow-sm font-black uppercase text-xs border-b-4 border-slate-100 active:translate-y-1 active:border-b-0 transition-all"
+                            class="p-4 md:p-5 bg-white rounded-2xl md:rounded-3xl shadow-sm font-black uppercase text-[10px] md:text-xs border-b-4 border-slate-100 active:translate-y-1 active:border-b-0 transition-all min-h-[52px]"
+                            type="button"
+                            aria-label="Сбросить выбранный ход"
                         >
                             Сбросить ход
                         </button>
@@ -208,29 +471,44 @@
                         <button
                             id="next-exercise-btn"
                             onclick="nextExercise()"
-                            class="flex-1 p-5 bg-indigo-500 text-white rounded-3xl shadow-md font-black uppercase text-xs border-b-4 border-indigo-700 active:translate-y-1 active:border-b-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="p-4 md:p-5 bg-indigo-500 text-white rounded-2xl md:rounded-3xl shadow-md font-black uppercase text-[10px] md:text-xs border-b-4 border-indigo-700 active:translate-y-1 active:border-b-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed min-h-[52px]"
                             disabled
+                            type="button"
+                            aria-label="Следующее упражнение"
                         >
                             Следующее
                         </button>
                     </div>
+                    <button
+                        id="ask-ai-exercise-btn"
+                        onclick="askAIExercise()"
+                        class="w-full p-4 md:p-5 bg-indigo-500 text-white rounded-2xl md:rounded-3xl shadow-md font-black uppercase text-[10px] md:text-xs border-b-4 border-indigo-700 active:translate-y-1 active:border-b-0 transition-all min-h-[52px]"
+                        type="button"
+                        aria-label="Спросить ИИ про это упражнение"
+                    >
+                        Спросить ИИ 🤖
+                    </button>
 
                     <button
                         id="complete-lesson-btn"
                         onclick="completeLesson()"
-                        class="w-full p-5 bg-emerald-500 text-white rounded-3xl shadow-md font-black uppercase text-xs border-b-4 border-emerald-700 active:translate-y-1 active:border-b-0 transition-all hidden"
+                        class="w-full p-4 md:p-5 bg-emerald-500 text-white rounded-2xl md:rounded-3xl shadow-md font-black uppercase text-[10px] md:text-xs border-b-4 border-emerald-700 active:translate-y-1 active:border-b-0 transition-all hidden min-h-[52px]"
+                        type="button"
+                        aria-label="Завершить урок"
                     >
                         Завершить урок
                     </button>
                 </div>
 
-                <div class="col-span-7 flex justify-center">
-                    <div class="space-y-5 flex flex-col items-center">
-                        <div id="exercise-board" class="chess-grid"></div>
+                <div class="xl:col-span-7 flex justify-center order-1 xl:order-2">
+                    <div class="space-y-5 flex flex-col items-center w-full">
+                        <div id="exercise-board" class="chess-grid" aria-label="Интерактивная шахматная доска упражнения"></div>
 
-                        <div class="bg-white rounded-3xl px-6 py-4 shadow-sm border-b-4 border-slate-100">
+                        <div class="bg-white rounded-2xl md:rounded-3xl px-5 md:px-6 py-4 shadow-sm border-b-4 border-slate-100 w-full max-w-[500px]">
                             <p class="text-slate-500 text-xs uppercase font-black mb-1">Как сделать ход</p>
-                            <p class="text-slate-700 font-bold">Нажми сначала на фигуру, потом на клетку назначения.</p>
+                            <p class="text-slate-700 font-bold text-sm md:text-base">
+                                Нажми сначала на фигуру, потом на клетку назначения.
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -240,6 +518,7 @@
 
     <script src="state.js"></script>
     <script src="api.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
     <script>
         let currentLessonData = null;
@@ -259,8 +538,122 @@
         let lastMoveFrom = null;
         let lastMoveTo = null;
         let solvedExercises = new Set();
+        let toastTimer = null;
+        let isCheckingExerciseMove = false;
 
         const DEFAULT_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+        const pageMessage = document.getElementById('page-message');
+        const liveRegion = document.getElementById('live-region');
+        const toast = document.getElementById('toast');
+
+        function announce(message) {
+            if (liveRegion) liveRegion.textContent = message;
+        }
+
+        function showToast(message, type = 'default') {
+            clearTimeout(toastTimer);
+            toast.textContent = message;
+            toast.className = 'toast show';
+
+            if (type === 'error') {
+                toast.style.background = 'rgba(127, 29, 29, 0.96)';
+            } else if (type === 'success') {
+                toast.style.background = 'rgba(6, 78, 59, 0.96)';
+            } else {
+                toast.style.background = 'rgba(15, 23, 42, 0.94)';
+            }
+
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2400);
+        }
+
+        function showPageMessage(message, type = 'info') {
+            pageMessage.className = `mb-5 inline-message ${type}`;
+            pageMessage.textContent = message;
+            pageMessage.classList.remove('hidden');
+            announce(message);
+        }
+
+        function hidePageMessage() {
+            pageMessage.classList.add('hidden');
+            pageMessage.textContent = '';
+        }
+
+        function renderEmptyState(title, text, actionHtml = '') {
+            return `
+                <div class="empty-state">
+                    <div class="text-4xl mb-3">📚</div>
+                    <div class="text-slate-700 text-lg font-black mb-2">${title}</div>
+                    <div class="text-slate-500 font-bold mb-4">${text}</div>
+                    ${actionHtml}
+                </div>
+            `;
+        }
+
+        function renderErrorState(message, retryCode = '') {
+            return `
+                <div class="error-state">
+                    <div class="text-4xl mb-3">😵</div>
+                    <div class="text-lg font-black text-red-700 mb-2">Ой, что-то пошло не так!</div>
+                    <div class="text-red-600 font-bold mb-5">${message}</div>
+                    ${retryCode ? `
+                        <button
+                            type="button"
+                            onclick="${retryCode}"
+                            class="px-6 py-3 min-h-[48px] bg-red-500 text-white rounded-2xl font-black uppercase text-xs tracking-widest shadow-[0_8px_0_#dc2626] active:translate-y-[4px]"
+                            aria-label="Попробовать снова"
+                        >
+                            Попробовать снова
+                        </button>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function renderTopicsSkeleton() {
+            const grid = document.getElementById('topics-grid');
+            grid.innerHTML = Array.from({ length: 6 }).map(() => `
+                <div class="topic-card p-6 md:p-8 flex flex-col items-center text-center">
+                    <div class="w-16 h-16 rounded-3xl skeleton mb-4"></div>
+                    <div class="h-5 w-32 rounded-xl skeleton mb-3"></div>
+                    <div class="h-4 w-20 rounded-xl skeleton"></div>
+                </div>
+            `).join('');
+        }
+
+        function renderLessonsSkeleton() {
+            const grid = document.getElementById('lessons-grid');
+            grid.innerHTML = Array.from({ length: 4 }).map(() => `
+                <div class="bg-white p-5 md:p-6 rounded-2xl md:rounded-3xl border-b-4 border-slate-100 flex justify-between items-center lesson-row">
+                    <div class="h-5 w-40 rounded-xl skeleton"></div>
+                    <div class="h-5 w-5 rounded-xl skeleton"></div>
+                </div>
+            `).join('');
+        }
+
+        function renderTheorySkeleton() {
+            document.getElementById('theory-container').innerHTML = `
+                <div class="w-full space-y-4">
+                    <div class="h-6 w-3/4 rounded-xl skeleton"></div>
+                    <div class="h-6 w-full rounded-xl skeleton"></div>
+                    <div class="h-6 w-5/6 rounded-xl skeleton"></div>
+                    <div class="h-6 w-2/3 rounded-xl skeleton"></div>
+                </div>
+            `;
+            renderStaticBoard(DEFAULT_FEN, 'chess-board');
+        }
+
+        function renderExerciseSkeleton() {
+            document.getElementById('exercise-counter').textContent = '';
+            document.getElementById('exercise-description').innerHTML = `
+                <span class="block h-6 w-5/6 rounded-xl skeleton mb-3"></span>
+                <span class="block h-6 w-3/4 rounded-xl skeleton"></span>
+            `;
+            document.getElementById('move-preview').textContent = '—';
+            hideFeedback();
+            renderInteractiveBoard(DEFAULT_FEN);
+        }
 
         function showSection(sectionId) {
             activeSection = sectionId;
@@ -270,10 +663,14 @@
                 if (el) el.classList.add('hidden');
             });
 
-            document.getElementById(sectionId).classList.remove('hidden');
+            const section = document.getElementById(sectionId);
+            section.classList.remove('hidden');
+            section.classList.add('fade-swap');
         }
 
         function goBack() {
+            hidePageMessage();
+
             if (activeSection === 'exercise-section') {
                 showSection('content-section');
             } else if (activeSection === 'content-section') {
@@ -286,31 +683,40 @@
         }
 
         function backToTheory() {
+            hidePageMessage();
             showSection('content-section');
         }
 
         async function loadTopics() {
             const grid = document.getElementById('topics-grid');
+            renderTopicsSkeleton();
+            hidePageMessage();
+            announce('Загружаются темы');
 
             try {
                 const data = await window.roChessApi.fetchWithAuth('lessons/topics');
                 const topics = data.topics || data;
 
                 if (!topics || topics.length === 0) {
-                    grid.innerHTML = '<p class="p-10 text-slate-400 uppercase font-black">Темы не найдены в ответе API 🔍</p>';
+                    grid.innerHTML = renderEmptyState(
+                        'Пока нет тем',
+                        'Когда темы обучения появятся, они будут показаны здесь.'
+                    );
                     return;
                 }
 
                 grid.innerHTML = '';
 
                 topics.forEach(topic => {
-                    const card = document.createElement('div');
-                    card.className = 'topic-card p-8 flex flex-col items-center text-center';
+                    const card = document.createElement('button');
+                    card.type = 'button';
+                    card.className = 'topic-card p-6 md:p-8 flex flex-col items-center text-center focus-ring';
+                    card.setAttribute('aria-label', `Открыть тему ${topic.name}`);
                     card.onclick = () => loadLessons(topic.id, topic.name);
 
                     card.innerHTML = `
-                        <div class="text-6xl mb-4">🧩</div>
-                        <h3 class="roblox-font italic uppercase text-lg mb-2 text-slate-800">${topic.name}</h3>
+                        <div class="text-5xl md:text-6xl mb-4">🧩</div>
+                        <h3 class="roblox-font italic uppercase text-base md:text-lg mb-2 text-slate-800">${topic.name}</h3>
                         <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">
                             ID темы: ${topic.id}
                         </p>
@@ -318,9 +724,13 @@
 
                     grid.appendChild(card);
                 });
+
+                announce('Темы загружены');
             } catch (err) {
                 console.error("Ошибка при загрузке тем:", err);
-                grid.innerHTML = `<p class="text-rose-500 p-10 font-black">ОШИБКА: ${err.message} ❌</p>`;
+                grid.innerHTML = renderErrorState('Не удалось загрузить темы обучения.', 'loadTopics()');
+                showPageMessage('Ой, что-то пошло не так! Не удалось загрузить темы.', 'error');
+                announce('Ошибка загрузки тем');
             }
         }
 
@@ -335,7 +745,9 @@
             document.getElementById('current-topic-title').textContent = title;
 
             const grid = document.getElementById('lessons-grid');
-            grid.innerHTML = '<p class="animate-pulse font-black uppercase text-slate-400">Загрузка...</p>';
+            renderLessonsSkeleton();
+            hidePageMessage();
+            announce('Загружаются уроки');
 
             try {
                 const data = await window.roChessApi.fetchWithAuth(`lessons/topics/${topicId}`);
@@ -344,35 +756,43 @@
                 currentTopicLessons = lessons;
 
                 if (lessons.length === 0) {
-                    grid.innerHTML = '<p class="text-slate-400 font-black uppercase">Уроки не найдены</p>';
+                    grid.innerHTML = renderEmptyState(
+                        'Пока нет уроков',
+                        'Для этой темы уроки ещё не добавлены.'
+                    );
                     return;
                 }
 
                 grid.innerHTML = '';
 
                 lessons.forEach((lesson, index) => {
-                    const row = document.createElement('div');
-                    row.className = 'bg-white p-6 rounded-3xl border-b-4 border-slate-100 flex justify-between items-center hover:bg-slate-50 cursor-pointer transition-all';
+                    const row = document.createElement('button');
+                    row.type = 'button';
+                    row.className = 'bg-white p-5 md:p-6 rounded-2xl md:rounded-3xl border-b-4 border-slate-100 flex justify-between items-center hover:bg-slate-50 cursor-pointer transition-all lesson-row w-full text-left focus-ring';
+                    row.setAttribute('aria-label', `Открыть урок ${lesson.title}`);
                     row.onclick = () => loadLessonContent(lesson.id, index);
 
                     row.innerHTML = `
-                        <span class="font-black text-slate-700 uppercase text-sm">${lesson.title}</span>
+                        <span class="font-black text-slate-700 uppercase text-xs md:text-sm">${lesson.title}</span>
                         <span class="text-indigo-500 font-black">➔</span>
                     `;
 
                     grid.appendChild(row);
                 });
+
+                announce('Уроки загружены');
             } catch (err) {
                 console.error("Ошибка загрузки уроков:", err);
-                grid.innerHTML = `<p class="text-rose-500 p-10 font-black">Ошибка загрузки уроков ❌</p>`;
+                grid.innerHTML = renderErrorState('Не удалось загрузить уроки.', `loadLessons(${topicId}, ${JSON.stringify(title)})`);
+                showPageMessage('Ой, что-то пошло не так! Не удалось загрузить уроки.', 'error');
             }
         }
 
         async function loadLessonContent(lessonId, lessonIndex = -1) {
             showSection('content-section');
-
-            const theoryContainer = document.getElementById('theory-container');
-            theoryContainer.innerHTML = '<p>Загрузка теории...</p>';
+            renderTheorySkeleton();
+            hidePageMessage();
+            announce('Загружается теория урока');
 
             try {
                 const data = await window.roChessApi.fetchWithAuth(`lessons/${lessonId}`);
@@ -390,9 +810,11 @@
 
                 updateTheoryUI();
                 updateLessonNavigationButtons();
+                announce('Теория урока загружена');
             } catch (err) {
                 console.error("ОШИБКА ЗАГРУЗКИ КОНТЕНТА:", err);
-                theoryContainer.innerHTML = '<p class="text-red-500">Ошибка загрузки данных ❌</p>';
+                document.getElementById('theory-container').innerHTML = renderErrorState('Не удалось загрузить теорию урока.', `loadLessonContent(${lessonId}, ${lessonIndex})`);
+                showPageMessage('Ой, что-то пошло не так! Не удалось загрузить теорию.', 'error');
             }
         }
 
@@ -408,20 +830,17 @@
 
             if (content) {
                 theoryContainer.innerHTML = `
-                    <div class="w-full h-full flex items-start">
-                        <p class="text-slate-700 text-3xl font-bold leading-relaxed">
+                    <div class="w-full h-full flex items-start fade-swap">
+                        <p class="text-slate-700 text-xl md:text-2xl xl:text-3xl font-bold leading-relaxed">
                             ${content}
                         </p>
                     </div>
                 `;
             } else {
-                theoryContainer.innerHTML = `
-                    <div class="w-full h-full flex items-center">
-                        <p class="text-slate-400 text-2xl font-bold">
-                            Теория в процессе написания... ✍️
-                        </p>
-                    </div>
-                `;
+                theoryContainer.innerHTML = renderEmptyState(
+                    'Теория пока не готова',
+                    'Текст урока ещё добавляется.'
+                );
             }
 
             const boards = Array.isArray(currentLessonData.board_examples)
@@ -438,7 +857,6 @@
             const nextBtn = document.getElementById('next-btn');
 
             const hasLessons = Array.isArray(currentTopicLessons) && currentTopicLessons.length > 0;
-
             prevBtn.disabled = !hasLessons || currentLessonIndex <= 0;
 
             if (!hasLessons) {
@@ -480,12 +898,9 @@
             if (!currentLessonData?.id) return;
 
             showSection('exercise-section');
+            renderExerciseSkeleton();
 
             document.getElementById('exercise-title').textContent = `${currentLessonData.title}: упражнения`;
-            document.getElementById('exercise-description').textContent = 'Загрузка упражнений...';
-            document.getElementById('exercise-counter').textContent = '';
-            document.getElementById('move-preview').textContent = '—';
-            hideFeedback();
 
             try {
                 const data = await window.roChessApi.fetchWithAuth(`lessons/${currentLessonData.id}/exercises`);
@@ -500,6 +915,7 @@
                     document.getElementById('complete-lesson-btn').classList.remove('hidden');
                     document.getElementById('next-exercise-btn').classList.add('hidden');
                     renderInteractiveBoard(DEFAULT_FEN);
+                    showPageMessage('Упражнений пока нет. Можно завершить урок.', 'info');
                     return;
                 }
 
@@ -507,10 +923,13 @@
                 document.getElementById('complete-lesson-btn').classList.add('hidden');
 
                 loadExerciseByIndex(0);
+                announce('Упражнения загружены');
             } catch (err) {
                 console.error('Ошибка загрузки упражнений:', err);
-                document.getElementById('exercise-description').textContent = 'Ошибка загрузки упражнений ❌';
+                document.getElementById('exercise-description').textContent = 'Ошибка загрузки упражнений';
+                document.getElementById('exercise-feedback').classList.add('hidden');
                 renderInteractiveBoard(DEFAULT_FEN);
+                showPageMessage('Ой, что-то пошло не так! Не удалось загрузить упражнения.', 'error');
             }
         }
 
@@ -581,15 +1000,8 @@
         function resetMoveSelection() {
             selectedFromSquare = null;
             selectedToSquare = null;
-            document.getElementById('move-preview').textContent = '—';
-
-            const fen =
-                currentExercise?.fen ||
-                currentExercise?.position_fen ||
-                currentExercise?.board_fen ||
-                DEFAULT_FEN;
-
-            renderInteractiveBoard(fen);
+            updateMovePreview();
+            renderInteractiveBoard(getCurrentExerciseFen());
         }
 
         function hideFeedback() {
@@ -619,45 +1031,88 @@
             return `${files[col]}${rank}`;
         }
 
-        function squareToCoords(square) {
-            if (!square || square.length < 2) return null;
-            const file = square[0].toLowerCase();
-            const rank = parseInt(square[1], 10);
-            const files = 'abcdefgh';
-            const col = files.indexOf(file);
-            const row = 8 - rank;
-
-            if (col < 0 || row < 0 || row > 7) return null;
-            return { row, col };
-        }
-
-        function onExerciseSquareClick(square) {
-            if (!currentExercise) return;
-
-            if (!selectedFromSquare) {
-                selectedFromSquare = square;
-                selectedToSquare = null;
-            } else if (!selectedToSquare) {
-                if (square === selectedFromSquare) {
-                    selectedFromSquare = null;
-                } else {
-                    selectedToSquare = square;
-                    submitExerciseMove();
-                    return;
-                }
-            } else {
-                selectedFromSquare = square;
-                selectedToSquare = null;
-            }
-
-            const fen =
+        function getCurrentExerciseFen() {
+            return (
                 currentExercise?.fen ||
                 currentExercise?.position_fen ||
                 currentExercise?.board_fen ||
-                DEFAULT_FEN;
+                DEFAULT_FEN
+            );
+        }
 
+        function parseFenBoardMap(fen) {
+            const boardPart = String(fen || DEFAULT_FEN).split(' ')[0];
+            const rows = boardPart.split('/');
+            const boardMap = {};
+
+            rows.forEach((rowStr, rowIndex) => {
+                let colIndex = 0;
+
+                for (const char of rowStr) {
+                    if (/\d/.test(char)) {
+                        colIndex += parseInt(char, 10);
+                    } else {
+                        const square = indexToSquare(rowIndex, colIndex);
+                        boardMap[square] = char;
+                        colIndex += 1;
+                    }
+                }
+            });
+
+            return boardMap;
+        }
+
+        function getPieceAtSquare(square) {
+            const boardMap = parseFenBoardMap(getCurrentExerciseFen());
+            return boardMap[square] || null;
+        }
+
+        function onExerciseSquareClick(square) {
+            if (!currentExercise || isCheckingExerciseMove) return;
+
+            const clickedPiece = getPieceAtSquare(square);
+            const fromPiece = selectedFromSquare ? getPieceAtSquare(selectedFromSquare) : null;
+
+            // Первый клик: обязательно по фигуре
+            if (!selectedFromSquare) {
+                if (!clickedPiece) {
+                    showToast('Сначала выбери фигуру', 'error');
+                    return;
+                }
+
+                selectedFromSquare = square;
+                selectedToSquare = null;
+                updateMovePreview();
+                renderInteractiveBoard(getCurrentExerciseFen());
+                return;
+            }
+
+            // Клик по той же клетке = снять выбор
+            if (square === selectedFromSquare) {
+                selectedFromSquare = null;
+                selectedToSquare = null;
+                updateMovePreview();
+                renderInteractiveBoard(getCurrentExerciseFen());
+                return;
+            }
+
+            // Если нажали на фигуру ТОЙ ЖЕ стороны — просто меняем выбранную фигуру
+            if (clickedPiece && fromPiece && isSameSide(clickedPiece, fromPiece)) {
+                selectedFromSquare = square;
+                selectedToSquare = null;
+                updateMovePreview();
+                renderInteractiveBoard(getCurrentExerciseFen());
+                return;
+            }
+
+            // Иначе это попытка хода, в том числе взятия
+            selectedToSquare = square;
             updateMovePreview();
-            renderInteractiveBoard(fen);
+            renderInteractiveBoard(getCurrentExerciseFen());
+
+            setTimeout(() => {
+                submitExerciseMove();
+            }, 0);
         }
 
         function updateMovePreview() {
@@ -673,15 +1128,23 @@
         }
 
         async function submitExerciseMove() {
-            if (!currentExercise || !selectedFromSquare || !selectedToSquare) return;
+            if (!currentExercise || !selectedFromSquare || !selectedToSquare || isCheckingExerciseMove) return;
+
+            const fromSquare = selectedFromSquare;
+            const toSquare = selectedToSquare;
+
+            const sanMove = buildSanMove(fromSquare, toSquare, getCurrentExerciseFen());
 
             const payload = {
-                from: selectedFromSquare,
-                to: selectedToSquare,
-                move: `${selectedFromSquare}${selectedToSquare}`
+                from: fromSquare,
+                to: toSquare,
+                move: sanMove,
+                uci: `${fromSquare}${toSquare}`
             };
 
-            console.log("ОТПРАВКА ХОДА:", payload);
+            isCheckingExerciseMove = true;
+            showFeedback('warning', 'Проверяем ход...');
+            renderInteractiveBoard(getCurrentExerciseFen());
 
             try {
                 const res = await window.roChessApi.fetchWithAuth(
@@ -695,38 +1158,11 @@
                     }
                 );
 
-                console.log("ОТВЕТ CHECK:", res);
-
                 const isCorrect =
                     res.correct === true ||
                     res.is_correct === true ||
                     res.result === 'correct' ||
                     res.status === 'correct';
-
-                let feedbackText = '';
-
-                if (isCorrect) {
-                    feedbackText = res.message || res.feedback || 'Правильно! ✅';
-                    showFeedback('success', feedbackText);
-                    solvedExercises.add(currentExerciseIndex);
-                    lastMoveFrom = selectedFromSquare;
-                    lastMoveTo = selectedToSquare;
-                } else {
-                    feedbackText =
-                        res.message ||
-                        res.feedback ||
-                        res.hint ||
-                        'Неправильно ❌';
-
-                    if (res.hint) {
-                        showFeedback('warning', `Неправильно. Подсказка: ${res.hint}`);
-                    } else {
-                        showFeedback('error', feedbackText);
-                    }
-
-                    lastMoveFrom = selectedFromSquare;
-                    lastMoveTo = selectedToSquare;
-                }
 
                 const nextFen =
                     res.fen ||
@@ -737,16 +1173,56 @@
                     DEFAULT_FEN;
 
                 currentExercise.fen = nextFen;
+                lastMoveFrom = fromSquare;
+                lastMoveTo = toSquare;
+
+                if (isCorrect) {
+                    const feedbackText =
+                        res.message ||
+                        res.feedback ||
+                        res.explanation ||
+                        'Правильно! ✅';
+
+                    showFeedback('success', feedbackText);
+                    showToast('Правильный ход', 'success');
+                    solvedExercises.add(currentExerciseIndex);
+
+                    selectedFromSquare = null;
+                    selectedToSquare = null;
+                    updateMovePreview();
+                } else {
+                    let text = 'Неправильно ❌';
+
+                    if (res.hint) {
+                        text = `Неправильно. Подсказка: ${res.hint}`;
+                    }
+
+                    if (res.correct_move) {
+                        text += ` Правильный ход: ${res.correct_move}`;
+                    }
+
+                    if (res.explanation) {
+                        text += ` ${res.explanation}`;
+                    }
+
+                    showFeedback('warning', text);
+                    showToast('Попробуй ещё раз', 'error');
+
+                    // НЕ сбрасываем from/to сразу —
+                    // пусть пользователь видит, какой ход он пытался сделать
+                    updateMovePreview();
+                }
+
                 renderInteractiveBoard(nextFen);
                 updateExerciseButtons();
 
             } catch (err) {
                 console.error('Ошибка проверки упражнения:', err);
                 showFeedback('error', `Ошибка проверки хода: ${err.message} ❌`);
+                showToast('Ой, что-то пошло не так!', 'error');
             } finally {
-                selectedFromSquare = null;
-                selectedToSquare = null;
-                document.getElementById('move-preview').textContent = '—';
+                isCheckingExerciseMove = false;
+                renderInteractiveBoard(getCurrentExerciseFen());
             }
         }
 
@@ -757,59 +1233,62 @@
             const originalText = btn.textContent;
 
             btn.disabled = true;
-            btn.textContent = 'Завершение...';
+            btn.innerHTML = `<span class="spinner"></span> Завершаем`;
 
             try {
-                const res = await window.roChessApi.fetchWithAuth(
-                    `lessons/${currentLessonData.id}/complete`,
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    }
-                );
+                await window.roChessApi.fetchWithAuth(`lessons/${currentLessonData.id}/complete`, {
+                    method: 'POST'
+                });
 
-                alert(res.message || 'Урок завершен! 🎉');
-                showSection('lessons-section');
+                showToast('Урок завершён!', 'success');
+                showPageMessage('Отлично! Урок успешно завершён.', 'success');
+
+                if (currentTopicId && currentTopicTitle) {
+                    await loadLessons(currentTopicId, currentTopicTitle);
+                    showSection('lessons-section');
+                } else {
+                    window.location.href = 'Dashboard.html';
+                }
             } catch (err) {
                 console.error('Ошибка завершения урока:', err);
-                alert('Не удалось завершить урок ❌');
+                showToast('Не удалось завершить урок', 'error');
+                showPageMessage('Ой, что-то пошло не так! Не удалось завершить урок.', 'error');
             } finally {
                 btn.disabled = false;
                 btn.textContent = originalText;
             }
         }
 
-        function renderStaticBoard(fen, boardId = 'chess-board') {
-            const board = document.getElementById(boardId);
-            board.innerHTML = '';
+        function renderStaticBoard(fen, containerId) {
+            const board = document.getElementById(containerId);
+            if (!board) return;
 
             const pieces = {
-                'p': '♟', 'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚',
-                'P': '♙', 'R': '♖', 'N': '♘', 'B': '♗', 'Q': '♕', 'K': '♔'
+                'P': '♙', 'N': '♘', 'B': '♗', 'R': '♖', 'Q': '♕', 'K': '♔',
+                'p': '♟', 'n': '♞', 'b': '♝', 'r': '♜', 'q': '♛', 'k': '♚'
             };
 
-            const fenBoard = (fen || DEFAULT_FEN).split(' ')[0];
-            const rows = fenBoard.split('/');
+            const boardPart = String(fen || DEFAULT_FEN).split(' ')[0];
+            const rows = boardPart.split('/');
+            board.innerHTML = '';
 
             rows.forEach((row, rIdx) => {
                 let cIdx = 0;
 
                 for (const char of row) {
-                    if (isNaN(char)) {
-                        const sq = document.createElement('div');
-                        sq.className = `${(rIdx + cIdx) % 2 === 0 ? 'sq-l' : 'sq-d'} flex items-center justify-center`;
-                        sq.innerHTML = `<span class="piece">${pieces[char] || ''}</span>`;
-                        board.appendChild(sq);
-                        cIdx++;
-                    } else {
-                        for (let i = 0; i < parseInt(char); i++) {
+                    if (/\d/.test(char)) {
+                        for (let i = 0; i < parseInt(char, 10); i++) {
                             const sq = document.createElement('div');
-                            sq.className = `${(rIdx + cIdx) % 2 === 0 ? 'sq-l' : 'sq-d'}`;
+                            sq.className = `board-square ${(rIdx + cIdx) % 2 === 0 ? 'sq-l' : 'sq-d'}`;
                             board.appendChild(sq);
                             cIdx++;
                         }
+                    } else {
+                        const sq = document.createElement('div');
+                        sq.className = `board-square ${(rIdx + cIdx) % 2 === 0 ? 'sq-l' : 'sq-d'} flex items-center justify-center`;
+                        sq.innerHTML = `<span class="piece">${pieces[char] || ''}</span>`;
+                        board.appendChild(sq);
+                        cIdx++;
                     }
                 }
             });
@@ -817,55 +1296,210 @@
 
         function renderInteractiveBoard(fen) {
             const board = document.getElementById('exercise-board');
-            board.innerHTML = '';
+            if (!board) return;
 
             const pieces = {
-                'p': '♟', 'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚',
-                'P': '♙', 'R': '♖', 'N': '♘', 'B': '♗', 'Q': '♕', 'K': '♔'
+                'P': '♙', 'N': '♘', 'B': '♗', 'R': '♖', 'Q': '♕', 'K': '♔',
+                'p': '♟', 'n': '♞', 'b': '♝', 'r': '♜', 'q': '♛', 'k': '♚'
             };
 
-            const fenBoard = (fen || DEFAULT_FEN).split(' ')[0];
-            const rows = fenBoard.split('/');
+            const boardPart = String(fen || DEFAULT_FEN).split(' ')[0];
+            const rows = boardPart.split('/');
+            board.innerHTML = '';
 
             rows.forEach((row, rIdx) => {
                 let cIdx = 0;
 
                 for (const char of row) {
-                    if (isNaN(char)) {
-                        const squareName = indexToSquare(rIdx, cIdx);
-                        const sq = document.createElement('div');
-                        sq.className = `board-square ${(rIdx + cIdx) % 2 === 0 ? 'sq-l' : 'sq-d'} flex items-center justify-center`;
-
-                        if (selectedFromSquare === squareName) sq.classList.add('selected-square');
-                        if (selectedToSquare === squareName) sq.classList.add('target-square');
-                        if (lastMoveFrom === squareName) sq.classList.add('last-move-from');
-                        if (lastMoveTo === squareName) sq.classList.add('last-move-to');
-
-                        sq.onclick = () => onExerciseSquareClick(squareName);
-                        sq.innerHTML = `<span class="piece">${pieces[char] || ''}</span>`;
-                        board.appendChild(sq);
-                        cIdx++;
-                    } else {
+                    if (/\d/.test(char)) {
                         for (let i = 0; i < parseInt(char, 10); i++) {
                             const squareName = indexToSquare(rIdx, cIdx);
-                            const sq = document.createElement('div');
-                            sq.className = `board-square ${(rIdx + cIdx) % 2 === 0 ? 'sq-l' : 'sq-d'}`;
+                            const sq = document.createElement('button');
+                            sq.type = 'button';
+                            sq.className = `board-square ${(rIdx + cIdx) % 2 === 0 ? 'sq-l' : 'sq-d'} focus-ring`;
+                            sq.setAttribute('aria-label', `Клетка ${squareName}`);
 
                             if (selectedFromSquare === squareName) sq.classList.add('selected-square');
                             if (selectedToSquare === squareName) sq.classList.add('target-square');
                             if (lastMoveFrom === squareName) sq.classList.add('last-move-from');
                             if (lastMoveTo === squareName) sq.classList.add('last-move-to');
 
-                            sq.onclick = () => onExerciseSquareClick(squareName);
+                            if (!isCheckingExerciseMove) {
+                                sq.onclick = () => onExerciseSquareClick(squareName);
+                            } else {
+                                sq.disabled = true;
+                            }
+
                             board.appendChild(sq);
                             cIdx++;
                         }
+                    } else {
+                        const squareName = indexToSquare(rIdx, cIdx);
+                        const sq = document.createElement('button');
+                        sq.type = 'button';
+                        sq.className = `board-square ${(rIdx + cIdx) % 2 === 0 ? 'sq-l' : 'sq-d'} flex items-center justify-center focus-ring`;
+                        sq.setAttribute('aria-label', `Клетка ${squareName}`);
+
+                        if (selectedFromSquare === squareName) sq.classList.add('selected-square');
+                        if (selectedToSquare === squareName) sq.classList.add('target-square');
+                        if (lastMoveFrom === squareName) sq.classList.add('last-move-from');
+                        if (lastMoveTo === squareName) sq.classList.add('last-move-to');
+
+                        if (!isCheckingExerciseMove) {
+                            sq.onclick = () => onExerciseSquareClick(squareName);
+                        } else {
+                            sq.disabled = true;
+                        }
+
+                        sq.innerHTML = `<span class="piece">${pieces[char] || ''}</span>`;
+                        board.appendChild(sq);
+                        cIdx++;
                     }
                 }
             });
         }
 
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileOverlay = document.getElementById('mobile-overlay');
+        const sidebar = document.getElementById('sidebar');
+
+        function openMobileMenu() {
+            sidebar.classList.remove('-translate-x-full');
+            mobileOverlay.classList.remove('hidden');
+            mobileMenuBtn.setAttribute('aria-label', 'Закрыть меню');
+        }
+
+        function closeMobileMenu() {
+            if (window.innerWidth < 1280) {
+                sidebar.classList.add('-translate-x-full');
+            }
+            mobileOverlay.classList.add('hidden');
+            mobileMenuBtn.setAttribute('aria-label', 'Открыть меню');
+        }
+
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', () => {
+                if (sidebar.classList.contains('-translate-x-full')) {
+                    openMobileMenu();
+                } else {
+                    closeMobileMenu();
+                }
+            });
+        }
+
+        if (mobileOverlay) {
+            mobileOverlay.addEventListener('click', closeMobileMenu);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeMobileMenu();
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1280) {
+                mobileOverlay?.classList.add('hidden');
+                sidebar?.classList.remove('-translate-x-full');
+            } else {
+                sidebar?.classList.add('-translate-x-full');
+            }
+        });
+
+        function isWhitePiece(piece) {
+            return !!piece && piece === piece.toUpperCase();
+        }
+
+        function isBlackPiece(piece) {
+            return !!piece && piece === piece.toLowerCase();
+        }
+
+        function isSameSide(pieceA, pieceB) {
+            if (!pieceA || !pieceB) return false;
+            return (isWhitePiece(pieceA) && isWhitePiece(pieceB)) ||
+                (isBlackPiece(pieceA) && isBlackPiece(pieceB));
+        }
+
+        function buildSanMove(from, to, fen) {
+            try {
+                const game = new Chess(fen);
+                const moveObj = game.move({ from, to, promotion: 'q' });
+                return moveObj ? moveObj.san : `${from}${to}`;
+            } catch (e) {
+                console.error('Ошибка преобразования хода в SAN:', e);
+                return `${from}${to}`;
+            }
+        }
+
+        function askAILesson() {
+            const lessonTitle = currentLessonData?.title || 'Урок';
+            const lessonContent = String(currentLessonData?.content || '').trim();
+            const topicTitle = currentTopicTitle || 'Тема';
+
+            const prompt = [
+                `Я изучаю урок "${lessonTitle}" по теме "${topicTitle}".`,
+                lessonContent ? `Вот текст урока:\n${lessonContent}` : '',
+                'Объясни этот урок простыми словами.',
+                'Выдели главное, что нужно запомнить.',
+                'Скажи, какие типичные ошибки бывают по этой теме.',
+                'И дай 3 коротких совета, как лучше усвоить этот материал.'
+            ].filter(Boolean).join('\n\n');
+
+            localStorage.setItem('chat_prefill', prompt);
+            localStorage.setItem('chat_context', JSON.stringify({
+                type: 'lesson',
+                topic_title: topicTitle,
+                lesson_id: currentLessonData?.id || null,
+                lesson_title: lessonTitle
+            }));
+
+            window.location.href = 'chat.html';
+        }
+
+        function askAIExercise() {
+            const lessonTitle = currentLessonData?.title || 'Урок';
+            const topicTitle = currentTopicTitle || 'Тема';
+            const exerciseText =
+                currentExercise?.description ||
+                currentExercise?.prompt ||
+                currentExercise?.task ||
+                'Шахматное упражнение';
+
+            const fen =
+                currentExercise?.fen ||
+                currentExercise?.position_fen ||
+                currentExercise?.board_fen ||
+                '';
+
+            const selectedMove = document.getElementById('move-preview')?.textContent?.trim() || '—';
+            const feedbackText = document.getElementById('exercise-feedback')?.textContent?.trim() || '';
+
+            const prompt = [
+                `Я решаю упражнение в уроке "${lessonTitle}" по теме "${topicTitle}".`,
+                `Описание упражнения: ${exerciseText}`,
+                fen ? `Позиция FEN: ${fen}` : '',
+                `Мой выбранный ход: ${selectedMove}`,
+                feedbackText ? `Подсказка/фидбек от системы: ${feedbackText}` : '',
+                'Помоги решить это упражнение, но не просто давай ответ сразу.',
+                'Сначала объясни, на что смотреть в позиции.',
+                'Потом мягко подведи к правильной идее.',
+                'Если нужно, в конце скажи правильный ход.'
+            ].filter(Boolean).join('\n\n');
+
+            localStorage.setItem('chat_prefill', prompt);
+            localStorage.setItem('chat_context', JSON.stringify({
+                type: 'exercise',
+                topic_title: topicTitle,
+                lesson_id: currentLessonData?.id || null,
+                lesson_title: lessonTitle,
+                exercise_id: currentExercise?.id || null,
+                fen: fen || null
+            }));
+
+            window.location.href = 'chat.html';
+        }
+
         loadTopics();
-    </script>
+</script>
 </body>
 </html>

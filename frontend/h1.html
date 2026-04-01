@@ -3,32 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox Chess - Welcome</title>
+    <title>RO-CHESS — Welcome</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
     <style>
-        body { 
-            font-family: 'Nunito', sans-serif; 
-            background: radial-gradient(circle at 20% 30%, #ffffff 0%, #e2e8f0 100%); 
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: radial-gradient(circle at 20% 30%, #ffffff 0%, #e2e8f0 100%);
             min-height: 100vh;
         }
-        .roblox-font { font-family: 'Montserrat', sans-serif; }
-        
-        .desktop-card-lux { 
-            background: rgba(255, 255, 255, 0.85); 
+
+        .roblox-font {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .desktop-card-lux {
+            background: rgba(255, 255, 255, 0.88);
             backdrop-filter: blur(20px);
-            border-radius: 50px; 
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.55);
             box-shadow: 0 40px 100px rgba(0,0,0,0.07), 0 15px 0 #d1d5db;
         }
 
-        .btn-green-lux { 
+        .btn-green-lux {
             background: linear-gradient(180deg, #00cd81 0%, #00b06f 100%);
-            box-shadow: 0 10px 0 #008a57, 0 20px 40px rgba(0, 176, 111, 0.25); 
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            box-shadow: 0 10px 0 #008a57, 0 20px 40px rgba(0, 176, 111, 0.25);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .btn-green-lux:hover { transform: scale(1.03) translateY(-2px); }
-        .btn-green-lux:active { transform: translateY(8px); box-shadow: 0 2px 0 #008a57; }
+
+        .btn-green-lux:hover:not(:disabled) {
+            transform: scale(1.03) translateY(-2px);
+        }
+
+        .btn-green-lux:active:not(:disabled) {
+            transform: translateY(8px);
+            box-shadow: 0 2px 0 #008a57;
+        }
 
         .floating-shape {
             position: absolute;
@@ -43,82 +53,367 @@
             from { transform: translate(0, 0); }
             to { transform: translate(100px, 100px); }
         }
+
+        .field-shell {
+            position: relative;
+        }
+
+        .field-input {
+            width: 100%;
+            background: rgba(248, 250, 252, 0.7);
+            border: 2px solid transparent;
+            border-radius: 1.4rem;
+            padding: 1.15rem 1.15rem;
+            padding-right: 4rem;
+            color: #334155;
+            font-weight: 800;
+            outline: none;
+            transition: all 0.2s ease;
+            box-shadow: inset 0 2px 8px rgba(148,163,184,0.08);
+            font-size: 1rem;
+            min-height: 52px;
+        }
+
+        .field-input:focus {
+            border-color: #00b06f;
+            background: white;
+        }
+
+        .field-input.error {
+            border-color: #f87171;
+            background: #fff7f7;
+        }
+
+        .field-icon {
+            position: absolute;
+            right: 1.1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.22;
+            font-size: 1.7rem;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+        }
+
+        .field-shell:focus-within .field-icon {
+            opacity: 1;
+        }
+
+        .fade-swap {
+            animation: fadeIn 0.25s ease;
+        }
+
+        .inline-message {
+            border-radius: 1.25rem;
+            padding: 14px 16px;
+            font-weight: 800;
+            font-size: 0.92rem;
+            animation: fadeInUp 0.25s ease;
+        }
+
+        .inline-message.error {
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 2px solid #fecaca;
+        }
+
+        .inline-message.success {
+            background: #ecfdf5;
+            color: #047857;
+            border: 2px solid #a7f3d0;
+        }
+
+        .hint-box {
+            background: rgba(248, 250, 252, 0.95);
+            border: 2px dashed #cbd5e1;
+            border-radius: 1.5rem;
+            padding: 16px 18px;
+            color: #64748b;
+            font-weight: 800;
+            animation: fadeInUp 0.25s ease;
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255,255,255,0.35);
+            border-top-color: white;
+            border-radius: 999px;
+            animation: spin 0.75s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .btn-loading {
+            opacity: 0.9;
+            pointer-events: none;
+        }
+
+        .btn-disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: 24px;
+            transform: translateX(-50%);
+            z-index: 120;
+            background: rgba(15, 23, 42, 0.94);
+            color: white;
+            border-radius: 18px;
+            padding: 14px 18px;
+            font-weight: 800;
+            box-shadow: 0 14px 30px rgba(0,0,0,0.18);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            max-width: calc(100vw - 32px);
+            text-align: center;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-4px);
+        }
+
+        .focus-ring:focus-visible,
+        button:focus-visible,
+        a:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible,
+        [tabindex]:focus-visible {
+            outline: 3px solid #60a5fa;
+            outline-offset: 3px;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0,0,0,0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .desktop-card-lux {
+                border-radius: 36px;
+                box-shadow: 0 24px 60px rgba(0,0,0,0.08), 0 10px 0 #d1d5db;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .desktop-card-lux {
+                border-radius: 28px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.08), 0 8px 0 #d1d5db;
+            }
+
+            .field-input {
+                border-radius: 1rem;
+                padding: 1rem 1rem;
+                padding-right: 3.4rem;
+                font-size: 0.95rem;
+                min-height: 50px;
+            }
+
+            .field-icon {
+                font-size: 1.4rem;
+                right: 0.95rem;
+            }
+
+            .floating-shape {
+                filter: blur(45px);
+                opacity: 0.3;
+            }
+
+            .hint-box,
+            .inline-message {
+                border-radius: 1.1rem;
+            }
+        }
     </style>
 </head>
-<body class="flex items-center justify-center relative p-6">
+<body class="flex items-center justify-center relative p-4 sm:p-6 md:p-8">
+    <div id="live-region" class="sr-only" aria-live="polite"></div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-    <div class="floating-shape w-96 h-96 bg-blue-300 -top-20 -left-20"></div>
-    <div class="floating-shape w-80 h-80 bg-emerald-300 -bottom-20 -right-20" style="animation-delay: -5s;"></div>
+    <div class="floating-shape w-72 h-72 md:w-96 md:h-96 bg-blue-300 -top-16 -left-16 md:-top-20 md:-left-20"></div>
+    <div class="floating-shape w-64 h-64 md:w-80 md:h-80 bg-emerald-300 -bottom-16 -right-16 md:-bottom-20 md:-right-20" style="animation-delay: -5s;"></div>
 
-    <div class="w-full max-w-[500px] desktop-card-lux p-12 relative">
-        
-        <div class="text-center mb-14">
-            <div class="inline-block bg-[#00b06f] text-white roblox-font italic uppercase text-5xl px-8 py-3 rounded-[2rem] transform -rotate-2 shadow-2xl mb-6 border-t-2 border-white/40">
+    <div class="w-full max-w-[500px] desktop-card-lux px-5 py-6 sm:px-8 sm:py-10 md:p-12 relative">
+        <div class="text-center mb-8 sm:mb-10 md:mb-14">
+            <div class="inline-block bg-[#00b06f] text-white roblox-font italic uppercase text-3xl sm:text-4xl md:text-5xl px-5 sm:px-6 md:px-8 py-3 rounded-[1.4rem] sm:rounded-[1.7rem] md:rounded-[2rem] transform -rotate-2 shadow-2xl mb-5 md:mb-6 border-t-2 border-white/40">
                 RO-CHESS
             </div>
-            <p class="text-slate-400 font-black uppercase text-xs tracking-[0.4em] ml-2">Premium Desktop Portal</p>
+            <p class="text-slate-400 font-black uppercase text-[10px] sm:text-xs tracking-[0.25em] sm:tracking-[0.35em] md:tracking-[0.4em]">
+                Premium Portal
+            </p>
         </div>
 
-        <div id="login-section">
-            <form class="space-y-8">
+        <div id="form-message" class="hidden mb-5" aria-live="polite"></div>
+
+        <div id="login-section" class="fade-swap">
+            <form class="space-y-6 md:space-y-8" novalidate>
                 <div class="space-y-2">
-                    <label class="text-slate-400 text-xs font-black uppercase tracking-widest ml-4">Логин</label>
-                    <div class="relative group">
-                        <input type="text" id="login-username" placeholder="Введите ваш ник..." 
-                            class="w-full bg-slate-50/50 border-2 border-transparent rounded-[1.5rem] p-6 text-slate-700 font-bold placeholder-slate-300 outline-none focus:border-[#00b06f] focus:bg-white transition-all shadow-inner text-lg">
-                        <span class="absolute right-6 top-6 opacity-20 text-3xl group-focus-within:opacity-100 transition-opacity">👤</span>
+                    <label for="login-username" class="text-slate-400 text-[10px] sm:text-xs font-black uppercase tracking-widest ml-3 sm:ml-4">
+                        Логин
+                    </label>
+                    <div class="field-shell">
+                        <input
+                            type="text"
+                            id="login-username"
+                            placeholder="Введите email или телефон..."
+                            class="field-input"
+                            aria-label="Логин: email или телефон"
+                            autocomplete="username"
+                        >
+                        <span class="field-icon">👤</span>
                     </div>
+                    <p id="login-username-error" class="hidden text-rose-500 font-bold text-xs ml-3 sm:ml-4"></p>
                 </div>
 
                 <div class="space-y-2">
-                    <label class="text-slate-400 text-xs font-black uppercase tracking-widest ml-4">Пароль</label>
-                    <div class="relative group">
-                        <input type="password" id="login-password" placeholder="••••••••" 
-                            class="w-full bg-slate-50/50 border-2 border-transparent rounded-[1.5rem] p-6 text-slate-700 font-bold placeholder-slate-300 outline-none focus:border-[#00b06f] focus:bg-white transition-all shadow-inner text-lg">
-                        <span class="absolute right-6 top-6 opacity-20 text-3xl group-focus-within:opacity-100 transition-opacity">🔑</span>
+                    <label for="login-password" class="text-slate-400 text-[10px] sm:text-xs font-black uppercase tracking-widest ml-3 sm:ml-4">
+                        Пароль
+                    </label>
+                    <div class="field-shell">
+                        <input
+                            type="password"
+                            id="login-password"
+                            placeholder="••••••••"
+                            class="field-input"
+                            aria-label="Пароль"
+                            autocomplete="current-password"
+                        >
+                        <span class="field-icon">🔑</span>
                     </div>
+                    <p id="login-password-error" class="hidden text-rose-500 font-bold text-xs ml-3 sm:ml-4"></p>
                 </div>
 
-                <button type="button" class="btn-green-lux btn-login block w-full text-white font-black py-6 rounded-[2.5rem] text-center uppercase italic roblox-font tracking-[0.2em] text-3xl">
+                <button
+                    type="button"
+                    id="login-button"
+                    class="btn-green-lux block w-full text-white font-black py-4 sm:py-5 md:py-6 rounded-[1.6rem] sm:rounded-[2rem] md:rounded-[2.5rem] text-center uppercase italic roblox-font tracking-[0.15em] sm:tracking-[0.18em] md:tracking-[0.2em] text-xl sm:text-2xl md:text-3xl min-h-[56px]"
+                    aria-label="Войти в аккаунт"
+                >
                     Играть! ➔
                 </button>
 
-                <div class="flex items-center gap-8 py-2">
+                <div class="flex items-center gap-3 sm:gap-5 md:gap-8 py-1 sm:py-2">
                     <div class="h-[2px] bg-slate-100 flex-1 shadow-sm"></div>
-                    <span class="text-slate-300 font-black text-xs tracking-tighter">ЕЩЕ НЕТ АККАУНТА?</span>
+                    <span class="text-slate-300 font-black text-[9px] sm:text-[10px] md:text-xs tracking-tight text-center">
+                        ЕЩЕ НЕТ АККАУНТА?
+                    </span>
                     <div class="h-[2px] bg-slate-100 flex-1 shadow-sm"></div>
                 </div>
 
-                <p id="to-register" class="block w-full text-slate-400 hover:text-indigo-500 font-black py-2 text-center uppercase italic roblox-font tracking-widest text-sm transition-colors cursor-pointer">
+                <button
+                    type="button"
+                    id="to-register"
+                    class="block w-full text-slate-400 hover:text-indigo-500 font-black py-1 sm:py-2 text-center uppercase italic roblox-font tracking-[0.1em] sm:tracking-widest text-xs sm:text-sm transition-colors cursor-pointer min-h-[48px]"
+                    aria-label="Перейти к регистрации"
+                >
                     Создать новый профиль
-                </p>
+                </button>
+
+                <div class="hint-box">
+                    Войти можно по email или по телефону.
+                </div>
             </form>
         </div>
 
-        <div id="register-section" class="hidden">
-            <h2 class="roblox-font italic uppercase text-slate-700 text-xl mb-6 text-center">Создать аккаунт 🆕</h2>
-            <form class="space-y-4">
-                <input type="text" id="reg-username" placeholder="Никнейм" class="w-full p-4 rounded-2xl bg-white border-2 border-slate-100 outline-none focus:border-emerald-400 transition-all font-bold">
-                <input type="email" id="reg-email" placeholder="Email" class="w-full p-4 rounded-2xl bg-white border-2 border-slate-100 outline-none focus:border-emerald-400 transition-all font-bold">
-                <input type="tel" id="reg-phone" placeholder="Телефон (например, +77001234567)" class="w-full p-4 rounded-2xl bg-white border-2 border-slate-100 outline-none focus:border-emerald-400 transition-all font-bold">
-                <input type="password" id="reg-password" placeholder="Пароль" class="w-full p-4 rounded-2xl bg-white border-2 border-slate-100 outline-none focus:border-emerald-400 transition-all font-bold">
-                <input type="number" id="reg-age" placeholder="Возраст" class="w-full p-4 rounded-2xl bg-white border-2 border-slate-100 outline-none focus:border-emerald-400 transition-all font-bold">
-                
-                <button type="button" id="register-button" class="w-full bg-emerald-500 text-white font-black py-5 rounded-[2rem] uppercase italic roblox-font tracking-widest shadow-[0_8px_0_#059669] active:translate-y-2 active:shadow-none transition-all">
+        <div id="register-section" class="hidden fade-swap">
+            <h2 class="roblox-font italic uppercase text-slate-700 text-lg sm:text-xl mb-5 sm:mb-6 text-center">
+                Создать аккаунт 🆕
+            </h2>
+
+            <form class="space-y-3 sm:space-y-4" novalidate>
+                <div>
+                    <input type="text" id="reg-username" placeholder="Никнейм" class="w-full p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white border-2 border-slate-100 outline-none focus:border-emerald-400 transition-all font-bold min-h-[50px]" aria-label="Никнейм" autocomplete="nickname">
+                    <p id="reg-username-error" class="hidden text-rose-500 font-bold text-xs mt-2 ml-1"></p>
+                </div>
+
+                <div>
+                    <input type="email" id="reg-email" placeholder="Email" class="w-full p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white border-2 border-slate-100 outline-none focus:border-emerald-400 transition-all font-bold min-h-[50px]" aria-label="Email" autocomplete="email">
+                    <p id="reg-email-error" class="hidden text-rose-500 font-bold text-xs mt-2 ml-1"></p>
+                </div>
+
+                <div>
+                    <input type="tel" id="reg-phone" placeholder="Телефон (например, +77001234567)" class="w-full p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white border-2 border-slate-100 outline-none focus:border-emerald-400 transition-all font-bold min-h-[50px]" aria-label="Телефон" autocomplete="tel">
+                    <p id="reg-phone-error" class="hidden text-rose-500 font-bold text-xs mt-2 ml-1"></p>
+                </div>
+
+                <div>
+                    <input type="password" id="reg-password" placeholder="Пароль" class="w-full p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white border-2 border-slate-100 outline-none focus:border-emerald-400 transition-all font-bold min-h-[50px]" aria-label="Пароль" autocomplete="new-password">
+                    <p id="reg-password-error" class="hidden text-rose-500 font-bold text-xs mt-2 ml-1"></p>
+                </div>
+
+                <div>
+                    <input type="number" id="reg-age" placeholder="Возраст" class="w-full p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white border-2 border-slate-100 outline-none focus:border-emerald-400 transition-all font-bold min-h-[50px]" aria-label="Возраст" autocomplete="bday">
+                    <p id="reg-age-error" class="hidden text-rose-500 font-bold text-xs mt-2 ml-1"></p>
+                </div>
+
+                <button
+                    type="button"
+                    id="register-button"
+                    class="w-full bg-emerald-500 text-white font-black py-4 sm:py-5 rounded-[1.3rem] sm:rounded-[2rem] uppercase italic roblox-font tracking-[0.12em] sm:tracking-widest shadow-[0_8px_0_#059669] active:translate-y-2 active:shadow-none transition-all text-sm sm:text-base min-h-[54px]"
+                    aria-label="Зарегистрироваться"
+                >
                     Зарегистрироваться
                 </button>
 
-                <p id="to-login" class="text-center text-slate-400 font-black text-xs uppercase tracking-widest mt-4 cursor-pointer hover:text-blue-500">
+                <button
+                    type="button"
+                    id="to-login"
+                    class="w-full text-center text-slate-400 font-black text-[10px] sm:text-xs uppercase tracking-[0.12em] sm:tracking-widest mt-4 cursor-pointer hover:text-blue-500 min-h-[48px]"
+                    aria-label="Перейти ко входу"
+                >
                     Уже есть аккаунт? Войти
-                </p>
+                </button>
+
+                <div class="hint-box">
+                    Обязательные поля: никнейм, телефон и пароль.
+                </div>
             </form>
         </div>
 
-        <div class="mt-12 p-5 bg-white rounded-[2rem] border-2 border-slate-50 flex items-center gap-5 shadow-sm">
-            <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-2xl">🛡️</div>
-            <div class="flex-1">
-                <p class="text-blue-500 text-[10px] font-black uppercase leading-tight tracking-widest">Безопасность</p>
-                <p class="text-slate-400 text-[9px] font-bold mt-1 leading-tight">Данные защищены по стандартам Roblox Security.</p>
+        <div class="mt-8 sm:mt-10 md:mt-12 p-4 sm:p-5 bg-white rounded-[1.3rem] sm:rounded-[2rem] border-2 border-slate-50 flex items-center gap-4 sm:gap-5 shadow-sm">
+            <div class="w-11 h-11 sm:w-12 sm:h-12 bg-blue-50 rounded-full flex items-center justify-center text-xl sm:text-2xl shrink-0">
+                🛡️
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-blue-500 text-[9px] sm:text-[10px] font-black uppercase leading-tight tracking-widest">
+                    Безопасность
+                </p>
+                <p class="text-slate-400 text-[8px] sm:text-[9px] font-bold mt-1 leading-tight">
+                    Данные защищены по стандартам Roblox Security.
+                </p>
             </div>
         </div>
     </div>
@@ -131,72 +426,275 @@
         const registerSection = document.getElementById('register-section');
         const toRegisterBtn = document.getElementById('to-register');
         const toLoginBtn = document.getElementById('to-login');
-    
-        toRegisterBtn.addEventListener('click', () => {
-            loginSection.classList.add('hidden');
-            registerSection.classList.remove('hidden');
-        });
-    
-        toLoginBtn.addEventListener('click', () => {
-            registerSection.classList.add('hidden');
+        const loginBtn = document.getElementById('login-button');
+        const regBtn = document.getElementById('register-button');
+        const formMessage = document.getElementById('form-message');
+        const liveRegion = document.getElementById('live-region');
+        const toast = document.getElementById('toast');
+
+        let toastTimer = null;
+
+        function announce(message) {
+            if (liveRegion) liveRegion.textContent = message;
+        }
+
+        function showToast(message, type = 'default') {
+            clearTimeout(toastTimer);
+            toast.textContent = message;
+            toast.className = 'toast show';
+
+            if (type === 'error') {
+                toast.style.background = 'rgba(127, 29, 29, 0.96)';
+            } else if (type === 'success') {
+                toast.style.background = 'rgba(6, 78, 59, 0.96)';
+            } else {
+                toast.style.background = 'rgba(15, 23, 42, 0.94)';
+            }
+
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2400);
+        }
+
+        function showFormMessage(message, type = 'error') {
+            formMessage.className = `mb-5 inline-message ${type}`;
+            formMessage.textContent = message;
+            formMessage.classList.remove('hidden');
+            announce(message);
+        }
+
+        function hideFormMessage() {
+            formMessage.classList.add('hidden');
+            formMessage.textContent = '';
+        }
+
+        function clearFieldError(inputId, errorId) {
+            const input = document.getElementById(inputId);
+            const error = document.getElementById(errorId);
+
+            if (input) input.classList.remove('error');
+            if (error) {
+                error.textContent = '';
+                error.classList.add('hidden');
+            }
+        }
+
+        function setFieldError(inputId, errorId, message) {
+            const input = document.getElementById(inputId);
+            const error = document.getElementById(errorId);
+
+            if (input) input.classList.add('error');
+            if (error) {
+                error.textContent = message;
+                error.classList.remove('hidden');
+            }
+        }
+
+        function clearLoginErrors() {
+            clearFieldError('login-username', 'login-username-error');
+            clearFieldError('login-password', 'login-password-error');
+        }
+
+        function clearRegisterErrors() {
+            clearFieldError('reg-username', 'reg-username-error');
+            clearFieldError('reg-email', 'reg-email-error');
+            clearFieldError('reg-phone', 'reg-phone-error');
+            clearFieldError('reg-password', 'reg-password-error');
+            clearFieldError('reg-age', 'reg-age-error');
+        }
+
+        function setButtonLoading(button, isLoading, loadingText, defaultText, isGradient = false) {
+            button.disabled = isLoading;
+            button.classList.toggle('btn-loading', isLoading);
+            button.classList.toggle('btn-disabled', isLoading);
+
+            if (isLoading) {
+                button.innerHTML = `<span class="inline-flex items-center gap-3"><span class="spinner"></span>${loadingText}</span>`;
+            } else {
+                button.textContent = defaultText;
+            }
+
+            if (!isGradient && isLoading) {
+                button.style.opacity = '0.85';
+            } else if (!isGradient) {
+                button.style.opacity = '';
+            }
+        }
+
+        function showLogin() {
+            hideFormMessage();
+            clearLoginErrors();
             loginSection.classList.remove('hidden');
-        });
-    
-        const loginBtn = document.querySelector('.btn-login');
-        loginBtn.addEventListener('click', async (e) => {
-            e.preventDefault(); 
-            
+            registerSection.classList.add('hidden');
+            loginSection.classList.remove('fade-swap');
+            void loginSection.offsetWidth;
+            loginSection.classList.add('fade-swap');
+            announce('Открыта форма входа');
+        }
+
+        function showRegister() {
+            hideFormMessage();
+            clearRegisterErrors();
+            registerSection.classList.remove('hidden');
+            loginSection.classList.add('hidden');
+            registerSection.classList.remove('fade-swap');
+            void registerSection.offsetWidth;
+            registerSection.classList.add('fade-swap');
+            announce('Открыта форма регистрации');
+        }
+
+        toRegisterBtn.addEventListener('click', showRegister);
+        toLoginBtn.addEventListener('click', showLogin);
+
+        function validateLoginFields() {
+            clearLoginErrors();
+            hideFormMessage();
+
             const loginValue = document.getElementById('login-username').value.trim();
             const passwordValue = document.getElementById('login-password').value;
-    
-            const credentials = {
-                password: passwordValue
+
+            let valid = true;
+
+            if (!loginValue) {
+                setFieldError('login-username', 'login-username-error', 'Введите email или телефон');
+                valid = false;
+            }
+
+            if (!passwordValue) {
+                setFieldError('login-password', 'login-password-error', 'Введите пароль');
+                valid = false;
+            }
+
+            if (!valid) {
+                showFormMessage('Пожалуйста, заполни все обязательные поля.');
+            }
+
+            return { valid, loginValue, passwordValue };
+        }
+
+        function validateRegisterFields() {
+            clearRegisterErrors();
+            hideFormMessage();
+
+            const userData = {
+                username: document.getElementById('reg-username').value.trim(),
+                email: document.getElementById('reg-email').value.trim(),
+                phone: document.getElementById('reg-phone').value.trim(),
+                password: document.getElementById('reg-password').value,
+                age: Number(document.getElementById('reg-age').value) || 0,
+                role: 'student'
             };
-    
+
+            let valid = true;
+
+            if (!userData.username) {
+                setFieldError('reg-username', 'reg-username-error', 'Никнейм обязателен');
+                valid = false;
+            }
+
+            if (!userData.phone) {
+                setFieldError('reg-phone', 'reg-phone-error', 'Телефон обязателен');
+                valid = false;
+            }
+
+            if (!userData.password) {
+                setFieldError('reg-password', 'reg-password-error', 'Пароль обязателен');
+                valid = false;
+            } else if (userData.password.length < 6) {
+                setFieldError('reg-password', 'reg-password-error', 'Пароль должен быть не короче 6 символов');
+                valid = false;
+            }
+
+            if (userData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.email)) {
+                setFieldError('reg-email', 'reg-email-error', 'Введите корректный email');
+                valid = false;
+            }
+
+            if (userData.age && userData.age < 1) {
+                setFieldError('reg-age', 'reg-age-error', 'Возраст должен быть больше 0');
+                valid = false;
+            }
+
+            if (!valid) {
+                showFormMessage('Проверь поля формы и попробуй ещё раз.');
+            }
+
+            return { valid, userData };
+        }
+
+        loginBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+
+            const { valid, loginValue, passwordValue } = validateLoginFields();
+            if (!valid) return;
+
+            const credentials = { password: passwordValue };
+
             if (loginValue.includes('@')) {
                 credentials.email = loginValue;
             } else {
                 credentials.phone = loginValue;
             }
-    
+
+            setButtonLoading(loginBtn, true, 'Вход...', 'Играть! ➔', true);
+            hideFormMessage();
+
             try {
                 await window.roChessApi.login(credentials);
+                showFormMessage('Вход выполнен успешно. Переходим...', 'success');
+                showToast('Добро пожаловать!', 'success');
             } catch (error) {
-                alert('Ошибка входа: ' + error.message);
+                console.error(error);
+                const message = error?.message || 'Не удалось войти в аккаунт';
+                showFormMessage(`Ой, что-то пошло не так! ${message}`);
+                showToast('Ошибка входа', 'error');
+            } finally {
+                setButtonLoading(loginBtn, false, 'Вход...', 'Играть! ➔', true);
             }
         });
-    
-        const regBtn = document.getElementById('register-button');
+
         regBtn.addEventListener('click', async (e) => {
             e.preventDefault();
-    
-            const userData = {
-                username: document.getElementById('reg-username').value.trim(),
-                email: document.getElementById('reg-email').value.trim(),
-                phone: document.getElementById('reg-phone').value.trim(),
-                password: document.getElementById('reg-password').value, 
-                age: Number(document.getElementById('reg-age').value) || 0,
-                role: 'student'
-            };
 
-            if (!userData.username || !userData.password || !userData.phone) {
-                alert("Никнейм, телефон и пароль обязательны!");
-                return;
-            }
-    
-            if (userData.password.length < 6) {
-                alert("Пароль должен быть не короче 6 символов!");
-                return;
-            }
-    
+            const { valid, userData } = validateRegisterFields();
+            if (!valid) return;
+
+            setButtonLoading(regBtn, true, 'Регистрация...', 'Зарегистрироваться');
+            hideFormMessage();
+
             try {
                 const response = await window.roChessApi.register(userData);
-                console.log("Успех!", response);
-                alert('Регистрация прошла успешно!');
-                window.location.href = 'Dashboard.html';
+                console.log('Успех!', response);
+                showFormMessage('Регистрация прошла успешно! Переходим в Dashboard...', 'success');
+                showToast('Аккаунт создан', 'success');
+                setTimeout(() => {
+                    window.location.href = 'Dashboard.html';
+                }, 700);
             } catch (error) {
-                alert('Ошибка сервера: ' + error.message);
+                console.error(error);
+                const message = error?.message || 'Ошибка сервера';
+                showFormMessage(`Ой, что-то пошло не так! ${message}`);
+                showToast('Регистрация не удалась', 'error');
+            } finally {
+                setButtonLoading(regBtn, false, 'Регистрация...', 'Зарегистрироваться');
             }
+        });
+
+        document.getElementById('login-username').addEventListener('input', () => clearFieldError('login-username', 'login-username-error'));
+        document.getElementById('login-password').addEventListener('input', () => clearFieldError('login-password', 'login-password-error'));
+
+        document.getElementById('reg-username').addEventListener('input', () => clearFieldError('reg-username', 'reg-username-error'));
+        document.getElementById('reg-email').addEventListener('input', () => clearFieldError('reg-email', 'reg-email-error'));
+        document.getElementById('reg-phone').addEventListener('input', () => clearFieldError('reg-phone', 'reg-phone-error'));
+        document.getElementById('reg-password').addEventListener('input', () => clearFieldError('reg-password', 'reg-password-error'));
+        document.getElementById('reg-age').addEventListener('input', () => clearFieldError('reg-age', 'reg-age-error'));
+
+        document.getElementById('login-password').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') loginBtn.click();
+        });
+
+        document.getElementById('reg-age').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') regBtn.click();
         });
     </script>
 </body>

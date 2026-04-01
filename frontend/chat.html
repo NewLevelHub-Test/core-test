@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ИИ-помощник — Ro-Chess</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: radial-gradient(circle at center, #ffffff 0%, #f8fafc 100%);
+            min-height: 100vh;
+        }
+
+        .roblox-font {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .desktop-sidebar {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(20px);
+            border-right: 2px solid white;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.03);
+        }
+
+        .glass-card {
+            background: rgba(255,255,255,0.92);
+            border: 2px solid white;
+            border-radius: 32px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+        }
+
+        .chat-session {
+            background: white;
+            border-radius: 22px;
+            border: 2px solid white;
+            box-shadow: 0 8px 0 #e2e8f0;
+            transition: all 0.2s ease;
+        }
+
+        .chat-session:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 0 #cbd5e1;
+        }
+
+        .chat-session.active {
+            background: #eef2ff;
+            border-color: #c7d2fe;
+            box-shadow: 0 8px 0 #c7d2fe;
+        }
+
+        .message-bubble {
+            border-radius: 24px;
+            padding: 16px 18px;
+            max-width: 100%;
+            word-wrap: break-word;
+            overflow-wrap: anywhere;
+        }
+
+        .message-user {
+            background: #4f46e5;
+            color: white;
+            border-bottom-right-radius: 10px;
+            box-shadow: 0 10px 20px rgba(79,70,229,0.18);
+        }
+
+        .message-bot {
+            background: white;
+            color: #1e293b;
+            border: 2px solid #f1f5f9;
+            border-bottom-left-radius: 10px;
+            box-shadow: 0 10px 25px rgba(15,23,42,0.05);
+        }
+
+        .quick-btn {
+            min-height: 48px;
+            border-radius: 18px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            font-weight: 800;
+            transition: all 0.18s ease;
+        }
+
+        .quick-btn:hover {
+            transform: translateY(-1px);
+            border-color: #818cf8;
+            background: #eef2ff;
+        }
+
+        .input-shell {
+            background: white;
+            border: 2px solid white;
+            border-radius: 28px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+        }
+
+        .focus-ring:focus-visible,
+        button:focus-visible,
+        a:focus-visible,
+        textarea:focus-visible,
+        input:focus-visible {
+            outline: 3px solid #60a5fa;
+            outline-offset: 3px;
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.22s ease;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: #94a3b8;
+            animation: blink 1.1s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.15s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.3s; }
+
+        .markdown-content h1,
+        .markdown-content h2,
+        .markdown-content h3 {
+            font-weight: 800;
+            margin: 0.5rem 0;
+            color: #0f172a;
+        }
+
+        .markdown-content p {
+            margin: 0.5rem 0;
+            line-height: 1.65;
+        }
+
+        .markdown-content ul,
+        .markdown-content ol {
+            margin: 0.5rem 0;
+            padding-left: 1.25rem;
+        }
+
+        .markdown-content code {
+            background: #f8fafc;
+            padding: 0.15rem 0.4rem;
+            border-radius: 8px;
+            font-size: 0.95em;
+        }
+
+        .markdown-content pre {
+            background: #0f172a;
+            color: white;
+            padding: 14px;
+            border-radius: 16px;
+            overflow-x: auto;
+            margin: 0.75rem 0;
+        }
+
+        .markdown-content pre code {
+            background: transparent;
+            padding: 0;
+            color: inherit;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes blink {
+            0%, 80%, 100% { opacity: 0.3; transform: translateY(0); }
+            40% { opacity: 1; transform: translateY(-2px); }
+        }
+
+        @media (max-width: 1279px) {
+            .desktop-sidebar {
+                box-shadow: 20px 0 40px rgba(0,0,0,0.12);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .glass-card {
+                border-radius: 24px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 xl:flex">
+    <div id="mobile-overlay" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-[80] xl:hidden"></div>
+
+    <!-- MOBILE HEADER -->
+    <header class="xl:hidden sticky top-0 z-[90] bg-white/90 backdrop-blur-xl border-b border-slate-100 px-4 py-3 flex items-center justify-between">
+        <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-lg px-3 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block">
+            RO-CHESS
+        </div>
+
+        <button id="mobile-menu-btn" class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl focus-ring" aria-label="Открыть меню" type="button">
+            ☰
+        </button>
+    </header>
+
+    <!-- LEFT MAIN SIDEBAR -->
+    <aside id="sidebar" class="w-72 desktop-sidebar h-screen fixed xl:sticky top-0 left-0 flex flex-col p-8 z-[85] -translate-x-full xl:translate-x-0 transition-transform duration-300">
+        <div class="mb-12 text-center">
+            <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-2xl px-4 py-2 rounded-xl shadow-lg transform -rotate-2">
+                RO-CHESS
+            </div>
+        </div>
+
+        <nav class="space-y-4 flex-1" aria-label="Основная навигация">
+            <a href="Dashboard.html" class="flex items-center gap-4 p-4 min-h-[52px] hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all">
+                <span>🏠</span> Дом
+            </a>
+
+            <a href="study.html" class="flex items-center gap-4 p-4 min-h-[52px] hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all">
+                <span>🎓</span> Обучение
+            </a>
+
+            <a href="chat.html" class="flex items-center gap-4 p-4 min-h-[52px] bg-indigo-50 rounded-2xl text-indigo-600 font-black uppercase text-xs tracking-widest border-b-4 border-indigo-100">
+                <span>🤖</span> ИИ-чат
+            </a>
+        </nav>
+    </aside>
+
+    <main class="flex-1 p-4 md:p-6 xl:p-8 max-w-[1600px] mx-auto w-full">
+        <div class="grid grid-cols-1 2xl:grid-cols-[340px_minmax(0,1fr)] gap-6 h-[calc(100vh-2rem)] xl:h-[calc(100vh-4rem)]">
+            
+            <!-- CHAT SESSIONS -->
+            <section class="glass-card p-5 md:p-6 flex flex-col min-h-0">
+                <div class="flex items-center justify-between gap-3 mb-5">
+                    <h1 class="roblox-font italic uppercase text-slate-800 text-xl md:text-2xl">
+                        ИИ-помощник
+                    </h1>
+
+                    <button id="new-chat-btn" class="bg-emerald-500 text-white px-4 py-3 rounded-2xl font-black uppercase text-xs shadow-md border-b-4 border-emerald-700 active:translate-y-1 active:border-b-0 transition-all focus-ring">
+                        + Новый
+                    </button>
+                </div>
+
+                <div class="mb-4">
+                    <input
+                        id="session-search"
+                        type="text"
+                        placeholder="Поиск чатов..."
+                        class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-4 py-3 font-bold text-slate-700 focus:outline-none focus:border-indigo-300"
+                    />
+                </div>
+
+                <div id="chat-sessions" class="flex-1 overflow-y-auto space-y-3 pr-1">
+                    <button class="chat-session active w-full text-left p-4 focus-ring">
+                        <div class="font-black text-slate-800 text-sm md:text-base mb-1">Новый разговор</div>
+                        <div class="text-slate-400 text-xs font-bold">Начни диалог с ИИ-тренером</div>
+                    </button>
+
+                    <button class="chat-session w-full text-left p-4 focus-ring">
+                        <div class="font-black text-slate-800 text-sm md:text-base mb-1">Разбор дебюта</div>
+                        <div class="text-slate-400 text-xs font-bold">Последнее сообщение: 5 мин назад</div>
+                    </button>
+
+                    <button class="chat-session w-full text-left p-4 focus-ring">
+                        <div class="font-black text-slate-800 text-sm md:text-base mb-1">Ошибки в миттельшпиле</div>
+                        <div class="text-slate-400 text-xs font-bold">Последнее сообщение: вчера</div>
+                    </button>
+                </div>
+            </section>
+
+            <!-- CHAT AREA -->
+            <section class="glass-card p-4 md:p-6 flex flex-col min-h-0">
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <div>
+                        <h2 id="chat-title" class="roblox-font italic uppercase text-slate-800 text-lg md:text-2xl">
+                            Новый разговор
+                        </h2>
+                        <p class="text-slate-400 font-bold text-sm">Спроси про партии, ошибки, дебюты и план обучения</p>
+                    </div>
+                </div>
+
+                <!-- QUICK ACTIONS -->
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 mb-4">
+                    <button class="quick-btn px-4 py-3 text-slate-700 text-sm focus-ring" data-prompt="Проанализируй мою последнюю партию и скажи 3 главные ошибки.">
+                        Анализ последней партии
+                    </button>
+                    <button class="quick-btn px-4 py-3 text-slate-700 text-sm focus-ring" data-prompt="Какие у меня слабые стороны на основе последних результатов?">
+                        Мои слабые стороны
+                    </button>
+                    <button class="quick-btn px-4 py-3 text-slate-700 text-sm focus-ring" data-prompt="Составь мне короткий план тренировки на сегодня.">
+                        План тренировки на сегодня
+                    </button>
+                    <button class="quick-btn px-4 py-3 text-slate-700 text-sm focus-ring" data-prompt="Объясни простыми словами, над чем мне работать дальше.">
+                        Что учить дальше
+                    </button>
+                </div>
+
+                <!-- MESSAGES -->
+                <div id="messages-container" class="flex-1 overflow-y-auto pr-1 space-y-4 mb-4">
+                    <div class="flex justify-start fade-in">
+                        <div class="message-bubble message-bot markdown-content max-w-[90%]">
+                            <p><strong>Привет!</strong> Я ИИ-помощник Ro-Chess.</p>
+                            <p>Я могу:</p>
+                            <ul>
+                                <li>разобрать твою партию,</li>
+                                <li>объяснить ошибки,</li>
+                                <li>подсказать, что учить дальше,</li>
+                                <li>составить короткий тренировочный план.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INPUT -->
+                <div class="input-shell p-3 md:p-4">
+                    <div class="flex flex-col md:flex-row gap-3 items-stretch">
+                        <textarea
+                            id="chat-input"
+                            rows="1"
+                            placeholder="Напиши вопрос ИИ..."
+                            class="flex-1 resize-none bg-slate-50 rounded-2xl px-4 py-4 font-bold text-slate-700 border-2 border-slate-100 focus:outline-none focus:border-indigo-300 min-h-[56px] max-h-40"
+                        ></textarea>
+
+                        <button
+                            id="send-btn"
+                            class="bg-indigo-500 text-white px-6 py-4 rounded-2xl font-black uppercase text-xs shadow-md border-b-4 border-indigo-700 active:translate-y-1 active:border-b-0 transition-all min-w-[140px] focus-ring"
+                        >
+                            Отправить
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="state.js"></script>
+    <script src="api.js"></script>
+    <script>
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileOverlay = document.getElementById('mobile-overlay');
+        const sidebar = document.getElementById('sidebar');
+    
+        function openMobileMenu() {
+            sidebar.classList.remove('-translate-x-full');
+            mobileOverlay.classList.remove('hidden');
+        }
+    
+        function closeMobileMenu() {
+            if (window.innerWidth < 1280) {
+                sidebar.classList.add('-translate-x-full');
+            }
+            mobileOverlay.classList.add('hidden');
+        }
+    
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', () => {
+                if (sidebar.classList.contains('-translate-x-full')) {
+                    openMobileMenu();
+                } else {
+                    closeMobileMenu();
+                }
+            });
+        }
+    
+        if (mobileOverlay) {
+            mobileOverlay.addEventListener('click', closeMobileMenu);
+        }
+    
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeMobileMenu();
+        });
+    
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1280) {
+                mobileOverlay?.classList.add('hidden');
+                sidebar?.classList.remove('-translate-x-full');
+            } else {
+                sidebar?.classList.add('-translate-x-full');
+            }
+        });
+    
+        const messagesContainer = document.getElementById('messages-container');
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+        const quickButtons = document.querySelectorAll('.quick-btn');
+        const newChatBtn = document.getElementById('new-chat-btn');
+        const chatSessionsContainer = document.getElementById('chat-sessions');
+        const sessionSearchInput = document.getElementById('session-search');
+        const chatTitle = document.getElementById('chat-title');
+    
+        let currentSessionId = null;
+        let chatSessions = [];
+    
+        function appendMessage(role, content, isMarkdown = false) {
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'} fade-in`;
+    
+            const bubble = document.createElement('div');
+            bubble.className = `message-bubble ${
+                role === 'user' ? 'message-user' : 'message-bot'
+            } ${role !== 'user' ? 'markdown-content' : ''} max-w-[90%]`;
+    
+            if (isMarkdown && role !== 'user') {
+                bubble.innerHTML = marked.parse(content || '');
+            } else {
+                bubble.textContent = content || '';
+            }
+    
+            wrapper.appendChild(bubble);
+            messagesContainer.appendChild(wrapper);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+    
+        function appendTyping() {
+            removeTyping();
+    
+            const wrapper = document.createElement('div');
+            wrapper.className = 'flex justify-start fade-in';
+            wrapper.id = 'typing-indicator';
+    
+            wrapper.innerHTML = `
+                <div class="message-bubble message-bot">
+                    <div class="flex items-center gap-2">
+                        <span class="typing-dot"></span>
+                        <span class="typing-dot"></span>
+                        <span class="typing-dot"></span>
+                    </div>
+                </div>
+            `;
+    
+            messagesContainer.appendChild(wrapper);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+    
+        function removeTyping() {
+            const typing = document.getElementById('typing-indicator');
+            if (typing) typing.remove();
+        }
+    
+        function renderWelcomeMessage() {
+            messagesContainer.innerHTML = `
+                <div class="flex justify-start fade-in">
+                    <div class="message-bubble message-bot markdown-content max-w-[90%]">
+                        <p><strong>Привет!</strong> Я ИИ-помощник Ro-Chess.</p>
+                        <p>Я могу:</p>
+                        <ul>
+                            <li>разобрать твою партию,</li>
+                            <li>объяснить ошибки,</li>
+                            <li>подсказать, что учить дальше,</li>
+                            <li>составить короткий тренировочный план.</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+    
+        function setActiveSessionButton() {
+            const buttons = chatSessionsContainer.querySelectorAll('[data-session-id]');
+            buttons.forEach(btn => {
+                const sessionId = btn.dataset.sessionId;
+                btn.classList.toggle('active', String(sessionId) === String(currentSessionId));
+            });
+        }
+    
+        function getSessionTitle(session) {
+            return (
+                session.title ||
+                session.name ||
+                session.session_title ||
+                'Новый разговор'
+            );
+        }
+    
+        function getSessionSubtitle(session) {
+            return (
+                session.preview ||
+                session.last_message ||
+                session.updated_at ||
+                'Начни диалог с ИИ-тренером'
+            );
+        }
+    
+        function renderSessions(list = chatSessions) {
+            chatSessionsContainer.innerHTML = '';
+    
+            if (!list.length) {
+                chatSessionsContainer.innerHTML = `
+                    <div class="chat-session w-full text-left p-4">
+                        <div class="font-black text-slate-800 text-sm md:text-base mb-1">Пока нет чатов</div>
+                        <div class="text-slate-400 text-xs font-bold">Нажми "+ Новый", чтобы начать.</div>
+                    </div>
+                `;
+                return;
+            }
+    
+            list.forEach(session => {
+                const sessionId = session.id || session.session_id || session.chat_id;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.dataset.sessionId = sessionId;
+                btn.className = 'chat-session w-full text-left p-4 focus-ring';
+    
+                btn.innerHTML = `
+                    <div class="font-black text-slate-800 text-sm md:text-base mb-1">${getSessionTitle(session)}</div>
+                    <div class="text-slate-400 text-xs font-bold truncate">${getSessionSubtitle(session)}</div>
+                `;
+    
+                btn.addEventListener('click', () => openSession(session));
+                chatSessionsContainer.appendChild(btn);
+            });
+    
+            setActiveSessionButton();
+        }
+    
+        async function loadSessions() {
+            try {
+                const data = await window.roChessApi.getChatSessions();
+                chatSessions = data.sessions || data.data || data || [];
+                renderSessions(chatSessions);
+    
+                if (!currentSessionId && chatSessions.length) {
+                    openSession(chatSessions[0]);
+                } else {
+                    setActiveSessionButton();
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки сессий:', error);
+                chatSessions = [];
+                renderSessions([]);
+            }
+        }
+    
+        async function openSession(session) {
+            const sessionId = session.id || session.session_id || session.chat_id;
+            currentSessionId = sessionId;
+            chatTitle.textContent = getSessionTitle(session);
+            setActiveSessionButton();
+    
+            messagesContainer.innerHTML = '';
+            appendTyping();
+    
+            try {
+                const data = await window.roChessApi.getChatMessages(sessionId);
+                removeTyping();
+    
+                const messages = data.messages || data.data || data || [];
+    
+                if (!messages.length) {
+                    renderWelcomeMessage();
+                    return;
+                }
+    
+                messagesContainer.innerHTML = '';
+    
+                messages.forEach(msg => {
+                    const role = msg.role === 'assistant' ? 'bot' : msg.role;
+                    appendMessage(role, msg.content || msg.message || '', role !== 'user');
+                });
+            } catch (error) {
+                console.error('Ошибка загрузки сообщений:', error);
+                removeTyping();
+                renderWelcomeMessage();
+                appendMessage('bot', 'Не удалось загрузить сообщения этого чата.', true);
+            }
+        }
+    
+        async function createSession() {
+            try {
+                const data = await window.roChessApi.createChatSession({
+                    title: 'Новый разговор'
+                });
+    
+                const createdSession =
+                    data.session ||
+                    data.data ||
+                    data;
+    
+                const sessionId =
+                    createdSession.id ||
+                    createdSession.session_id ||
+                    createdSession.chat_id;
+    
+                currentSessionId = sessionId;
+    
+                await loadSessions();
+    
+                const found = chatSessions.find(s =>
+                    String(s.id || s.session_id || s.chat_id) === String(sessionId)
+                );
+    
+                if (found) {
+                    await openSession(found);
+                } else {
+                    chatTitle.textContent = 'Новый разговор';
+                    messagesContainer.innerHTML = '';
+                    renderWelcomeMessage();
+                }
+            } catch (error) {
+                console.error('Ошибка создания сессии:', error);
+                messagesContainer.innerHTML = '';
+                renderWelcomeMessage();
+                appendMessage('bot', 'Не удалось создать новый чат.', true);
+            }
+        }
+    
+        async function sendMessage(prefillText = null) {
+            const text = prefillText ?? chatInput.value.trim();
+            if (!text) return;
+    
+            if (!currentSessionId) {
+                await createSession();
+            }
+    
+            if (!currentSessionId) return;
+    
+            appendMessage('user', text);
+            chatInput.value = '';
+            chatInput.style.height = '56px';
+    
+            appendTyping();
+    
+            try {
+                const data = await window.roChessApi.sendChatMessage(currentSessionId, text);
+                removeTyping();
+    
+                const assistantMessage =
+                    data.assistant_message ||
+                    data.bot_message ||
+                    data.response ||
+                    data.message ||
+                    data.data ||
+                    data;
+    
+                const botText =
+                    assistantMessage.content ||
+                    assistantMessage.message ||
+                    assistantMessage.reply ||
+                    'Пустой ответ от сервера.';
+    
+                appendMessage('bot', botText, true);
+                await loadSessions();
+            } catch (error) {
+                console.error('Ошибка отправки сообщения:', error);
+                removeTyping();
+    
+                appendMessage(
+                    'bot',
+                    '### Ошибка\n\nЧат API пока не отвечает. Скорее всего, фронт уже готов, а backend для `/api/chat/...` ещё не добавлен.',
+                    true
+                );
+            }
+        }
+    
+        sendBtn.addEventListener('click', () => sendMessage());
+    
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    
+        chatInput.addEventListener('input', () => {
+            chatInput.style.height = '56px';
+            chatInput.style.height = `${Math.min(chatInput.scrollHeight, 160)}px`;
+        });
+    
+        quickButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                sendMessage(btn.dataset.prompt);
+            });
+        });
+    
+        newChatBtn.addEventListener('click', createSession);
+    
+        sessionSearchInput.addEventListener('input', () => {
+            const query = sessionSearchInput.value.trim().toLowerCase();
+    
+            if (!query) {
+                renderSessions(chatSessions);
+                return;
+            }
+    
+            const filtered = chatSessions.filter(session => {
+                const title = getSessionTitle(session).toLowerCase();
+                const subtitle = getSessionSubtitle(session).toLowerCase();
+                return title.includes(query) || subtitle.includes(query);
+            });
+    
+            renderSessions(filtered);
+        });
+
+        // ===== PREFILL ИЗ ДРУГИХ СТРАНИЦ =====
+        window.addEventListener('load', () => {
+            const prefill = localStorage.getItem('chat_prefill');
+
+            if (prefill) {
+                chatInput.value = prefill;
+
+                // авто-отправка
+                setTimeout(() => {
+                    sendMessage(prefill);
+                }, 300);
+
+                localStorage.removeItem('chat_prefill');
+            }
+        });
+    
+        renderWelcomeMessage();
+        loadSessions();
+    </script>
+</body>
+</html>
