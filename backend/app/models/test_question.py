@@ -12,6 +12,10 @@ class TestQuestion(db.Model):
     correct_answer = db.Column(db.String(100), nullable=False)
     explanation = db.Column(db.Text)
     order = db.Column(db.Integer, default=0)
+    # Добавь это в класс TestQuestion
+    topic_id = db.Column(db.Integer, db.ForeignKey('topics.id'), nullable=True)
+# И связь, чтобы легко доставать имя темы
+    topic = db.relationship('Topic', backref='question_items')
 
     def to_dict(self):
         return {
@@ -23,4 +27,6 @@ class TestQuestion(db.Model):
             'correct_answer': self.correct_answer,
             'explanation': self.explanation,
             'order': self.order,
+            'topic_id': self.topic_id,
+            'topic': self.topic.name if self.topic else None
         }
