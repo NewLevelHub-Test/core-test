@@ -1,5 +1,5 @@
 const API_CONFIG = {
-    BASE_URL: 'http://192.168.8.17:5000/api', 
+    BASE_URL: 'http://10.120.104.178:5000/api', 
     AUTH_PAGE: 'h1.html'
 };
 
@@ -159,6 +159,205 @@ const api = {
 
     async getLessonContent(lessonId) {
         return await this.fetchWithAuth(`/lessons/${lessonId}`);
+    },
+
+    async getGameAnalysis(gameId) {
+        return await this.fetchWithAuth(`/analysis/game/${gameId}`, {
+            method: 'GET'
+        });
+    },
+
+    async getMistakeExercises(mistakeId) {
+        return await this.fetchWithAuth(`/analysis/mistakes/${mistakeId}/exercises`, {
+            method: 'GET'
+        });
+    },
+
+    async recognizePhoto(file) {
+        const formData = new FormData();
+        formData.append('image', file);
+    
+        const token = localStorage.getItem('access_token');
+        const response = await fetch(`${API_CONFIG.BASE_URL}/photo/recognize`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData
+        });
+    
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || `Ошибка: ${response.status}`);
+        return data;
+    },
+    
+    async correctPhotoPosition(payload) {
+        return await this.fetchWithAuth('/photo/correct', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+    },
+
+    async analyzePhotoPosition(payload) {
+        return await this.fetchWithAuth('/photo/analyze', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+    },
+
+    async getAdminUsers() {
+        return await this.fetchWithAuth('/admin/users', {
+            method: 'GET'
+        });
+    },
+    
+    async getAdminUserDetail(userId) {
+        return await this.fetchWithAuth(`/admin/users/${userId}`, {
+            method: 'GET'
+        });
+    },
+    
+    async deleteAdminUser(userId) {
+        return await this.fetchWithAuth(`/admin/users/${userId}`, {
+            method: 'DELETE'
+        });
+    },
+    
+    async getPlatformStats() {
+        return await this.fetchWithAuth('/admin/stats', {
+            method: 'GET'
+        });
+    },
+    
+    async getLessonsList() {
+        return await this.fetchWithAuth('/lessons/', {
+            method: 'GET'
+        });
+    },
+    
+    async createAdminLesson(payload) {
+        return await this.fetchWithAuth('/admin/lessons', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+    },
+    
+    async updateAdminLesson(lessonId, payload) {
+        return await this.fetchWithAuth(`/admin/lessons/${lessonId}`, {
+            method: 'PUT',
+            body: JSON.stringify(payload)
+        });
+    },
+    
+    async deleteAdminLesson(lessonId) {
+        return await this.fetchWithAuth(`/admin/lessons/${lessonId}`, {
+            method: 'DELETE'
+        });
+    },
+    
+    async getTopicsList() {
+        return await this.fetchWithAuth('/lessons/topics', {
+            method: 'GET'
+        });
+    },
+    
+    async getLessonExercises(lessonId) {
+        return await this.fetchWithAuth(`/lessons/${lessonId}/exercises`, {
+            method: 'GET'
+        });
+    },
+    
+    async createAdminExercise(payload) {
+        return await this.fetchWithAuth('/admin/exercises', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+    },
+    
+    async updateAdminExercise(exerciseId, payload) {
+        return await this.fetchWithAuth(`/admin/exercises/${exerciseId}`, {
+            method: 'PUT',
+            body: JSON.stringify(payload)
+        });
+    },
+    
+    async deleteAdminExercise(exerciseId) {
+        return await this.fetchWithAuth(`/admin/exercises/${exerciseId}`, {
+            method: 'DELETE'
+        });
+    },
+
+        // =========================
+    // CHAT API
+    // =========================
+
+    async getChatSessions() {
+        return await this.fetchWithAuth('/chat/sessions', {
+            method: 'GET'
+        });
+    },
+
+    async getChatSession(sessionId) {
+        return await this.fetchWithAuth(`/chat/sessions/${sessionId}`, {
+            method: 'GET'
+        });
+    },
+
+    async createChatSession(payload = {}) {
+        return await this.fetchWithAuth('/chat/sessions', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+    },
+
+    async renameChatSession(sessionId, title) {
+        return await this.fetchWithAuth(`/chat/sessions/${sessionId}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ title })
+        });
+    },
+
+    async deleteChatSession(sessionId) {
+        return await this.fetchWithAuth(`/chat/sessions/${sessionId}`, {
+            method: 'DELETE'
+        });
+    },
+
+    async getChatMessages(sessionId) {
+        return await this.fetchWithAuth(`/chat/sessions/${sessionId}/messages`, {
+            method: 'GET'
+        });
+    },
+
+    async sendChatMessage(sessionId, message, context = null) {
+        return await this.fetchWithAuth(`/chat/sessions/${sessionId}/messages`, {
+            method: 'POST',
+            body: JSON.stringify({
+                message,
+                context
+            })
+        });
+    },
+
+    async createSessionAndSendMessage(message, title = 'Новый разговор', context = null) {
+        const sessionData = await this.createChatSession({ title });
+
+        const sessionId =
+            sessionData.id ||
+            sessionData.session_id ||
+            sessionData.chat_id ||
+            (sessionData.session && sessionData.session.id);
+
+        if (!sessionId) {
+            throw new Error('Не удалось получить id чат-сессии');
+        }
+
+        const messageData = await this.sendChatMessage(sessionId, message, context);
+
+        return {
+            session: sessionData,
+            response: messageData
+        };
     },
 
     logout() {

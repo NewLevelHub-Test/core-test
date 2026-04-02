@@ -2,66 +2,360 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Выбор испытания - Ro-Chess</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Nunito', sans-serif; background: #f8fafc; }
-        .roblox-font { font-family: 'Montserrat', sans-serif; }
-        .luxury-card { 
-            background: white; border-radius: 32px; border: 2px solid white;
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: radial-gradient(circle at center, #ffffff 0%, #f8fafc 100%);
+            min-height: 100vh;
+        }
+
+        .roblox-font {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .luxury-card {
+            background: white;
+            border-radius: 32px;
+            border: 2px solid white;
             box-shadow: 0 15px 35px rgba(0,0,0,0.05), 0 8px 0 #e2e8f0;
             transition: all 0.2s ease;
+            animation: fadeInUp 0.22s ease;
         }
-        .luxury-card:hover { transform: translateY(-5px); }
+
+        .luxury-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .skeleton {
+            position: relative;
+            overflow: hidden;
+            background: #e2e8f0;
+        }
+
+        .skeleton::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            transform: translateX(-100%);
+            background: linear-gradient(
+                90deg,
+                rgba(255,255,255,0) 0%,
+                rgba(255,255,255,0.6) 50%,
+                rgba(255,255,255,0) 100%
+            );
+            animation: shimmer 1.25s infinite;
+        }
+
+        .inline-message {
+            border-radius: 20px;
+            padding: 14px 16px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            animation: fadeInUp 0.22s ease;
+        }
+
+        .inline-message.error {
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 2px solid #fecaca;
+        }
+
+        .inline-message.success {
+            background: #ecfdf5;
+            color: #047857;
+            border: 2px solid #a7f3d0;
+        }
+
+        .inline-message.info {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 2px solid #bfdbfe;
+        }
+
+        .empty-state {
+            background: rgba(248,250,252,0.92);
+            border: 2px dashed #cbd5e1;
+            border-radius: 24px;
+            padding: 28px;
+            text-align: center;
+            color: #64748b;
+            font-weight: 800;
+            animation: fadeInUp 0.22s ease;
+        }
+
+        .error-state {
+            background: linear-gradient(180deg, rgba(254,242,242,0.95), rgba(255,255,255,0.98));
+            border: 2px solid #fecaca;
+            border-radius: 24px;
+            padding: 28px;
+            text-align: center;
+            color: #991b1b;
+            font-weight: 800;
+            animation: fadeInUp 0.22s ease;
+        }
+
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: 24px;
+            transform: translateX(-50%);
+            z-index: 120;
+            background: rgba(15, 23, 42, 0.94);
+            color: white;
+            border-radius: 18px;
+            padding: 14px 18px;
+            font-weight: 800;
+            box-shadow: 0 14px 30px rgba(0,0,0,0.18);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            max-width: calc(100vw - 32px);
+            text-align: center;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-4px);
+        }
+
+        .focus-ring:focus-visible,
+        button:focus-visible,
+        a:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible,
+        [tabindex]:focus-visible {
+            outline: 3px solid #60a5fa;
+            outline-offset: 3px;
+        }
+
+        .btn-min {
+            min-height: 48px;
+            min-width: 48px;
+        }
+
+        .fade-swap {
+            animation: fadeIn 0.2s ease;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0,0,0,0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        @keyframes shimmer {
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .luxury-card {
+                border-radius: 24px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .luxury-card,
+            .empty-state,
+            .error-state,
+            .inline-message {
+                border-radius: 20px;
+            }
+        }
     </style>
 </head>
-<body class="p-12">
-    <div class="max-w-4xl mx-auto text-center">
-        <h1 class="roblox-font italic uppercase text-4xl mb-12 text-slate-800">Выбери Испытание 🧩</h1>
-        <div id="tests-grid" class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            </div>
+<body class="p-4 sm:p-6 md:p-10 xl:p-12">
+    <div id="live-region" class="sr-only" aria-live="polite"></div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <div class="max-w-5xl mx-auto">
+        <div id="page-message" class="hidden mb-6" aria-live="polite"></div>
+
+        <div class="text-center mb-10 md:mb-12">
+            <h1 class="roblox-font italic uppercase text-3xl md:text-4xl xl:text-5xl mb-4 text-slate-800 tracking-tighter">
+                Выбери Испытание 🧩
+            </h1>
+            <p class="text-slate-400 font-black uppercase text-[10px] md:text-xs tracking-[0.25em]">
+                Проверь знания и определи свой уровень
+            </p>
+        </div>
+
+        <div id="tests-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8" aria-live="polite"></div>
     </div>
 
     <script src="state.js"></script>
     <script src="api.js"></script>
     <script>
+        const container = document.getElementById('tests-grid');
+        const pageMessage = document.getElementById('page-message');
+        const liveRegion = document.getElementById('live-region');
+        const toast = document.getElementById('toast');
+        let toastTimer = null;
+
+        function announce(message) {
+            if (liveRegion) liveRegion.textContent = message;
+        }
+
+        function showToast(message, type = 'default') {
+            clearTimeout(toastTimer);
+            toast.textContent = message;
+            toast.className = 'toast show';
+
+            if (type === 'error') {
+                toast.style.background = 'rgba(127, 29, 29, 0.96)';
+            } else if (type === 'success') {
+                toast.style.background = 'rgba(6, 78, 59, 0.96)';
+            } else {
+                toast.style.background = 'rgba(15, 23, 42, 0.94)';
+            }
+
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2400);
+        }
+
+        function showPageMessage(message, type = 'info') {
+            pageMessage.className = `mb-6 inline-message ${type}`;
+            pageMessage.textContent = message;
+            pageMessage.classList.remove('hidden');
+            announce(message);
+        }
+
+        function hidePageMessage() {
+            pageMessage.classList.add('hidden');
+            pageMessage.textContent = '';
+        }
+
+        function escapeHtml(text) {
+            if (text == null) return '';
+            return String(text)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        function renderTestsSkeleton() {
+            container.innerHTML = Array.from({ length: 4 }).map(() => `
+                <div class="luxury-card p-8 flex flex-col items-center text-center">
+                    <div class="w-16 h-16 rounded-3xl skeleton mb-4"></div>
+                    <div class="h-6 w-40 rounded-xl skeleton mb-3"></div>
+                    <div class="h-4 w-48 rounded-xl skeleton mb-2"></div>
+                    <div class="h-4 w-36 rounded-xl skeleton mb-6"></div>
+                    <div class="w-full h-14 rounded-2xl skeleton"></div>
+                </div>
+            `).join('');
+        }
+
+        function renderEmptyState() {
+            container.innerHTML = `
+                <div class="col-span-full empty-state">
+                    <div class="text-4xl mb-3">📭</div>
+                    <div class="text-slate-700 text-lg font-black mb-2">Тесты пока не созданы</div>
+                    <div class="text-slate-500 font-bold">Как только они появятся в базе данных, ты увидишь их здесь.</div>
+                </div>
+            `;
+        }
+
+        function renderErrorState(message) {
+            container.innerHTML = `
+                <div class="col-span-full error-state">
+                    <div class="text-4xl mb-3">😵</div>
+                    <div class="text-lg font-black text-red-700 mb-2">Ой, что-то пошло не так!</div>
+                    <div class="text-red-600 font-bold mb-5">${escapeHtml(message)}</div>
+                    <button
+                        type="button"
+                        onclick="loadAllTests()"
+                        class="px-6 py-3 min-h-[48px] bg-red-500 text-white rounded-2xl font-black uppercase text-xs tracking-widest shadow-[0_8px_0_#dc2626] active:translate-y-[4px]"
+                        aria-label="Попробовать снова"
+                    >
+                        Попробовать снова
+                    </button>
+                </div>
+            `;
+        }
+
         async function loadAllTests() {
-            const container = document.getElementById('tests-grid');
+            renderTestsSkeleton();
+            hidePageMessage();
+            announce('Загружается список тестов');
+
             try {
                 console.log("Запрашиваю список тестов...");
                 const data = await window.roChessApi.getTestsList();
-                
                 console.log("Данные от сервера:", data);
 
-                const tests = data.tests || []; 
+                const tests = Array.isArray(data.tests) ? data.tests : [];
 
                 if (tests.length === 0) {
-                    container.innerHTML = `
-                        <div class="col-span-full p-10 bg-white rounded-3xl border-2 border-dashed border-slate-200 text-slate-400">
-                            <p class="text-xl">📭 Тесты пока не созданы в базе данных</p>
-                        </div>`;
+                    renderEmptyState();
+                    showPageMessage('Пока доступных тестов нет.', 'info');
                     return;
                 }
 
-                container.innerHTML = ''; 
-                
+                container.innerHTML = '';
+
                 tests.forEach(test => {
                     const card = document.createElement('div');
-                    card.className = 'luxury-card p-8 flex flex-col items-center';
+                    card.className = 'luxury-card p-6 md:p-8 flex flex-col items-center text-center';
+
                     card.innerHTML = `
                         <div class="text-5xl mb-4">🏆</div>
-                        <h2 class="roblox-font italic uppercase text-xl mb-2 text-slate-800">${test.title}</h2>
-                        <p class="text-slate-400 text-[10px] font-black mb-6 uppercase tracking-widest">${test.description || 'Проверка знаний'}</p>
-                        <a href="test.html?id=${test.id}" class="w-full bg-indigo-500 text-white font-black py-4 rounded-2xl uppercase italic roblox-font tracking-widest text-center shadow-[0_6px_0_#4338ca] active:translate-y-1 active:shadow-none transition-all">Играть ➔</a>
+                        <h2 class="roblox-font italic uppercase text-xl md:text-2xl mb-3 text-slate-800 tracking-tight">
+                            ${escapeHtml(test.title || 'Без названия')}
+                        </h2>
+                        <p class="text-slate-400 text-[10px] md:text-xs font-black mb-6 uppercase tracking-widest">
+                            ${escapeHtml(test.description || 'Проверка знаний')}
+                        </p>
+                        <a
+                            href="test.html?id=${encodeURIComponent(test.id)}"
+                            class="w-full bg-indigo-500 text-white font-black py-4 rounded-2xl uppercase italic roblox-font tracking-widest text-center shadow-[0_6px_0_#4338ca] active:translate-y-1 active:shadow-none transition-all min-h-[52px] inline-flex items-center justify-center focus-ring"
+                            aria-label="Начать тест ${escapeHtml(test.title || 'без названия')}"
+                        >
+                            Играть ➔
+                        </a>
                     `;
+
                     container.appendChild(card);
                 });
+
+                announce('Список тестов загружен');
             } catch (err) {
                 console.error("Критическая ошибка:", err);
-                container.innerHTML = `<p class="text-rose-500 font-bold">Ошибка соединения: ${err.message}</p>`;
+                renderErrorState(err.message || 'Ошибка соединения с сервером.');
+                showPageMessage('Ой, что-то пошло не так! Не удалось загрузить тесты.', 'error');
+                showToast('Ошибка загрузки тестов', 'error');
+                announce('Ошибка загрузки тестов');
             }
         }
+
         loadAllTests();
     </script>
 </body>

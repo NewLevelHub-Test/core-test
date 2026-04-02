@@ -3,28 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox Chess - Desktop Challenge</title>
+    <title>Roblox Chess - Challenge</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
     <style>
-        body { 
-            font-family: 'Nunito', sans-serif; 
-            background: radial-gradient(circle at center, #ffffff 0%, #f8fafc 100%); 
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: radial-gradient(circle at center, #ffffff 0%, #f8fafc 100%);
             min-height: 100vh;
         }
-        .roblox-font { font-family: 'Montserrat', sans-serif; }
-        
+
+        .roblox-font {
+            font-family: 'Montserrat', sans-serif;
+        }
+
         .desktop-sidebar {
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.82);
             backdrop-filter: blur(20px);
             border-right: 2px solid white;
             box-shadow: 10px 0 30px rgba(0,0,0,0.03);
         }
 
         .board-wrapper {
-            width: 100%;
-            max-width: 580px;
-            aspect-ratio: 1 / 1;
+            width: min(92vw, 580px);
+            height: min(92vw, 580px);
+            min-width: 240px;
+            min-height: 240px;
             display: grid;
             grid-template-columns: repeat(8, 1fr);
             grid-template-rows: repeat(8, 1fr);
@@ -35,12 +39,19 @@
             background: white;
         }
 
-        .sq { display: flex; justify-content: center; align-items: center; font-size: 3rem; }
+        .sq {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: clamp(20px, 4.5vw, 48px);
+            line-height: 1;
+        }
+
         .sq-w { background-color: #ffffff; }
         .sq-b { background-color: #3b82f6; }
 
         .glass-card {
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.86);
             backdrop-filter: blur(15px);
             border: 2px solid white;
             border-radius: 32px;
@@ -50,94 +61,439 @@
         .answer-card {
             transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             border-bottom: 6px solid #f1f5f9;
+            min-height: 72px;
         }
-        .answer-card:hover { transform: scale(1.02); border-color: #3b82f6; }
-        .answer-card.selected { border-color: #3b82f6; background-color: #eff6ff; ring: 4px; ring-color: #3b82f6; }
-        
+
+        .answer-card:hover:not(:disabled) {
+            transform: scale(1.02);
+            border-color: #3b82f6;
+        }
+
         .check-btn {
             background: linear-gradient(180deg, #00cd81 0%, #00b06f 100%);
             box-shadow: 0 10px 0 #008a57;
+            min-height: 56px;
         }
-        .check-btn:active:not(:disabled) { transform: translateY(8px); box-shadow: 0 2px 0 #008a57; }
+
+        .check-btn:active:not(:disabled) {
+            transform: translateY(8px);
+            box-shadow: 0 2px 0 #008a57;
+        }
+
+        .check-btn:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .skeleton {
+            position: relative;
+            overflow: hidden;
+            background: #e2e8f0;
+        }
+
+        .skeleton::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            transform: translateX(-100%);
+            background: linear-gradient(
+                90deg,
+                rgba(255,255,255,0) 0%,
+                rgba(255,255,255,0.6) 50%,
+                rgba(255,255,255,0) 100%
+            );
+            animation: shimmer 1.25s infinite;
+        }
+
+        .inline-message {
+            border-radius: 20px;
+            padding: 14px 16px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            animation: fadeInUp 0.22s ease;
+        }
+
+        .inline-message.error {
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 2px solid #fecaca;
+        }
+
+        .inline-message.success {
+            background: #ecfdf5;
+            color: #047857;
+            border: 2px solid #a7f3d0;
+        }
+
+        .inline-message.info {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 2px solid #bfdbfe;
+        }
+
+        .error-state {
+            background: linear-gradient(180deg, rgba(254,242,242,0.95), rgba(255,255,255,0.98));
+            border: 2px solid #fecaca;
+            border-radius: 24px;
+            padding: 24px;
+            text-align: center;
+            color: #991b1b;
+            font-weight: 800;
+            animation: fadeInUp 0.22s ease;
+        }
+
+        .empty-state {
+            background: rgba(248,250,252,0.92);
+            border: 2px dashed #cbd5e1;
+            border-radius: 24px;
+            padding: 24px;
+            text-align: center;
+            color: #64748b;
+            font-weight: 800;
+            animation: fadeInUp 0.22s ease;
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255,255,255,0.35);
+            border-top-color: white;
+            border-radius: 999px;
+            animation: spin 0.75s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: 24px;
+            transform: translateX(-50%);
+            z-index: 120;
+            background: rgba(15, 23, 42, 0.94);
+            color: white;
+            border-radius: 18px;
+            padding: 14px 18px;
+            font-weight: 800;
+            box-shadow: 0 14px 30px rgba(0,0,0,0.18);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            max-width: calc(100vw - 32px);
+            text-align: center;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-4px);
+        }
+
+        .focus-ring:focus-visible,
+        button:focus-visible,
+        a:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible,
+        [tabindex]:focus-visible {
+            outline: 3px solid #60a5fa;
+            outline-offset: 3px;
+        }
+
+        .fade-swap {
+            animation: fadeIn 0.2s ease;
+        }
+
+        .btn-min {
+            min-height: 48px;
+            min-width: 48px;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0,0,0,0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes shimmer {
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 1279px) {
+            .desktop-sidebar {
+                box-shadow: 20px 0 40px rgba(0,0,0,0.12);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .glass-card {
+                border-radius: 24px;
+            }
+
+            .board-wrapper {
+                width: min(84vw, 500px);
+                height: min(84vw, 500px);
+                border-width: 10px;
+                border-radius: 24px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .glass-card {
+                border-radius: 22px;
+            }
+
+            .board-wrapper {
+                width: min(94vw, 360px);
+                height: min(94vw, 360px);
+                min-width: 220px;
+                min-height: 220px;
+                border-width: 8px;
+                border-radius: 20px;
+            }
+
+            .sq {
+                font-size: clamp(16px, 5vw, 30px);
+            }
+
+            .inline-message,
+            .error-state,
+            .empty-state {
+                border-radius: 18px;
+            }
+        }
     </style>
 </head>
-<body class="flex">
+<body class="bg-slate-50 xl:flex">
+    <div id="live-region" class="sr-only" aria-live="polite"></div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-    <aside class="w-72 desktop-sidebar h-screen sticky top-0 flex flex-col p-8 z-50">
+    <!-- MOBILE HEADER -->
+    <header class="xl:hidden sticky top-0 z-[90] bg-white/90 backdrop-blur-xl border-b border-slate-100 px-4 py-3 flex items-center justify-between">
+        <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-lg px-3 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block">
+            RO-CHESS
+        </div>
+
+        <button id="mobile-menu-btn" class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl btn-min" aria-label="Открыть меню" type="button">
+            ☰
+        </button>
+    </header>
+
+    <div id="mobile-overlay" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-[80] xl:hidden"></div>
+
+    <aside id="sidebar" class="w-72 desktop-sidebar h-screen fixed xl:sticky top-0 left-0 flex flex-col p-8 z-[85] -translate-x-full xl:translate-x-0 transition-transform duration-300">
         <div class="mb-12 text-center">
             <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-2xl px-4 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block transform -rotate-2">
                 RO-CHESS
             </div>
         </div>
-        <nav class="space-y-4 flex-1">
-            <a href="Dashboard.html" class="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all">
+
+        <nav class="space-y-4 flex-1" aria-label="Основная навигация">
+            <a href="Dashboard.html" class="flex items-center gap-4 p-4 min-h-[52px] hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all" aria-label="Перейти на главную">
                 <span class="text-2xl">🏠</span> Дом
             </a>
-            <a href="profile.html" class="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all">
+            <a href="profile.html" class="flex items-center gap-4 p-4 min-h-[52px] hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all" aria-label="Перейти в профиль">
                 <span class="text-2xl">👤</span> Профиль
             </a>
-            <a href="TestsList.html" class="flex items-center gap-4 p-4 bg-orange-50 rounded-2xl text-orange-600 font-black uppercase text-xs tracking-widest border-b-4 border-orange-100">
+            <a href="TestsList.html" class="flex items-center gap-4 p-4 min-h-[52px] bg-orange-50 rounded-2xl text-orange-600 font-black uppercase text-xs tracking-widest border-b-4 border-orange-100" aria-label="Текущая страница: тест">
                 <span class="text-2xl">📝</span> Тест
             </a>
         </nav>
     </aside>
 
-    <main class="flex-1 p-12 max-w-[1400px] mx-auto">
-        <header class="flex justify-between items-center mb-10">
-            <div class="flex items-center gap-6">
-                <a href="TestsList.html" class="bg-white p-3 rounded-2xl shadow-md border-b-4 border-slate-100 active:translate-y-1 transition-all">⬅️</a>
-                <h1 id="test-title" class="roblox-font italic uppercase text-slate-800 text-3xl tracking-tighter">Загрузка...</h1>
+    <main class="flex-1 p-4 md:p-6 xl:p-12 max-w-[1400px] mx-auto w-full">
+        <div id="page-message" class="hidden mb-5" aria-live="polite"></div>
+
+        <header class="flex flex-col xl:flex-row xl:justify-between xl:items-center gap-5 mb-8 md:mb-10">
+            <div class="flex items-start sm:items-center gap-4 md:gap-6">
+                <a href="TestsList.html" class="bg-white p-3 rounded-2xl shadow-md border-b-4 border-slate-100 active:translate-y-1 transition-all shrink-0 btn-min inline-flex items-center justify-center focus-ring" aria-label="Назад к списку тестов">
+                    ⬅️
+                </a>
+
+                <h1 id="test-title" class="roblox-font italic uppercase text-slate-800 text-xl md:text-2xl xl:text-3xl tracking-tighter leading-tight">
+                    Загрузка...
+                </h1>
             </div>
-            <div class="w-80 flex items-center gap-4">
-                <span id="progress-text" class="text-[10px] font-black text-slate-400 uppercase whitespace-nowrap">Вопрос 0/0</span>
+
+            <div class="w-full xl:w-80 flex items-center gap-4" aria-live="polite">
+                <span id="progress-text" class="text-[10px] font-black text-slate-400 uppercase whitespace-nowrap">
+                    Вопрос 0/0
+                </span>
                 <div class="w-full h-4 bg-slate-100 rounded-full border border-white shadow-inner overflow-hidden">
                     <div id="progress-bar" class="bg-emerald-400 h-full shadow-[0_0_10px_#10b981] transition-all duration-500" style="width: 0%"></div>
                 </div>
             </div>
         </header>
-    
-        <div class="grid grid-cols-12 gap-12 items-start">
-            <div class="col-span-5 space-y-8">
-                <section class="glass-card p-8 border-b-8 border-slate-100">
-                    <h2 class="text-indigo-500 font-black text-xs uppercase mb-3 tracking-[0.2em]">Миссия: Шах и Мат</h2>
-                    <p id="question-text" class="text-slate-800 font-black text-2xl leading-tight roblox-font italic uppercase italic">Подготовка...</p>
+
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 md:gap-8 xl:gap-12 items-start">
+            <div class="xl:col-span-5 space-y-6 md:space-y-8 order-2 xl:order-1">
+                <section id="question-card" class="glass-card p-6 md:p-8 border-b-8 border-slate-100">
+                    <h2 class="text-indigo-500 font-black text-[10px] md:text-xs uppercase mb-3 tracking-[0.2em]">
+                        Миссия: Шах и Мат
+                    </h2>
+                    <p id="question-text" class="text-slate-800 font-black text-xl md:text-2xl leading-tight roblox-font italic uppercase">
+                        Подготовка...
+                    </p>
                 </section>
-    
-                <div id="answers-container" class="grid grid-cols-1 gap-4"></div>
-    
-                <button id="next-question-btn" class="check-btn w-full text-white font-black py-8 rounded-[2.5rem] uppercase italic roblox-font tracking-widest text-3xl transition-all opacity-50 cursor-not-allowed" disabled>
+
+                <div id="answers-container" class="grid grid-cols-1 gap-4" aria-live="polite"></div>
+
+                <button id="next-question-btn" class="check-btn w-full text-white font-black py-5 md:py-6 rounded-[2rem] md:rounded-[2.5rem] uppercase italic roblox-font tracking-widest text-xl md:text-2xl xl:text-3xl transition-all opacity-50 cursor-not-allowed" disabled type="button" aria-label="Следующий вопрос">
                     Далее ➔
                 </button>
             </div>
-    
-            <div class="col-span-7 flex justify-center">
-                <div id="chess-board" class="board-wrapper"></div>
+
+            <div class="xl:col-span-7 flex justify-center order-1 xl:order-2">
+                <div id="chess-board" class="board-wrapper" aria-label="Шахматная позиция вопроса"></div>
             </div>
         </div>
     </main>
-    
+
     <script src="state.js"></script>
     <script src="api.js"></script>
     <script>
         if (!window.roChessApi.isAuthenticated()) {
             window.location.href = 'h1.html';
         }
-    
+
         let questions = [];
         let currentIdx = 0;
         let userAnswers = [];
         let selectedOption = null;
-    
+        let currentTestId = null;
+        let toastTimer = null;
+
+        const pageMessage = document.getElementById('page-message');
+        const liveRegion = document.getElementById('live-region');
+        const toast = document.getElementById('toast');
+
+        function announce(message) {
+            if (liveRegion) liveRegion.textContent = message;
+        }
+
+        function showToast(message, type = 'default') {
+            clearTimeout(toastTimer);
+            toast.textContent = message;
+            toast.className = 'toast show';
+
+            if (type === 'error') {
+                toast.style.background = 'rgba(127, 29, 29, 0.96)';
+            } else if (type === 'success') {
+                toast.style.background = 'rgba(6, 78, 59, 0.96)';
+            } else {
+                toast.style.background = 'rgba(15, 23, 42, 0.94)';
+            }
+
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2400);
+        }
+
+        function showPageMessage(message, type = 'info') {
+            pageMessage.className = `mb-5 inline-message ${type}`;
+            pageMessage.textContent = message;
+            pageMessage.classList.remove('hidden');
+            announce(message);
+        }
+
+        function hidePageMessage() {
+            pageMessage.classList.add('hidden');
+            pageMessage.textContent = '';
+        }
+
+        function renderQuestionSkeleton() {
+            document.getElementById('test-title').innerHTML = `<div class="h-8 w-48 rounded-xl skeleton"></div>`;
+            document.getElementById('question-text').innerHTML = `
+                <div class="space-y-3">
+                    <div class="h-6 w-3/4 rounded-xl skeleton"></div>
+                    <div class="h-6 w-full rounded-xl skeleton"></div>
+                    <div class="h-6 w-5/6 rounded-xl skeleton"></div>
+                </div>
+            `;
+
+            document.getElementById('answers-container').innerHTML = Array.from({ length: 4 }).map(() => `
+                <div class="answer-card bg-white p-5 md:p-6 rounded-[1.6rem] md:rounded-[2rem] flex items-center justify-between w-full border-2 border-transparent">
+                    <div class="flex items-center gap-4 md:gap-6 text-left w-full">
+                        <div class="w-11 h-11 md:w-12 md:h-12 rounded-2xl skeleton shrink-0"></div>
+                        <div class="h-4 w-full rounded-xl skeleton"></div>
+                    </div>
+                </div>
+            `).join('');
+
+            renderBoard('8/8/8/8/8/8/8/8 w - - 0 1');
+        }
+
+        function renderErrorState(message) {
+            document.getElementById('question-card').innerHTML = `
+                <div class="error-state">
+                    <div class="text-4xl mb-3">😵</div>
+                    <div class="text-lg font-black text-red-700 mb-2">Ой, что-то пошло не так!</div>
+                    <div class="text-red-600 font-bold mb-5">${message}</div>
+                    <button
+                        type="button"
+                        onclick="initTest()"
+                        class="px-6 py-3 min-h-[48px] bg-red-500 text-white rounded-2xl font-black uppercase text-xs tracking-widest shadow-[0_8px_0_#dc2626] active:translate-y-[4px]"
+                        aria-label="Попробовать снова"
+                    >
+                        Попробовать снова
+                    </button>
+                </div>
+            `;
+            document.getElementById('answers-container').innerHTML = '';
+            document.getElementById('next-question-btn').disabled = true;
+            document.getElementById('next-question-btn').classList.add('opacity-50', 'cursor-not-allowed');
+        }
+
+        function setNextButtonLoading(isLoading) {
+            const btn = document.getElementById('next-question-btn');
+
+            if (isLoading) {
+                btn.disabled = true;
+                btn.innerHTML = `<span class="inline-flex items-center gap-3"><span class="spinner"></span>Сохраняю...</span>`;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                btn.textContent = (currentIdx === questions.length - 1) ? "Завершить 🏆" : "Далее ➔";
+            }
+        }
+
         function renderBoard(fen) {
             const board = document.getElementById('chess-board');
-            board.innerHTML = ''; 
+            board.innerHTML = '';
+
             const piecesMap = {
                 'p': '♟', 'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚',
                 'P': '♙', 'R': '♖', 'N': '♘', 'B': '♗', 'Q': '♕', 'K': '♔'
             };
-            const position = fen.split(' ')[0];
+
+            const safeFen = (fen && typeof fen === 'string') ? fen : '8/8/8/8/8/8/8/8 w - - 0 1';
+            const position = safeFen.split(' ')[0];
             const rows = position.split('/');
-    
+
             rows.forEach((row, rIdx) => {
                 let cIdx = 0;
                 for (const char of row) {
@@ -145,7 +501,7 @@
                         board.appendChild(createSquare(rIdx, cIdx, piecesMap[char]));
                         cIdx++;
                     } else {
-                        const emptyCount = parseInt(char);
+                        const emptyCount = parseInt(char, 10);
                         for (let i = 0; i < emptyCount; i++) {
                             board.appendChild(createSquare(rIdx, cIdx, ''));
                             cIdx++;
@@ -154,22 +510,27 @@
                 }
             });
         }
-    
+
         function createSquare(r, c, p) {
             const div = document.createElement('div');
-            div.className = `sq ${ (r + c) % 2 === 0 ? 'sq-w' : 'sq-b' }`;
+            div.className = `sq ${(r + c) % 2 === 0 ? 'sq-w' : 'sq-b'}`;
             div.innerHTML = p || '';
             return div;
         }
-    
+
         async function initTest() {
             const urlParams = new URLSearchParams(window.location.search);
             const testId = urlParams.get('id');
+            currentTestId = testId;
 
             if (!testId || testId === "null") {
                 window.location.href = 'TestsList.html';
                 return;
             }
+
+            renderQuestionSkeleton();
+            hidePageMessage();
+            announce('Запускается тест');
 
             try {
                 console.log("1. Сообщаем серверу о начале теста...");
@@ -177,89 +538,177 @@
 
                 console.log("2. Загружаем вопросы...");
                 const data = await window.roChessApi.fetchWithAuth(`tests/${testId}`);
-                
-                if (data && data.questions) {
+
+                if (data && data.questions && data.questions.length) {
                     questions = data.questions;
-                    document.getElementById('test-title').textContent = data.title;
+                    userAnswers = [];
+                    currentIdx = 0;
+
+                    document.getElementById('test-title').textContent = data.title || 'Тест';
                     showQuestion(0);
+                    announce('Тест загружен');
+                } else {
+                    renderErrorState('В этом тесте пока нет вопросов.');
+                    showPageMessage('Тест пустой. Попробуй выбрать другой.', 'error');
                 }
             } catch (error) {
                 console.error("Ошибка инициализации:", error);
-                document.getElementById('question-text').textContent = "Не удалось начать тест ❌";
+                renderErrorState(error.message || 'Не удалось начать тест.');
+                showPageMessage('Ой, что-то пошло не так! Не удалось начать тест.', 'error');
+                showToast('Ошибка запуска теста', 'error');
             }
         }
-    
+
         function showQuestion(idx) {
             if (idx >= questions.length) {
-                submitAllResults(); 
+                submitAllResults();
                 return;
             }
-    
+
             currentIdx = idx;
             selectedOption = null;
             const q = questions[idx];
-    
+
             const progress = ((idx + 1) / questions.length) * 100;
             document.getElementById('progress-bar').style.width = `${progress}%`;
             document.getElementById('progress-text').textContent = `Вопрос ${idx + 1}/${questions.length}`;
-            document.getElementById('question-text').textContent = q.question_text;
-    
-            renderBoard(q.fen);
-            renderAnswers(q.options);
-            
+            document.getElementById('question-text').textContent = q.question_text || 'Вопрос без текста';
+
+            renderBoard(q.fen || '8/8/8/8/8/8/8/8 w - - 0 1');
+            renderAnswers(Array.isArray(q.options) ? q.options : []);
+
             const nextBtn = document.getElementById('next-question-btn');
             nextBtn.disabled = true;
             nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
             nextBtn.textContent = (idx === questions.length - 1) ? "Завершить 🏆" : "Далее ➔";
         }
-    
+
         function renderAnswers(options) {
             const container = document.getElementById('answers-container');
             container.innerHTML = '';
-            options.forEach((opt, i) => {
-                const btn = document.createElement('button');
-                btn.className = "answer-card bg-white p-6 rounded-[2rem] flex items-center justify-between group w-full mb-3 border-2 border-transparent";
-                btn.innerHTML = `
-                    <div class="flex items-center gap-6">
-                        <span class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center font-black text-slate-400 group-hover:bg-blue-500 group-hover:text-white transition-all shadow-inner text-xl">
-                            ${String.fromCharCode(65 + i)}
-                        </span>
-                        <span class="font-black text-slate-600 uppercase text-sm tracking-widest">${opt}</span>
+
+            if (!options.length) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="text-4xl mb-3">📭</div>
+                        <div class="text-slate-700 text-lg font-black mb-2">Нет вариантов ответа</div>
+                        <div class="text-slate-500 font-bold">У этого вопроса пока не настроены ответы.</div>
                     </div>
                 `;
+                return;
+            }
+
+            options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = "answer-card bg-white p-5 md:p-6 rounded-[1.6rem] md:rounded-[2rem] flex items-center justify-between group w-full border-2 border-transparent text-left focus-ring";
+                btn.setAttribute('aria-label', `Выбрать вариант ${String.fromCharCode(65 + i)}: ${opt}`);
+                btn.innerHTML = `
+                    <div class="flex items-center gap-4 md:gap-6 text-left">
+                        <span class="w-11 h-11 md:w-12 md:h-12 bg-slate-50 rounded-2xl flex items-center justify-center font-black text-slate-400 group-hover:bg-blue-500 group-hover:text-white transition-all shadow-inner text-lg md:text-xl shrink-0">
+                            ${String.fromCharCode(65 + i)}
+                        </span>
+                        <span class="font-black text-slate-600 uppercase text-xs md:text-sm tracking-widest break-words">
+                            ${opt}
+                        </span>
+                    </div>
+                `;
+
                 btn.onclick = () => {
                     selectedOption = opt;
-                    document.querySelectorAll('.answer-card').forEach(c => c.classList.remove('ring-4', 'ring-blue-400', 'border-blue-500'));
+
+                    document.querySelectorAll('.answer-card').forEach(c => {
+                        c.classList.remove('ring-4', 'ring-blue-400', 'border-blue-500');
+                    });
+
                     btn.classList.add('ring-4', 'ring-blue-400', 'border-blue-500');
+
                     const nextBtn = document.getElementById('next-question-btn');
                     nextBtn.disabled = false;
                     nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                 };
+
                 container.appendChild(btn);
             });
         }
-    
+
         document.getElementById('next-question-btn').onclick = () => {
+            if (!questions[currentIdx] || !selectedOption) return;
+
             userAnswers.push({
                 question_id: questions[currentIdx].id,
                 selected_option: selectedOption
             });
+
             showQuestion(currentIdx + 1);
         };
-    
+
         async function submitAllResults() {
-            const testId = new URLSearchParams(window.location.search).get('id');
             try {
-                const result = await window.roChessApi.submitTest(testId, userAnswers);
-                
+                setNextButtonLoading(true);
+                showPageMessage('Сохраняю результат теста...', 'info');
+                announce('Сохраняется результат теста');
+
+                const result = await window.roChessApi.submitTest(currentTestId, userAnswers);
                 localStorage.setItem('last_result', JSON.stringify(result));
+                showToast('Результат сохранён', 'success');
                 window.location.href = 'test_result.html';
             } catch (e) {
                 console.error(e);
-                alert("Не удалось сохранить результат теста.");
+                setNextButtonLoading(false);
+                renderErrorState('Не удалось сохранить результат теста.');
+                showPageMessage('Ой, что-то пошло не так! Не удалось сохранить результат теста.', 'error');
+                showToast('Ошибка сохранения результата', 'error');
             }
         }
-    
+
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileOverlay = document.getElementById('mobile-overlay');
+        const sidebar = document.getElementById('sidebar');
+
+        function openMobileMenu() {
+            sidebar.classList.remove('-translate-x-full');
+            mobileOverlay.classList.remove('hidden');
+            mobileMenuBtn.setAttribute('aria-label', 'Закрыть меню');
+        }
+
+        function closeMobileMenu() {
+            if (window.innerWidth < 1280) {
+                sidebar.classList.add('-translate-x-full');
+            }
+            mobileOverlay.classList.add('hidden');
+            mobileMenuBtn.setAttribute('aria-label', 'Открыть меню');
+        }
+
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', () => {
+                if (sidebar.classList.contains('-translate-x-full')) {
+                    openMobileMenu();
+                } else {
+                    closeMobileMenu();
+                }
+            });
+        }
+
+        if (mobileOverlay) {
+            mobileOverlay.addEventListener('click', closeMobileMenu);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeMobileMenu();
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1280) {
+                mobileOverlay?.classList.add('hidden');
+                sidebar?.classList.remove('-translate-x-full');
+            } else {
+                sidebar?.classList.add('-translate-x-full');
+            }
+        });
+
         initTest();
     </script>
 </body>

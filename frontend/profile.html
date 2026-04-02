@@ -3,28 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox Chess - Desktop Profile</title>
+    <title>Ro-Chess — Профиль</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
     <style>
-        body { 
-            font-family: 'Nunito', sans-serif; 
-            background: radial-gradient(circle at center, #ffffff 0%, #f8fafc 100%); 
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: radial-gradient(circle at center, #ffffff 0%, #f8fafc 100%);
             min-height: 100vh;
         }
-        .roblox-font { font-family: 'Montserrat', sans-serif; }
-        
+
+        .roblox-font {
+            font-family: 'Montserrat', sans-serif;
+        }
+
         .desktop-sidebar {
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.82);
             backdrop-filter: blur(20px);
             border-right: 2px solid white;
             box-shadow: 10px 0 30px rgba(0,0,0,0.03);
         }
 
-        .luxury-card { 
-            background: rgba(255, 255, 255, 0.9); 
+        .luxury-card {
+            background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(15px);
-            border-radius: 40px; 
+            border-radius: 32px;
             border: 2px solid white;
             box-shadow: 0 20px 50px rgba(0,0,0,0.05), 0 10px 0 #e2e8f0;
         }
@@ -37,171 +40,705 @@
             background: white;
             border-radius: 24px;
             border-bottom: 6px solid #f1f5f9;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .badge-slot:hover { transform: scale(1.1) rotate(5deg); border-color: #e2e8f0; }
+
+        .badge-slot:hover {
+            transform: scale(1.04) rotate(2deg);
+            border-color: #e2e8f0;
+        }
+
+        .skeleton {
+            position: relative;
+            overflow: hidden;
+            background: #e2e8f0;
+        }
+
+        .skeleton::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            transform: translateX(-100%);
+            background: linear-gradient(
+                90deg,
+                rgba(255,255,255,0) 0%,
+                rgba(255,255,255,0.6) 50%,
+                rgba(255,255,255,0) 100%
+            );
+            animation: shimmer 1.25s infinite;
+        }
+
+        .inline-message {
+            border-radius: 20px;
+            padding: 14px 16px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            animation: fadeInUp 0.22s ease;
+        }
+
+        .inline-message.error {
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 2px solid #fecaca;
+        }
+
+        .inline-message.success {
+            background: #ecfdf5;
+            color: #047857;
+            border: 2px solid #a7f3d0;
+        }
+
+        .inline-message.info {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 2px solid #bfdbfe;
+        }
+
+        .empty-state {
+            background: rgba(248,250,252,0.92);
+            border: 2px dashed #cbd5e1;
+            border-radius: 24px;
+            padding: 24px;
+            text-align: center;
+            color: #64748b;
+            font-weight: 800;
+            animation: fadeInUp 0.22s ease;
+        }
+
+        .error-state {
+            background: linear-gradient(180deg, rgba(254,242,242,0.95), rgba(255,255,255,0.98));
+            border: 2px solid #fecaca;
+            border-radius: 24px;
+            padding: 24px;
+            text-align: center;
+            color: #991b1b;
+            font-weight: 800;
+            animation: fadeInUp 0.22s ease;
+        }
+
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: 24px;
+            transform: translateX(-50%);
+            z-index: 120;
+            background: rgba(15, 23, 42, 0.94);
+            color: white;
+            border-radius: 18px;
+            padding: 14px 18px;
+            font-weight: 800;
+            box-shadow: 0 14px 30px rgba(0,0,0,0.18);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            max-width: calc(100vw - 32px);
+            text-align: center;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-4px);
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255,255,255,0.35);
+            border-top-color: white;
+            border-radius: 999px;
+            animation: spin 0.75s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .btn-min {
+            min-height: 48px;
+            min-width: 48px;
+        }
+
+        .focus-ring:focus-visible,
+        button:focus-visible,
+        a:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible,
+        label:focus-visible,
+        [tabindex]:focus-visible {
+            outline: 3px solid #60a5fa;
+            outline-offset: 3px;
+        }
+
+        .fade-swap {
+            animation: fadeIn 0.2s ease;
+        }
+
+        .page-transition {
+            animation: fadeInUp 0.22s ease;
+        }
+
+        .avatar-overlay {
+            transition: opacity 0.2s ease;
+        }
+
+        .confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 130;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .confirm-overlay.show {
+            display: flex;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .confirm-card {
+            width: min(430px, 100%);
+            background: rgba(255,255,255,0.98);
+            border-radius: 28px;
+            border: 2px solid white;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+            padding: 24px;
+            animation: fadeInUp 0.2s ease;
+        }
+
+        .confirm-actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .confirm-btn {
+            min-height: 50px;
+            border-radius: 18px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            transition: all 0.2s ease;
+        }
+
+        .confirm-btn:active {
+            transform: translateY(2px);
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0,0,0,0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes shimmer {
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 1279px) {
+            .desktop-sidebar {
+                box-shadow: 20px 0 40px rgba(0,0,0,0.12);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .luxury-card {
+                border-radius: 24px;
+            }
+
+            .badge-slot {
+                border-radius: 20px;
+            }
+
+            .confirm-card {
+                border-radius: 24px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .luxury-card {
+                border-radius: 22px;
+            }
+
+            .badge-slot {
+                border-radius: 18px;
+            }
+
+            .confirm-card,
+            .inline-message,
+            .empty-state,
+            .error-state {
+                border-radius: 20px;
+            }
+
+            .confirm-actions {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
-<body class="flex">
+<body class="bg-slate-50 xl:flex">
+    <div id="live-region" class="sr-only" aria-live="polite"></div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-    <aside class="w-72 desktop-sidebar h-screen sticky top-0 flex flex-col p-8 z-50">
+    <!-- MOBILE HEADER -->
+    <header class="xl:hidden sticky top-0 z-[90] bg-white/90 backdrop-blur-xl border-b border-slate-100 px-4 py-3 flex items-center justify-between">
+        <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-lg px-3 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block">
+            RO-CHESS
+        </div>
+
+        <button id="mobile-menu-btn" class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl btn-min" aria-label="Открыть меню" type="button">
+            ☰
+        </button>
+    </header>
+
+    <div id="mobile-overlay" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-[80] xl:hidden"></div>
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="w-72 desktop-sidebar h-screen fixed xl:sticky top-0 left-0 flex flex-col p-8 z-[85] -translate-x-full xl:translate-x-0 transition-transform duration-300">
         <div class="mb-12 text-center">
             <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-2xl px-4 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block transform -rotate-2">
                 RO-CHESS
             </div>
         </div>
 
-        <nav class="space-y-4 flex-1">
-            <a href="Dashboard.html" class="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all">
+        <nav class="space-y-4 flex-1" aria-label="Основная навигация">
+            <a href="Dashboard.html" class="flex items-center gap-4 p-4 min-h-[52px] hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all" aria-label="Перейти на главную">
                 <span class="text-2xl">🏠</span> Дом
             </a>
-            <a href="profile.html" class="flex items-center gap-4 p-4 bg-indigo-50 rounded-2xl text-indigo-600 font-black uppercase text-xs tracking-widest border-b-4 border-indigo-100">
+            <a href="profile.html" class="flex items-center gap-4 p-4 min-h-[52px] bg-indigo-50 rounded-2xl text-indigo-600 font-black uppercase text-xs tracking-widest border-b-4 border-indigo-100" aria-label="Текущая страница: профиль">
                 <span class="text-2xl">👤</span> Профиль
             </a>
-            <a href="study.html" class="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all">
+            <a href="study.html" class="flex items-center gap-4 p-4 min-h-[52px] hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all" aria-label="Перейти к урокам">
                 <span class="text-2xl">📖</span> Уроки
             </a>
-            <a href="admin.html" class="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all">
+            <a href="admin.html" class="flex items-center gap-4 p-4 min-h-[52px] hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all" aria-label="Перейти в админ-панель">
                 <span class="text-2xl">⚙️</span> Админ
             </a>
         </nav>
     </aside>
 
-    <main class="flex-1 p-12 max-w-[1100px] mx-auto">
-        <div class="grid grid-cols-12 gap-10">
-            <div class="col-span-5">
-                <div class="luxury-card p-10 text-center sticky top-12">
+    <!-- MAIN -->
+    <main class="flex-1 p-4 md:p-6 xl:p-12 max-w-[1200px] mx-auto w-full">
+        <div id="page-message" class="hidden mb-5" aria-live="polite"></div>
+
+        <div class="grid grid-cols-12 gap-6 md:gap-8 xl:gap-10">
+            <!-- LEFT -->
+            <div class="col-span-12 xl:col-span-5">
+                <div class="luxury-card p-6 md:p-8 xl:p-10 text-center xl:sticky xl:top-12 page-transition">
                     <div class="relative mb-8 inline-block">
                         <div class="absolute -inset-4 luxury-gradient rounded-[3.5rem] blur-xl opacity-20 animate-pulse"></div>
-                        
-                        <label class="relative block w-48 h-48 bg-white rounded-[3rem] border-8 border-white shadow-2xl overflow-hidden ring-4 ring-indigo-50 cursor-pointer group">
-                            <img id="profile-avatar" src="https://api.dicebear.com/7.x/pixel-art/svg?seed=Chess" alt="Avatar" class="w-full h-full object-cover">
-                            <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <span class="text-white text-3xl">📸</span>
+
+                        <label class="relative block w-36 h-36 sm:w-40 sm:h-40 md:w-44 md:h-44 xl:w-48 xl:h-48 bg-white rounded-[2.4rem] md:rounded-[3rem] border-8 border-white shadow-2xl overflow-hidden ring-4 ring-indigo-50 cursor-pointer group mx-auto focus-ring" tabindex="0" aria-label="Изменить аватар">
+                            <img id="profile-avatar" src="https://api.dicebear.com/7.x/pixel-art/svg?seed=Chess" alt="Аватар пользователя" class="w-full h-full object-cover">
+                            <div id="avatar-overlay" class="avatar-overlay absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                <span id="avatar-overlay-content" class="text-white text-3xl">📸</span>
                             </div>
-                            <input type="file" id="avatar-input" class="hidden" accept="image/*">
+                            <input type="file" id="avatar-input" class="hidden" accept="image/*" aria-label="Загрузить новый аватар">
                         </label>
-    
-                        <div class="absolute bottom-2 right-2 bg-emerald-500 text-white text-xs font-black px-5 py-2 rounded-full border-4 border-white uppercase shadow-lg">
+
+                        <div class="absolute bottom-1 right-1 md:bottom-2 md:right-2 bg-emerald-500 text-white text-[10px] md:text-xs font-black px-4 md:px-5 py-2 rounded-full border-4 border-white uppercase shadow-lg">
                             Online
                         </div>
                     </div>
-                    
-                    <h1 id="profile-username" class="text-4xl font-black roblox-font italic uppercase tracking-tighter text-slate-800 leading-none mb-3">
+
+                    <h1 id="profile-username" class="text-2xl sm:text-3xl xl:text-4xl font-black roblox-font italic uppercase tracking-tighter text-slate-800 leading-none mb-3 break-words">
                         Загрузка...
                     </h1>
-                    <p id="profile-email" class="text-indigo-400 font-black text-sm uppercase tracking-[0.2em] mb-8">@email</p>
-    
+
+                    <p id="profile-email" class="text-indigo-400 font-black text-[11px] sm:text-sm uppercase tracking-[0.18em] sm:tracking-[0.2em] mb-8 break-all">
+                        @email
+                    </p>
+
                     <div class="space-y-4">
-                        <a href="admin.html" class="block w-full bg-slate-800 text-white font-black py-5 rounded-[1.5rem] text-center uppercase italic roblox-font tracking-widest text-sm hover:bg-black transition-all shadow-xl">
+                        <a href="admin.html" class="block w-full bg-slate-800 text-white font-black py-4 md:py-5 rounded-[1.3rem] md:rounded-[1.5rem] text-center uppercase italic roblox-font tracking-widest text-xs md:text-sm hover:bg-black transition-all shadow-xl min-h-[52px] flex items-center justify-center" aria-label="Редактировать профиль">
                             Редактировать ⚙️
                         </a>
-                        <button id="logout-btn" class="block w-full bg-white text-rose-400 font-black py-4 rounded-[1.5rem] text-center uppercase text-[10px] tracking-widest border-2 border-slate-50 hover:bg-rose-50 hover:text-rose-600 transition-all">
+
+                        <button id="logout-btn" class="block w-full bg-white text-rose-400 font-black py-4 rounded-[1.3rem] md:rounded-[1.5rem] text-center uppercase text-[10px] tracking-widest border-2 border-slate-50 hover:bg-rose-50 hover:text-rose-600 transition-all min-h-[52px]" aria-label="Выйти из аккаунта" type="button">
                             Выйти из аккаунта 🚪
                         </button>
                     </div>
                 </div>
             </div>
-    
-            <div class="col-span-7 space-y-8">
-                <div class="grid grid-cols-2 gap-6">
-                    <div class="luxury-card p-8 flex flex-col items-center">
+
+            <!-- RIGHT -->
+            <div class="col-span-12 xl:col-span-7 space-y-6 md:space-y-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+                    <div class="luxury-card p-6 md:p-8 flex flex-col items-center text-center page-transition" aria-live="polite">
                         <span class="text-slate-400 text-[11px] font-black uppercase mb-2 tracking-widest">Твой возраст</span>
-                        <span id="profile-age" class="text-3xl font-black text-slate-700 roblox-font italic">-- ЛЕТ</span>
+                        <span id="profile-age" class="text-2xl md:text-3xl font-black text-slate-700 roblox-font italic">-- ЛЕТ</span>
                     </div>
-                    <div class="luxury-card p-8 flex flex-col items-center border-l-8 border-l-indigo-500">
+
+                    <div class="luxury-card p-6 md:p-8 flex flex-col items-center text-center border-l-0 sm:border-l-8 sm:border-l-indigo-500 page-transition" aria-live="polite">
                         <span class="text-indigo-400 text-[11px] font-black uppercase mb-2 tracking-widest">Текущий ранг</span>
-                        <span id="profile-rank" class="text-3xl font-black text-indigo-600 roblox-font italic">Загрузка</span>
+                        <span id="profile-rank" class="text-2xl md:text-3xl font-black text-indigo-600 roblox-font italic">Загрузка</span>
                     </div>
                 </div>
-    
-                <div class="luxury-card p-10">
-                    <div class="flex justify-between items-end mb-5 px-2">
-                        <h3 class="font-black text-slate-800 uppercase text-xs tracking-widest">Уровень мастерства (XP)</h3>
-                        <span id="xp-text" class="text-indigo-600 font-black text-sm italic bg-indigo-50 px-4 py-2 rounded-2xl">0 / 0</span>
+
+                <div class="luxury-card p-6 md:p-8 xl:p-10 page-transition">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3 mb-5 px-1 md:px-2">
+                        <h3 class="font-black text-slate-800 uppercase text-[10px] md:text-xs tracking-widest">
+                            Уровень мастерства (XP)
+                        </h3>
+                        <span id="xp-text" class="text-indigo-600 font-black text-xs md:text-sm italic bg-indigo-50 px-4 py-2 rounded-2xl w-fit">
+                            0 / 0
+                        </span>
                     </div>
-                    <div class="w-full bg-slate-100 h-12 rounded-[1.5rem] p-2 shadow-inner relative overflow-hidden border-2 border-white">
+
+                    <div class="w-full bg-slate-100 h-10 md:h-12 rounded-[1.2rem] md:rounded-[1.5rem] p-2 shadow-inner relative overflow-hidden border-2 border-white">
                         <div id="xp-bar" class="luxury-gradient h-full rounded-xl shadow-[0_0_20px_rgba(99,102,241,0.3)] relative z-10 transition-all duration-1000" style="width: 0%">
                             <div class="absolute top-0 left-0 w-full h-1/2 bg-white/20 rounded-full"></div>
                         </div>
                     </div>
-                    <p id="next-rank-text" class="mt-4 text-[11px] text-slate-400 text-center font-bold uppercase italic tracking-widest">Следующее звание: PLATINUM I 🏆</p>
+
+                    <p id="next-rank-text" class="mt-4 text-[10px] md:text-[11px] text-slate-400 text-center font-bold uppercase italic tracking-widest">
+                        Следующее звание: PLATINUM I 🏆
+                    </p>
                 </div>
-    
-                <div class="luxury-card p-10">
-                    <h3 class="text-slate-400 font-black text-xs uppercase mb-8 tracking-[0.4em] text-center">Заработанные награды</h3>
-                    <div class="grid grid-cols-3 gap-6">
-                        <div class="badge-slot p-6 flex flex-col items-center gap-3">
-                            <span class="text-5xl">🏆</span>
-                            <span class="text-[9px] font-black text-slate-400 uppercase">Чемпион</span>
+
+                <div class="luxury-card p-6 md:p-8 xl:p-10 page-transition">
+                    <h3 class="text-slate-400 font-black text-[10px] md:text-xs uppercase mb-6 md:mb-8 tracking-[0.25em] md:tracking-[0.4em] text-center">
+                        Заработанные награды
+                    </h3>
+
+                    <div id="badges-grid" class="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6" aria-live="polite">
+                        <div class="badge-slot p-4 md:p-6 flex flex-col items-center gap-3">
+                            <span class="text-4xl md:text-5xl">🏆</span>
+                            <span class="text-[9px] font-black text-slate-400 uppercase text-center">Чемпион</span>
                         </div>
-                        <div class="badge-slot p-6 flex flex-col items-center gap-3 opacity-30 grayscale">
-                            <span class="text-5xl">🧠</span>
-                            <span class="text-[9px] font-black text-slate-400 uppercase">Тактик</span>
+
+                        <div class="badge-slot p-4 md:p-6 flex flex-col items-center gap-3 opacity-30 grayscale">
+                            <span class="text-4xl md:text-5xl">🧠</span>
+                            <span class="text-[9px] font-black text-slate-400 uppercase text-center">Тактик</span>
                         </div>
-                        <div class="badge-slot p-6 flex flex-col items-center gap-3 opacity-30 grayscale">
-                            <span class="text-5xl">🔥</span>
-                            <span class="text-[9px] font-black text-slate-400 uppercase">В огне</span>
+
+                        <div class="badge-slot p-4 md:p-6 flex flex-col items-center gap-3 opacity-30 grayscale col-span-2 md:col-span-1">
+                            <span class="text-4xl md:text-5xl">🔥</span>
+                            <span class="text-[9px] font-black text-slate-400 uppercase text-center">В огне</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
-    
+
+    <!-- LOGOUT CONFIRM -->
+    <div id="logout-confirm" class="confirm-overlay" aria-hidden="true">
+        <div class="confirm-card" role="dialog" aria-modal="true" aria-labelledby="logout-title">
+            <div class="text-center">
+                <div class="text-4xl mb-3">🚪</div>
+                <h2 id="logout-title" class="text-2xl font-black text-slate-800 mb-2">Выйти из аккаунта?</h2>
+                <p class="text-slate-500 font-bold">Ты всегда сможешь войти снова через welcome-страницу.</p>
+            </div>
+
+            <div class="confirm-actions">
+                <button id="cancel-logout-btn" class="confirm-btn bg-slate-100 text-slate-600" type="button" aria-label="Отмена выхода">
+                    Отмена
+                </button>
+                <button id="confirm-logout-btn" class="confirm-btn bg-rose-500 text-white shadow-[0_8px_0_#dc2626]" type="button" aria-label="Подтвердить выход">
+                    Выйти
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="state.js"></script>
     <script src="api.js"></script>
     <script>
         if (!window.roChessApi.isAuthenticated()) {
             window.location.href = 'h1.html';
         }
-    
+
+        const pageMessage = document.getElementById('page-message');
+        const liveRegion = document.getElementById('live-region');
+        const toast = document.getElementById('toast');
+        const logoutOverlay = document.getElementById('logout-confirm');
+        const avatarOverlayContent = document.getElementById('avatar-overlay-content');
+        const avatarInput = document.getElementById('avatar-input');
+        let toastTimer = null;
+
+        function announce(message) {
+            if (liveRegion) liveRegion.textContent = message;
+        }
+
+        function showToast(message, type = 'default') {
+            clearTimeout(toastTimer);
+            toast.textContent = message;
+            toast.className = 'toast show';
+
+            if (type === 'error') {
+                toast.style.background = 'rgba(127, 29, 29, 0.96)';
+            } else if (type === 'success') {
+                toast.style.background = 'rgba(6, 78, 59, 0.96)';
+            } else {
+                toast.style.background = 'rgba(15, 23, 42, 0.94)';
+            }
+
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2400);
+        }
+
+        function showPageMessage(message, type = 'info') {
+            pageMessage.className = `mb-5 inline-message ${type}`;
+            pageMessage.textContent = message;
+            pageMessage.classList.remove('hidden');
+            announce(message);
+        }
+
+        function hidePageMessage() {
+            pageMessage.classList.add('hidden');
+            pageMessage.textContent = '';
+        }
+
+        function renderProfileSkeleton() {
+            document.getElementById('profile-username').innerHTML = `
+                <div class="h-8 w-40 rounded-xl skeleton mx-auto"></div>
+            `;
+            document.getElementById('profile-email').innerHTML = `
+                <div class="h-5 w-28 rounded-xl skeleton mx-auto"></div>
+            `;
+            document.getElementById('profile-age').innerHTML = `
+                <div class="h-8 w-28 rounded-xl skeleton"></div>
+            `;
+            document.getElementById('profile-rank').innerHTML = `
+                <div class="h-8 w-32 rounded-xl skeleton"></div>
+            `;
+            document.getElementById('xp-text').innerHTML = `
+                <div class="h-5 w-20 rounded-xl skeleton"></div>
+            `;
+            document.getElementById('xp-bar').style.width = '24%';
+            document.getElementById('next-rank-text').innerHTML = `
+                <div class="h-4 w-48 rounded-xl skeleton mx-auto"></div>
+            `;
+            document.getElementById('badges-grid').innerHTML = Array.from({ length: 3 }).map((_, i) => `
+                <div class="badge-slot p-4 md:p-6 flex flex-col items-center gap-3 ${i === 2 ? 'col-span-2 md:col-span-1' : ''}">
+                    <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl skeleton"></div>
+                    <div class="h-3 w-16 rounded-xl skeleton"></div>
+                </div>
+            `).join('');
+        }
+
+        function rankFromLevel(level = 1) {
+            if (level >= 30) return 'DIAMOND I';
+            if (level >= 20) return 'PLATINUM I';
+            if (level >= 10) return 'GOLD V';
+            return 'SILVER I';
+        }
+
+        function nextRankLabel(level = 1) {
+            if (level < 10) return 'Следующее звание: GOLD V 🏆';
+            if (level < 20) return 'Следующее звание: PLATINUM I 🏆';
+            if (level < 30) return 'Следующее звание: DIAMOND I 💎';
+            return 'Максимальное звание достигнуто 👑';
+        }
+
+        function renderBadges(user) {
+            const badgesGrid = document.getElementById('badges-grid');
+            const xp = user?.xp || 0;
+            const level = user?.level || 1;
+
+            const badges = [
+                { icon: '🏆', title: 'Чемпион', unlocked: level >= 5 },
+                { icon: '🧠', title: 'Тактик', unlocked: xp >= 1000 },
+                { icon: '🔥', title: 'В огне', unlocked: level >= 10 }
+            ];
+
+            badgesGrid.innerHTML = badges.map((badge, index) => `
+                <div class="badge-slot p-4 md:p-6 flex flex-col items-center gap-3 ${badge.unlocked ? '' : 'opacity-30 grayscale'} ${index === 2 ? 'col-span-2 md:col-span-1' : ''}">
+                    <span class="text-4xl md:text-5xl">${badge.icon}</span>
+                    <span class="text-[9px] font-black text-slate-400 uppercase text-center">${badge.title}</span>
+                </div>
+            `).join('');
+        }
+
         async function loadUserProfile() {
+            renderProfileSkeleton();
+            hidePageMessage();
+            announce('Загружается профиль');
+
             try {
                 const response = await window.roChessApi.getUserProfile();
-                const user = response.user;
-    
-                document.getElementById('profile-username').textContent = user.username;
-                document.getElementById('profile-email').textContent = `@${user.email.split('@')[0]}`;
+                const user = response.user || response || {};
+
+                document.getElementById('profile-username').textContent = user.username || 'Игрок';
+                document.getElementById('profile-email').textContent = user.email ? `@${user.email.split('@')[0]}` : '@no-email';
                 document.getElementById('profile-age').textContent = `${user.age || '--'} ЛЕТ`;
-                document.getElementById('profile-rank').textContent = user.level >= 10 ? 'GOLD V' : 'SILVER I';
-                
+                document.getElementById('profile-rank').textContent = rankFromLevel(user.level || 1);
+
                 if (user.avatar_url) {
                     document.getElementById('profile-avatar').src = user.avatar_url;
                 }
-    
-                const currentXP = user.xp || 500;
-                const targetXP = 3000;
-                const progress = (currentXP / targetXP) * 100;
+
+                const currentXP = user.xp || 0;
+                const targetXP = user.next_level_xp || 3000;
+                const progress = targetXP > 0 ? Math.min((currentXP / targetXP) * 100, 100) : 0;
+
                 document.getElementById('xp-text').textContent = `${currentXP.toLocaleString()} / ${targetXP.toLocaleString()}`;
                 document.getElementById('xp-bar').style.width = `${progress}%`;
-    
+                document.getElementById('next-rank-text').textContent = nextRankLabel(user.level || 1);
+
+                renderBadges(user);
+                announce('Профиль загружен');
             } catch (error) {
                 console.error("Ошибка при загрузке профиля:", error.message);
+
+                document.getElementById('profile-username').textContent = 'Профиль недоступен';
+                document.getElementById('profile-email').textContent = '@error';
+                document.getElementById('profile-age').textContent = '-- ЛЕТ';
+                document.getElementById('profile-rank').textContent = '—';
+                document.getElementById('xp-text').textContent = '0 / 0';
+                document.getElementById('xp-bar').style.width = '0%';
+                document.getElementById('next-rank-text').textContent = 'Данные временно недоступны';
+                document.getElementById('badges-grid').innerHTML = `
+                    <div class="col-span-full error-state">
+                        <div class="text-4xl mb-3">😵</div>
+                        <div class="text-lg font-black text-red-700 mb-2">Ой, что-то пошло не так!</div>
+                        <div class="text-red-600 font-bold">Не удалось загрузить профиль.</div>
+                    </div>
+                `;
+
+                showPageMessage('Ой, что-то пошло не так! Не удалось загрузить профиль.', 'error');
+                showToast('Ошибка загрузки профиля', 'error');
+                announce('Ошибка загрузки профиля');
             }
         }
-    
-        document.getElementById('avatar-input').addEventListener('change', async (e) => {
+
+        avatarInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-    
+
+            avatarOverlayContent.innerHTML = `<span class="spinner"></span>`;
+            showPageMessage('Загружаю новый аватар...', 'info');
+
             try {
                 const response = await window.roChessApi.uploadAvatar(file);
                 document.getElementById('profile-avatar').src = response.avatar_url;
-                alert('Аватар успешно обновлен! 📸');
+                showPageMessage('Аватар успешно обновлён! 📸', 'success');
+                showToast('Аватар обновлён', 'success');
             } catch (error) {
-                alert('Ошибка загрузки: ' + error.message);
+                console.error(error);
+                showPageMessage(`Ой, что-то пошло не так! ${error.message || 'Ошибка загрузки аватара.'}`, 'error');
+                showToast('Не удалось загрузить аватар', 'error');
+            } finally {
+                avatarOverlayContent.textContent = '📸';
+                avatarInput.value = '';
             }
         });
-    
-        document.getElementById('logout-btn').addEventListener('click', () => {
-            if(confirm("Выйти из аккаунта?")) {
-                window.roChessApi.logout();
+
+        document.querySelector('label[for], #profile-avatar')?.addEventListener?.('keydown', () => {});
+
+        const avatarLabel = avatarInput.closest('label');
+        if (avatarLabel) {
+            avatarLabel.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    avatarInput.click();
+                }
+            });
+        }
+
+        function openLogoutConfirm() {
+            logoutOverlay.classList.add('show');
+            logoutOverlay.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeLogoutConfirm() {
+            logoutOverlay.classList.remove('show');
+            logoutOverlay.setAttribute('aria-hidden', 'true');
+        }
+
+        document.getElementById('logout-btn').addEventListener('click', openLogoutConfirm);
+        document.getElementById('cancel-logout-btn').addEventListener('click', closeLogoutConfirm);
+
+        document.getElementById('confirm-logout-btn').addEventListener('click', () => {
+            window.roChessApi.logout();
+        });
+
+        logoutOverlay.addEventListener('click', (e) => {
+            if (e.target === logoutOverlay) {
+                closeLogoutConfirm();
             }
         });
-    
+
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileOverlay = document.getElementById('mobile-overlay');
+        const sidebar = document.getElementById('sidebar');
+
+        function openMobileMenu() {
+            sidebar.classList.remove('-translate-x-full');
+            mobileOverlay.classList.remove('hidden');
+            mobileMenuBtn.setAttribute('aria-label', 'Закрыть меню');
+        }
+
+        function closeMobileMenu() {
+            if (window.innerWidth < 1280) {
+                sidebar.classList.add('-translate-x-full');
+            }
+            mobileOverlay.classList.add('hidden');
+            mobileMenuBtn.setAttribute('aria-label', 'Открыть меню');
+        }
+
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', () => {
+                if (sidebar.classList.contains('-translate-x-full')) {
+                    openMobileMenu();
+                } else {
+                    closeMobileMenu();
+                }
+            });
+        }
+
+        if (mobileOverlay) {
+            mobileOverlay.addEventListener('click', closeMobileMenu);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeMobileMenu();
+                closeLogoutConfirm();
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1280) {
+                mobileOverlay?.classList.add('hidden');
+                sidebar?.classList.remove('-translate-x-full');
+            } else {
+                sidebar?.classList.add('-translate-x-full');
+            }
+        });
+
         loadUserProfile();
     </script>
-
 </body>
 </html>

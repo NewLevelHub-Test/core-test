@@ -3,37 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox Chess - Desktop Dashboard</title>
+    <title>RO-CHESS — Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
     <style>
-        body { 
-            font-family: 'Nunito', sans-serif; 
-            background: radial-gradient(circle at center, #ffffff 0%, #f8fafc 100%); 
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: radial-gradient(circle at center, #ffffff 0%, #f8fafc 100%);
             min-height: 100vh;
         }
-        .roblox-font { font-family: 'Montserrat', sans-serif; }
-        
+
+        .roblox-font {
+            font-family: 'Montserrat', sans-serif;
+        }
+
         .desktop-sidebar {
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.82);
             backdrop-filter: blur(20px);
             border-right: 2px solid white;
             box-shadow: 10px 0 30px rgba(0,0,0,0.03);
         }
 
-        .luxury-card { 
-            background: rgba(255, 255, 255, 0.9); 
+        .luxury-card {
+            background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(12px);
-            border-radius: 32px; 
+            border-radius: 32px;
             border: 2px solid white;
             box-shadow: 0 15px 35px rgba(0,0,0,0.05), 0 8px 0 #e2e8f0;
             transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .luxury-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.08), 0 8px 0 #e2e8f0; }
+
+        .luxury-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08), 0 8px 0 #e2e8f0;
+        }
 
         .quest-gradient {
             background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
             box-shadow: 0 20px 40px rgba(99, 102, 241, 0.25), 0 10px 0 #1d4ed8;
+        }
+
+        .btn-min {
+            min-height: 48px;
+            min-width: 48px;
+        }
+
+        .focus-ring:focus-visible,
+        button:focus-visible,
+        a:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible {
+            outline: 3px solid #60a5fa;
+            outline-offset: 3px;
+        }
+
+        .skeleton {
+            position: relative;
+            overflow: hidden;
+            background: #e2e8f0;
+        }
+
+        .skeleton::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            transform: translateX(-100%);
+            background: linear-gradient(
+                90deg,
+                rgba(255,255,255,0) 0%,
+                rgba(255,255,255,0.6) 50%,
+                rgba(255,255,255,0) 100%
+            );
+            animation: shimmer 1.25s infinite;
+        }
+
+        .fade-swap {
+            animation: fadeIn 0.22s ease;
+        }
+
+        .page-transition {
+            animation: fadeInUp 0.25s ease;
+        }
+
+        .error-state {
+            background: linear-gradient(180deg, rgba(254,242,242,0.95), rgba(255,255,255,0.98));
+            border: 2px solid #fecaca;
+            border-radius: 28px;
+            padding: 24px;
+            text-align: center;
+            color: #991b1b;
+            font-weight: 800;
+            animation: fadeInUp 0.25s ease;
+        }
+
+        .empty-state {
+            background: rgba(248,250,252,0.9);
+            border: 2px dashed #cbd5e1;
+            border-radius: 28px;
+            padding: 24px;
+            text-align: center;
+            color: #64748b;
+            font-weight: 800;
+            animation: fadeInUp 0.25s ease;
+        }
+
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: 24px;
+            transform: translateX(-50%);
+            z-index: 120;
+            background: rgba(15, 23, 42, 0.94);
+            color: white;
+            border-radius: 18px;
+            padding: 14px 18px;
+            font-weight: 800;
+            box-shadow: 0 14px 30px rgba(0,0,0,0.18);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            max-width: calc(100vw - 32px);
+            text-align: center;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-4px);
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0,0,0,0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        .ghost-btn {
+            min-height: 48px;
+            border-radius: 18px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            transition: all 0.2s ease;
+        }
+
+        .ghost-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .ghost-btn:active {
+            transform: translateY(2px);
         }
 
         @keyframes float {
@@ -41,447 +166,791 @@
             50% { transform: translateY(-15px) rotate(2deg); }
             100% { transform: translateY(0px) rotate(-3deg); }
         }
-        .floating { animation: float 4s ease-in-out infinite; }
+
+        .floating {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 1279px) {
+            .desktop-sidebar {
+                box-shadow: 20px 0 40px rgba(0,0,0,0.12);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .luxury-card {
+                border-radius: 24px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .luxury-card {
+                border-radius: 22px;
+            }
+
+            .error-state,
+            .empty-state {
+                border-radius: 22px;
+                padding: 20px;
+            }
+        }
     </style>
 </head>
-<body class="flex">
+<body class="bg-slate-50 xl:flex">
+    <div id="live-region" class="sr-only" aria-live="polite"></div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-    <aside class="w-72 desktop-sidebar h-screen sticky top-0 flex flex-col p-8 z-50">
+    <!-- MOBILE HEADER -->
+    <header class="xl:hidden sticky top-0 z-[90] bg-white/90 backdrop-blur-xl border-b border-slate-100 px-4 py-3 flex items-center justify-between">
+        <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-lg px-3 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block">
+            RO-CHESS
+        </div>
+
+        <button
+            id="mobile-menu-btn"
+            class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl btn-min"
+            aria-label="Открыть меню"
+            type="button"
+        >
+            ☰
+        </button>
+    </header>
+
+    <div id="mobile-overlay" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-[80] xl:hidden"></div>
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="w-72 desktop-sidebar h-screen fixed xl:sticky top-0 left-0 flex flex-col p-8 z-[85] -translate-x-full xl:translate-x-0 transition-transform duration-300">
         <div class="mb-12 text-center">
             <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-2xl px-4 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block transform -rotate-2">
                 RO-CHESS
             </div>
         </div>
 
-        <nav class="space-y-4 flex-1">
-            <a href="Dashboard.html" class="flex items-center gap-4 p-4 bg-indigo-50 rounded-2xl text-indigo-600 font-black uppercase text-xs tracking-widest border-b-4 border-indigo-100">
+        <nav class="space-y-4 flex-1" aria-label="Основная навигация">
+            <a href="Dashboard.html" class="flex items-center gap-4 p-4 min-h-[52px] bg-indigo-50 rounded-2xl text-indigo-600 font-black uppercase text-xs tracking-widest border-b-4 border-indigo-100" aria-label="Перейти на главную">
                 <span class="text-2xl">🏠</span> Дом
             </a>
-            <a href="profile.html" class="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all">
+            <a href="profile.html" class="flex items-center gap-4 p-4 min-h-[52px] hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all" aria-label="Перейти в профиль">
                 <span class="text-2xl">👤</span> Профиль
             </a>
-            <a href="study.html" class="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all">
+            <a href="study.html" class="flex items-center gap-4 p-4 min-h-[52px] hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all" aria-label="Перейти к урокам">
                 <span class="text-2xl">📖</span> Уроки
             </a>
-            <a href="admin.html" class="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all">
+            <a href="position.html" class="flex items-center gap-4 p-4 min-h-[52px] hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all" aria-label="Перейти к сканеру">
+                <span class="text-2xl">📸</span> Сканер
+            </a>
+            <a href="admin.html" class="flex items-center gap-4 p-4 min-h-[52px] hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all" aria-label="Перейти в админ-панель">
                 <span class="text-2xl">⚙️</span> Админ
             </a>
         </nav>
 
-        <a href="profile.html" class="mt-auto flex items-center gap-3 p-4 bg-white rounded-3xl border-2 border-slate-50 shadow-sm hover:scale-105 transition-transform">
+        <a href="profile.html" class="mt-auto flex items-center gap-3 p-4 min-h-[56px] bg-white rounded-3xl border-2 border-slate-50 shadow-sm hover:scale-105 transition-transform" aria-label="Открыть профиль пользователя">
             <div class="w-10 h-10 bg-sky-400 rounded-xl flex items-center justify-center text-xl shadow-md">😎</div>
-            <div class="leading-none">
-                <p id="sidebar-user-name" class="font-black text-[10px] text-slate-800 uppercase tracking-tighter">Загрузка...</p>
-                <p class="text-[9px] text-emerald-500 font-bold uppercase mt-1">LVL 5 ⭐</p>
+            <div class="leading-none min-w-0">
+                <p id="sidebar-user-name" class="font-black text-[10px] text-slate-800 uppercase tracking-tighter truncate">Загрузка...</p>
+                <p id="sidebar-user-level" class="text-[9px] text-emerald-500 font-bold uppercase mt-1">LVL — ⭐</p>
             </div>
         </a>
     </aside>
 
-    <main class="flex-1 p-12 max-w-[1200px] mx-auto space-y-10">
+    <!-- MAIN -->
+    <main class="flex-1 p-4 md:p-6 xl:p-12 max-w-[1200px] mx-auto w-full space-y-6 md:space-y-8 xl:space-y-10">
 
-        <div class="grid grid-cols-3 gap-8 items-stretch">
-            <section class="col-span-2 quest-gradient rounded-[3rem] p-10 relative overflow-hidden text-white border-2 border-white/20 flex flex-col justify-center">
-                <div class="relative z-10 max-w-md">
-                    <span class="bg-white/20 backdrop-blur-md text-[10px] font-black px-4 py-2 rounded-full uppercase mb-4 inline-block border border-white/30 tracking-widest">Цель Дня</span>
-                    <h3 id="daily-goal-text" class="text-5xl font-black roblox-font italic uppercase mb-6 leading-[0.9] tracking-tighter">
+        <!-- HERO -->
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8 items-stretch page-transition">
+            <section id="hero-card" class="xl:col-span-2 quest-gradient rounded-[2rem] md:rounded-[2.5rem] xl:rounded-[3rem] p-6 md:p-8 xl:p-10 relative overflow-hidden text-white border-2 border-white/20 flex flex-col justify-center min-h-[280px] md:min-h-[320px]" aria-live="polite">
+                <div class="relative z-10 max-w-xl">
+                    <span class="bg-white/20 backdrop-blur-md text-[10px] font-black px-4 py-2 rounded-full uppercase mb-4 inline-block border border-white/30 tracking-widest">
+                        Цель Дня
+                    </span>
+
+                    <h3 id="daily-goal-text" class="text-3xl md:text-4xl xl:text-5xl font-black roblox-font italic uppercase mb-6 leading-[0.95] tracking-tighter">
                         Загрузка цели...
                     </h3>
-                    <a href="study.html" class="inline-block bg-white text-blue-600 font-black px-10 py-4 rounded-[1.5rem] shadow-[0_8px_0_#e2e8f0] uppercase italic text-sm active:translate-y-2 active:shadow-none transition-all">Начать Урок 🚀</a>
+
+                    <a href="study.html" id="hero-action-btn" class="inline-flex items-center justify-center bg-white text-blue-600 font-black px-8 md:px-10 py-4 rounded-[1.3rem] md:rounded-[1.5rem] shadow-[0_8px_0_#e2e8f0] uppercase italic text-xs md:text-sm active:translate-y-2 active:shadow-none transition-all min-h-[52px]" aria-label="Начать урок">
+                        Начать Урок 🚀
+                    </a>
                 </div>
-                <div class="absolute -right-10 -bottom-10 text-[18rem] opacity-20 floating">🐴</div>
+
+                <div class="absolute -right-6 md:-right-10 -bottom-10 md:-bottom-12 text-[10rem] md:text-[14rem] xl:text-[18rem] opacity-20 floating select-none">
+                    🐴
+                </div>
             </section>
 
-            <section class="luxury-card p-8 flex flex-col justify-center text-center">
+            <section id="season-pass-card" class="luxury-card p-6 md:p-8 flex flex-col justify-center text-center" aria-live="polite">
                 <span class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">Сезонный пропуск</span>
-                <div class="relative w-32 h-32 mx-auto mb-4">
-                    <svg class="w-full h-full transform -rotate-90">
+
+                <div class="relative w-28 h-28 md:w-32 md:h-32 mx-auto mb-4">
+                    <svg class="w-full h-full transform -rotate-90" aria-hidden="true">
                         <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="12" fill="transparent" class="text-slate-100" />
                         <circle id="roadmap-svg-circle" cx="64" cy="64" r="58" stroke="currentColor" stroke-width="12" fill="transparent" class="text-emerald-400 transition-all duration-1000" stroke-dasharray="364.4" stroke-dashoffset="364.4" stroke-linecap="round" />
                     </svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
-                        <span id="roadmap-percent" class="text-3xl font-black text-slate-800">0%</span>
+                        <span id="roadmap-percent" class="text-2xl md:text-3xl font-black text-slate-800">0%</span>
                         <span class="text-[8px] font-black text-slate-400 uppercase">Опыт</span>
                     </div>
                 </div>
+
                 <p id="xp-left-text" class="text-[10px] font-bold text-slate-400 uppercase italic">До нового ранга: ...</p>
             </section>
         </div>
 
-        <div class="grid grid-cols-4 gap-6">
-            <a href="test.html" class="luxury-card p-8 flex flex-col items-center gap-4">
-                <div class="w-20 h-20 bg-orange-100 rounded-[2rem] flex items-center justify-center text-5xl shadow-inner">📝</div>
-                <span class="text-slate-700 font-black text-xs uppercase tracking-widest">Испытания</span>
+        <!-- QUICK ACTIONS -->
+        <div class="grid grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6 page-transition">
+            <a href="test.html" class="luxury-card p-5 md:p-6 xl:p-8 flex flex-col items-center gap-4 min-h-[170px] focus-ring" aria-label="Перейти к испытаниям">
+                <div class="w-16 h-16 md:w-20 md:h-20 bg-orange-100 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center text-4xl md:text-5xl shadow-inner">📝</div>
+                <span class="text-slate-700 font-black text-[10px] md:text-xs uppercase tracking-widest text-center">Испытания</span>
             </a>
-            <a href="study.html" class="luxury-card p-8 flex flex-col items-center gap-4">
-                <div class="w-20 h-20 bg-blue-100 rounded-[2rem] flex items-center justify-center text-5xl shadow-inner">📖</div>
-                <span class="text-slate-700 font-black text-xs uppercase tracking-widest">Уроки</span>
+
+            <a href="study.html" class="luxury-card p-5 md:p-6 xl:p-8 flex flex-col items-center gap-4 min-h-[170px] focus-ring" aria-label="Перейти к урокам">
+                <div class="w-16 h-16 md:w-20 md:h-20 bg-blue-100 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center text-4xl md:text-5xl shadow-inner">📖</div>
+                <span class="text-slate-700 font-black text-[10px] md:text-xs uppercase tracking-widest text-center">Уроки</span>
             </a>
-            <a href="wbots.html" class="luxury-card p-8 flex flex-col items-center gap-4">
-                <div class="w-20 h-20 bg-indigo-100 rounded-[2rem] flex items-center justify-center text-5xl shadow-inner">⚔️</div>
-                <span class="text-slate-700 font-black text-xs uppercase tracking-widest">Играть</span>
+
+            <a href="wbots.html" class="luxury-card p-5 md:p-6 xl:p-8 flex flex-col items-center gap-4 min-h-[170px] focus-ring" aria-label="Играть с ботом">
+                <div class="w-16 h-16 md:w-20 md:h-20 bg-indigo-100 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center text-4xl md:text-5xl shadow-inner">⚔️</div>
+                <span class="text-slate-700 font-black text-[10px] md:text-xs uppercase tracking-widest text-center">Играть</span>
             </a>
-            <a href="hist.html" class="luxury-card p-8 flex flex-col items-center gap-4">
-                <div class="w-20 h-20 bg-purple-100 rounded-[2rem] flex items-center justify-center text-5xl shadow-inner">📜</div>
-                <span class="text-slate-700 font-black text-xs uppercase tracking-widest">История</span>
+
+            <a href="hist.html" class="luxury-card p-5 md:p-6 xl:p-8 flex flex-col items-center gap-4 min-h-[170px] focus-ring" aria-label="Перейти к истории партий">
+                <div class="w-16 h-16 md:w-20 md:h-20 bg-purple-100 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center text-4xl md:text-5xl shadow-inner">📜</div>
+                <span class="text-slate-700 font-black text-[10px] md:text-xs uppercase tracking-widest text-center">История</span>
             </a>
         </div>
 
-        <section class="luxury-card p-10 bg-indigo-50/20 border-dashed border-4 border-indigo-100">
-            <div class="flex items-center justify-between mb-8">
+        <!-- ROADMAP -->
+        <section id="roadmap-section" class="luxury-card p-5 md:p-8 xl:p-10 bg-indigo-50/20 border-dashed border-4 border-indigo-100 page-transition" aria-live="polite">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
                 <div>
-                    <h3 class="text-indigo-500 font-black text-xl uppercase tracking-widest">Дорожная карта</h3>
+                    <h3 class="text-indigo-500 font-black text-lg md:text-xl uppercase tracking-widest">Дорожная карта</h3>
                     <p id="roadmap-subtitle" class="text-slate-400 text-sm mt-2">Загрузка плана...</p>
                 </div>
-                <div class="text-right">
+                <div class="text-left md:text-right">
                     <div id="roadmap-mini-progress" class="text-2xl font-black text-emerald-500">0%</div>
                     <div class="text-[10px] uppercase font-black text-slate-400 tracking-widest">Прогресс</div>
                 </div>
             </div>
-        
-            <div class="mb-10 overflow-x-auto pb-4">
-                <div id="roadmap-timeline" class="flex items-center gap-6 min-w-max">
-                </div>
+
+            <div class="mb-8 md:mb-10 overflow-x-auto pb-4">
+                <div id="roadmap-timeline" class="flex items-center gap-4 md:gap-6 min-w-max"></div>
             </div>
-        
-            <div id="current-week-card" class="bg-white/80 rounded-[2rem] border-2 border-white shadow-[0_10px_25px_rgba(0,0,0,0.04)] p-8">
-                <div class="flex items-start justify-between gap-6 mb-6">
+
+            <div id="current-week-card" class="bg-white/80 rounded-[1.6rem] md:rounded-[2rem] border-2 border-white shadow-[0_10px_25px_rgba(0,0,0,0.04)] p-5 md:p-8">
+                <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 md:gap-6 mb-6">
                     <div>
-                        <h4 id="current-week-title" class="text-2xl font-black text-slate-800">Текущая неделя</h4>
+                        <h4 id="current-week-title" class="text-xl md:text-2xl font-black text-slate-800">Текущая неделя</h4>
                         <p id="current-week-description" class="text-slate-500 mt-2">Загрузка...</p>
                     </div>
-                    <div id="current-week-badge" class="px-4 py-2 rounded-2xl bg-indigo-100 text-indigo-600 text-xs font-black uppercase tracking-widest">
+                    <div id="current-week-badge" class="px-4 py-2 rounded-2xl bg-indigo-100 text-indigo-600 text-xs font-black uppercase tracking-widest w-fit">
                         Неделя
                     </div>
                 </div>
-        
-                <div id="daily-tasks-list" class="grid md:grid-cols-2 gap-4">
-                </div>
+
+                <div id="daily-tasks-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
         </section>
     </main>
 
     <script src="state.js"></script>
-<script src="api.js"></script>
+    <script src="api.js"></script>
 
-<script>
-    if (!window.roChessApi.isAuthenticated()) {
-        window.location.href = 'h1.html';
-    }
-
-    function escapeHtml(text) {
-        if (text == null) return '';
-        return String(text)
-            .replaceAll('&', '&amp;')
-            .replaceAll('<', '&lt;')
-            .replaceAll('>', '&gt;')
-            .replaceAll('"', '&quot;')
-            .replaceAll("'", '&#039;');
-    }
-
-    function getTaskTypeEmoji(type) {
-        switch (type) {
-            case 'lesson': return '📘';
-            case 'exercise': return '🧩';
-            case 'game': return '♟️';
-            case 'test': return '📝';
-            default: return '⭐';
+    <script>
+        if (!window.roChessApi.isAuthenticated()) {
+            window.location.href = 'h1.html';
         }
-    }
 
-    async function initDashboard() {
-        try {
-            const data = await window.roChessApi.getDashboardData();
-            console.log("Dashboard data:", data);
+        const liveRegion = document.getElementById('live-region');
+        const toast = document.getElementById('toast');
+        let toastTimer = null;
 
-            const sidebarName = document.getElementById('sidebar-user-name');
-            if (sidebarName && data.user) {
-                sidebarName.textContent = data.user.username || data.user.name || 'Игрок';
+        function announce(message) {
+            if (liveRegion) liveRegion.textContent = message;
+        }
+
+        function showToast(message, type = 'default') {
+            clearTimeout(toastTimer);
+            toast.textContent = message;
+            toast.className = 'toast show';
+
+            if (type === 'error') {
+                toast.style.background = 'rgba(127, 29, 29, 0.96)';
+            } else if (type === 'success') {
+                toast.style.background = 'rgba(6, 78, 59, 0.96)';
+            } else {
+                toast.style.background = 'rgba(15, 23, 42, 0.94)';
             }
 
-            const goalText = document.getElementById('daily-goal-text');
-            if (goalText) {
-                goalText.textContent =
-                    (data.recommendation && data.recommendation.description)
-                    ? data.recommendation.description
-                    : 'Готов к новым победам?';
-            }
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2400);
+        }
 
-            const roadmapCircle = document.getElementById('roadmap-svg-circle');
-            const progressPercent = document.getElementById('roadmap-percent');
-            const horizontalBar = document.getElementById('roadmap-horizontal-bar');
+        function escapeHtml(text) {
+            if (text == null) return '';
+            return String(text)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
 
-            const percentage = data?.roadmap_widget?.completed_percentage || 0;
-
-            if (progressPercent) {
-                progressPercent.textContent = `${percentage}%`;
-            }
-
-            if (roadmapCircle) {
-                const radius = 58;
-                const circumference = 2 * Math.PI * radius;
-                roadmapCircle.style.strokeDasharray = `${circumference} ${circumference}`;
-                const offset = circumference - (percentage / 100) * circumference;
-                roadmapCircle.style.strokeDashoffset = offset;
-            }
-
-            if (horizontalBar) {
-                setTimeout(() => {
-                    horizontalBar.style.width = `${percentage}%`;
-                }, 300);
-            }
-
-        } catch (error) {
-            console.error("Ошибка Dashboard:", error);
-            if (String(error.message).includes('401')) {
-                window.location.href = 'h1.html';
+        function getTaskTypeEmoji(type) {
+            switch (type) {
+                case 'lesson': return '📘';
+                case 'exercise': return '🧩';
+                case 'game': return '♟️';
+                case 'test': return '📝';
+                default: return '⭐';
             }
         }
-    }
 
-    async function loadRoadmap() {
-        try {
-            const data = await window.roChessApi.getRoadmap();
-            console.log("Roadmap:", data);
+        function renderHeroSkeleton() {
+            document.getElementById('daily-goal-text').innerHTML = `
+                <div class="space-y-3">
+                    <div class="h-10 w-5/6 rounded-2xl skeleton"></div>
+                    <div class="h-10 w-2/3 rounded-2xl skeleton"></div>
+                </div>
+            `;
+        }
 
-            const roadmap = data.roadmap || {};
-            const weeks = Array.isArray(data.weeks) ? data.weeks : [];
+        function renderSeasonPassSkeleton() {
+            document.getElementById('roadmap-percent').innerHTML = `<div class="h-8 w-16 rounded-xl skeleton mx-auto"></div>`;
+            document.getElementById('xp-left-text').innerHTML = `<div class="h-4 w-40 rounded-xl skeleton mx-auto"></div>`;
+        }
 
-            renderRoadmapTimeline(roadmap, weeks);
-            renderCurrentWeek(roadmap, weeks);
-
-        } catch (error) {
-            console.error("Ошибка загрузки roadmap:", error);
-
-            const subtitle = document.getElementById('roadmap-subtitle');
+        function renderRoadmapSkeleton() {
             const timeline = document.getElementById('roadmap-timeline');
-            const title = document.getElementById('current-week-title');
-            const desc = document.getElementById('current-week-description');
-            const badge = document.getElementById('current-week-badge');
             const list = document.getElementById('daily-tasks-list');
+            const subtitle = document.getElementById('roadmap-subtitle');
+            const currentWeekTitle = document.getElementById('current-week-title');
+            const currentWeekDescription = document.getElementById('current-week-description');
             const miniProgress = document.getElementById('roadmap-mini-progress');
 
-            if (subtitle) subtitle.textContent = 'План обучения пока не создан';
-            if (miniProgress) miniProgress.textContent = '0%';
-            if (timeline) timeline.innerHTML = '';
-            if (title) title.textContent = 'Дорожная карта недоступна';
-            if (desc) desc.textContent = error.message || 'Не удалось загрузить roadmap';
-            if (badge) badge.textContent = 'Неделя';
+            subtitle.innerHTML = `<div class="h-4 w-52 rounded-xl skeleton"></div>`;
+            currentWeekTitle.innerHTML = `<div class="h-8 w-56 rounded-xl skeleton"></div>`;
+            currentWeekDescription.innerHTML = `
+                <div class="space-y-3 mt-3">
+                    <div class="h-4 w-full rounded-xl skeleton"></div>
+                    <div class="h-4 w-4/5 rounded-xl skeleton"></div>
+                </div>
+            `;
+            miniProgress.innerHTML = `<div class="h-8 w-16 rounded-xl skeleton ml-0 md:ml-auto"></div>`;
 
-            const canGenerate =
-                String(error.message || '').toLowerCase().includes('план обучения не создан') &&
-                typeof window.roChessApi.generateRoadmap === 'function';
+            timeline.innerHTML = Array.from({ length: 4 }).map(() => `
+                <div class="flex flex-col items-center gap-3 shrink-0">
+                    <div class="w-16 h-16 md:w-20 md:h-20 rounded-[1.5rem] md:rounded-[2rem] skeleton"></div>
+                    <div class="w-20 h-3 rounded-xl skeleton"></div>
+                    <div class="w-24 h-3 rounded-xl skeleton"></div>
+                </div>
+            `).join('');
 
-            if (list) {
-                list.innerHTML = `
-                    <div class="col-span-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl p-6">
-                        <div class="text-slate-500 font-bold mb-4">
-                            Пока нет дорожной карты. Сначала нужно сгенерировать её на сервере.
+            list.innerHTML = Array.from({ length: 4 }).map(() => `
+                <div class="rounded-[1.3rem] md:rounded-[1.5rem] border-2 border-slate-100 bg-slate-50 p-4 md:p-5">
+                    <div class="flex items-start gap-4">
+                        <div class="w-5 h-5 rounded-md skeleton mt-1"></div>
+                        <div class="flex-1 space-y-3">
+                            <div class="h-4 w-2/3 rounded-xl skeleton"></div>
+                            <div class="h-5 w-4/5 rounded-xl skeleton"></div>
+                            <div class="h-4 w-full rounded-xl skeleton"></div>
                         </div>
-                        ${canGenerate ? `
-                            <button
-                                id="generate-roadmap-btn"
-                                class="px-6 py-3 rounded-2xl bg-indigo-500 text-white font-black uppercase tracking-wider hover:bg-indigo-600 transition"
-                            >
-                                Создать дорожную карту
-                            </button>
-                        ` : ''}
                     </div>
-                `;
+                </div>
+            `).join('');
+        }
 
-                if (canGenerate) {
-                    const btn = document.getElementById('generate-roadmap-btn');
-                    if (btn) {
-                        btn.addEventListener('click', async () => {
-                            try {
-                                btn.disabled = true;
-                                btn.textContent = 'Создание...';
+        function renderErrorState(message, withRetry = false, retryId = '') {
+            return `
+                <div class="error-state">
+                    <div class="text-4xl mb-3">😵</div>
+                    <div class="text-lg font-black text-red-700 mb-2">Ой, что-то пошло не так!</div>
+                    <div class="text-red-600 font-bold">${escapeHtml(message)}</div>
+                    ${withRetry ? `
+                        <button
+                            id="${retryId}"
+                            type="button"
+                            class="mt-5 bg-red-500 text-white font-black uppercase tracking-widest rounded-[1.2rem] px-6 py-3 min-h-[48px] shadow-[0_8px_0_#dc2626] active:translate-y-[4px]"
+                        >
+                            Попробовать снова
+                        </button>
+                    ` : ''}
+                </div>
+            `;
+        }
 
-                                await window.roChessApi.generateRoadmap();
-                                await loadRoadmap();
-                                await initDashboard();
+        function renderEmptyState(title, text, icon = '📭', extra = '') {
+            return `
+                <div class="empty-state">
+                    <div class="text-4xl mb-3">${icon}</div>
+                    <div class="text-slate-700 text-lg font-black mb-2">${escapeHtml(title)}</div>
+                    <div class="text-slate-500 font-bold">${escapeHtml(text)}</div>
+                    ${extra}
+                </div>
+            `;
+        }
 
-                            } catch (e) {
-                                console.error('Ошибка генерации roadmap:', e);
-                                alert(e.message || 'Не удалось создать дорожную карту');
-                                btn.disabled = false;
-                                btn.textContent = 'Создать дорожную карту';
-                            }
-                        });
+        async function initDashboard() {
+            renderHeroSkeleton();
+            renderSeasonPassSkeleton();
+            announce('Загружается Dashboard');
+
+            try {
+                const data = await window.roChessApi.getDashboardData();
+                console.log("Dashboard data:", data);
+
+                const sidebarName = document.getElementById('sidebar-user-name');
+                const sidebarLevel = document.getElementById('sidebar-user-level');
+
+                if (sidebarName && data.user) {
+                    sidebarName.textContent = data.user.username || data.user.name || 'Игрок';
+                }
+
+                if (sidebarLevel) {
+                    const level = data?.user?.level ?? data?.roadmap_widget?.level ?? '—';
+                    sidebarLevel.textContent = `LVL ${level} ⭐`;
+                }
+
+                const goalText = document.getElementById('daily-goal-text');
+                const heroActionBtn = document.getElementById('hero-action-btn');
+
+                if (goalText) {
+                    goalText.textContent =
+                        (data.recommendation && data.recommendation.description)
+                        ? data.recommendation.description
+                        : 'Готов к новым победам?';
+                }
+
+                if (heroActionBtn) {
+                    const hasRecommendation = !!(data.recommendation && data.recommendation.description);
+                    heroActionBtn.textContent = hasRecommendation ? 'Начать Урок 🚀' : 'Открыть Уроки 📖';
+                    heroActionBtn.setAttribute('aria-label', hasRecommendation ? 'Начать рекомендованный урок' : 'Открыть уроки');
+                }
+
+                const roadmapCircle = document.getElementById('roadmap-svg-circle');
+                const progressPercent = document.getElementById('roadmap-percent');
+                const xpLeftText = document.getElementById('xp-left-text');
+                const percentage = data?.roadmap_widget?.completed_percentage || 0;
+
+                if (progressPercent) {
+                    progressPercent.textContent = `${percentage}%`;
+                }
+
+                if (xpLeftText) {
+                    const xpLeft = data?.roadmap_widget?.xp_left ?? data?.roadmap_widget?.xp_to_next_level;
+                    xpLeftText.textContent = xpLeft != null
+                        ? `До нового ранга: ${xpLeft} XP`
+                        : 'Продолжай учиться каждый день';
+                }
+
+                if (roadmapCircle) {
+                    const radius = 58;
+                    const circumference = 2 * Math.PI * radius;
+                    roadmapCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+                    const offset = circumference - (percentage / 100) * circumference;
+                    roadmapCircle.style.strokeDashoffset = offset;
+                }
+
+                announce('Dashboard загружен');
+            } catch (error) {
+                console.error("Ошибка Dashboard:", error);
+
+                if (String(error.message).includes('401')) {
+                    window.location.href = 'h1.html';
+                    return;
+                }
+
+                const heroCard = document.getElementById('hero-card');
+                const seasonPassCard = document.getElementById('season-pass-card');
+
+                if (heroCard) {
+                    heroCard.innerHTML = renderErrorState('Не удалось загрузить главные данные страницы.', true, 'retry-dashboard-btn');
+                }
+
+                if (seasonPassCard) {
+                    seasonPassCard.innerHTML = `
+                        <div class="text-center">
+                            <div class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">Сезонный пропуск</div>
+                            <div class="text-2xl font-black text-slate-700">—</div>
+                            <p class="text-slate-400 text-sm mt-3">Данные временно недоступны</p>
+                        </div>
+                    `;
+                }
+
+                const retryBtn = document.getElementById('retry-dashboard-btn');
+                if (retryBtn) {
+                    retryBtn.addEventListener('click', initDashboard);
+                }
+
+                showToast('Не удалось загрузить Dashboard', 'error');
+            }
+        }
+
+        async function loadRoadmap() {
+            renderRoadmapSkeleton();
+            announce('Загружается дорожная карта');
+
+            try {
+                const data = await window.roChessApi.getRoadmap();
+                console.log("Roadmap:", data);
+
+                const roadmap = data.roadmap || {};
+                const weeks = Array.isArray(data.weeks) ? data.weeks : [];
+
+                renderRoadmapTimeline(roadmap, weeks);
+                renderCurrentWeek(roadmap, weeks);
+
+                announce('Дорожная карта загружена');
+            } catch (error) {
+                console.error("Ошибка загрузки roadmap:", error);
+
+                const subtitle = document.getElementById('roadmap-subtitle');
+                const timeline = document.getElementById('roadmap-timeline');
+                const title = document.getElementById('current-week-title');
+                const desc = document.getElementById('current-week-description');
+                const badge = document.getElementById('current-week-badge');
+                const list = document.getElementById('daily-tasks-list');
+                const miniProgress = document.getElementById('roadmap-mini-progress');
+
+                if (subtitle) subtitle.textContent = 'План обучения пока не создан';
+                if (miniProgress) miniProgress.textContent = '0%';
+                if (timeline) timeline.innerHTML = '';
+
+                const canGenerate =
+                    String(error.message || '').toLowerCase().includes('план обучения не создан') &&
+                    typeof window.roChessApi.generateRoadmap === 'function';
+
+                if (title) title.textContent = canGenerate ? 'План пока не создан' : 'Дорожная карта недоступна';
+                if (desc) {
+                    desc.textContent = canGenerate
+                        ? 'Пройди тест чтобы получить план'
+                        : (error.message || 'Не удалось загрузить roadmap');
+                }
+                if (badge) badge.textContent = 'Неделя';
+
+                if (list) {
+                    if (canGenerate) {
+                        list.innerHTML = renderEmptyState(
+                            'План ещё не готов',
+                            'Пройди тест чтобы получить план',
+                            '📝',
+                            `
+                                <div class="mt-5 flex flex-col sm:flex-row gap-3 justify-center">
+                                    <a
+                                        href="test.html"
+                                        class="ghost-btn inline-flex items-center justify-center px-6 py-3 bg-indigo-500 text-white rounded-2xl shadow-[0_8px_0_#4338ca] active:translate-y-[4px]"
+                                        aria-label="Перейти к тесту"
+                                    >
+                                        Пройти тест
+                                    </a>
+                                    <button
+                                        id="generate-roadmap-btn"
+                                        class="ghost-btn inline-flex items-center justify-center px-6 py-3 bg-white text-indigo-600 border-2 border-indigo-100 rounded-2xl"
+                                        type="button"
+                                        aria-label="Создать дорожную карту"
+                                    >
+                                        Создать сейчас
+                                    </button>
+                                </div>
+                            `
+                        );
+                    } else {
+                        list.innerHTML = renderErrorState(
+                            error.message || 'Не удалось загрузить дорожную карту',
+                            true,
+                            'retry-roadmap-btn'
+                        );
+                    }
+
+                    const retryRoadmapBtn = document.getElementById('retry-roadmap-btn');
+                    if (retryRoadmapBtn) {
+                        retryRoadmapBtn.addEventListener('click', loadRoadmap);
+                    }
+
+                    if (canGenerate) {
+                        const btn = document.getElementById('generate-roadmap-btn');
+                        if (btn) {
+                            btn.addEventListener('click', async () => {
+                                try {
+                                    btn.disabled = true;
+                                    btn.textContent = 'Создание...';
+
+                                    await window.roChessApi.generateRoadmap();
+                                    showToast('Дорожная карта создана', 'success');
+                                    await loadRoadmap();
+                                    await initDashboard();
+                                } catch (e) {
+                                    console.error('Ошибка генерации roadmap:', e);
+                                    showToast(e.message || 'Не удалось создать дорожную карту', 'error');
+                                    btn.disabled = false;
+                                    btn.textContent = 'Создать сейчас';
+                                }
+                            });
+                        }
                     }
                 }
             }
         }
-    }
 
-    function renderRoadmapTimeline(roadmap, weeks) {
-        const timeline = document.getElementById('roadmap-timeline');
-        const subtitle = document.getElementById('roadmap-subtitle');
-        const miniProgress = document.getElementById('roadmap-mini-progress');
+        function renderRoadmapTimeline(roadmap, weeks) {
+            const timeline = document.getElementById('roadmap-timeline');
+            const subtitle = document.getElementById('roadmap-subtitle');
+            const miniProgress = document.getElementById('roadmap-mini-progress');
 
-        if (!timeline) return;
+            if (!timeline) return;
 
-        const totalWeeks = roadmap?.total_weeks || weeks.length || 0;
-        const currentWeekNumber = roadmap?.current_week || 1;
-        const completedWeeks = weeks.filter(w => w.is_completed).length;
+            const totalWeeks = roadmap?.total_weeks || weeks.length || 0;
+            const currentWeekNumber = roadmap?.current_week || 1;
+            const completedWeeks = weeks.filter(w => w.is_completed).length;
 
-        const progressPercent = totalWeeks > 0
-            ? Math.round((completedWeeks / totalWeeks) * 100)
-            : 0;
+            const progressPercent = totalWeeks > 0
+                ? Math.round((completedWeeks / totalWeeks) * 100)
+                : 0;
 
-        if (subtitle) {
-            subtitle.textContent = `${roadmap?.title || 'План обучения'} • текущая неделя: ${currentWeekNumber}`;
-        }
-
-        if (miniProgress) {
-            miniProgress.textContent = `${progressPercent}%`;
-        }
-
-        if (!weeks.length) {
-            timeline.innerHTML = '';
-            return;
-        }
-
-        timeline.innerHTML = weeks.map((week) => {
-            const isCurrent = week.week_number === currentWeekNumber;
-            const isDone = !!week.is_completed;
-
-            let cardClass = 'bg-white text-slate-500 border-slate-200 shadow-[0_6px_0_#e2e8f0]';
-            let icon = '🔒';
-
-            if (isDone) {
-                cardClass = 'bg-emerald-500 text-white border-white shadow-[0_8px_0_#059669]';
-                icon = '✅';
-            } else if (isCurrent) {
-                cardClass = 'bg-indigo-500 text-white border-white shadow-[0_10px_0_#2563eb] scale-105';
-                icon = '🚀';
+            if (subtitle) {
+                subtitle.textContent = `${roadmap?.title || 'План обучения'} • текущая неделя: ${currentWeekNumber}`;
             }
 
-            return `
-                <div class="flex flex-col items-center gap-3">
-                    <div class="w-20 h-20 rounded-[2rem] border-4 ${cardClass} flex items-center justify-center text-3xl font-black transition-all">
-                        ${icon}
-                    </div>
-                    <div class="text-center max-w-[120px]">
-                        <div class="text-[10px] uppercase font-black tracking-widest text-slate-400">
-                            Неделя ${week.week_number}
+            if (miniProgress) {
+                miniProgress.textContent = `${progressPercent}%`;
+            }
+
+            if (!weeks.length) {
+                timeline.innerHTML = renderEmptyState(
+                    'Пока нет недель',
+                    'Когда план появится, здесь отобразится маршрут обучения.',
+                    '🗺️'
+                );
+                return;
+            }
+
+            timeline.innerHTML = weeks.map((week) => {
+                const isCurrent = week.week_number === currentWeekNumber;
+                const isDone = !!week.is_completed;
+
+                let cardClass = 'bg-white text-slate-500 border-slate-200 shadow-[0_6px_0_#e2e8f0]';
+                let icon = '🔒';
+
+                if (isDone) {
+                    cardClass = 'bg-emerald-500 text-white border-white shadow-[0_8px_0_#059669]';
+                    icon = '✅';
+                } else if (isCurrent) {
+                    cardClass = 'bg-indigo-500 text-white border-white shadow-[0_10px_0_#2563eb] scale-105';
+                    icon = '🚀';
+                }
+
+                return `
+                    <div class="flex flex-col items-center gap-3 shrink-0 fade-swap">
+                        <div class="w-16 h-16 md:w-20 md:h-20 rounded-[1.5rem] md:rounded-[2rem] border-4 ${cardClass} flex items-center justify-center text-2xl md:text-3xl font-black transition-all">
+                            ${icon}
                         </div>
-                        <div class="text-xs font-black ${isCurrent ? 'text-indigo-500' : isDone ? 'text-emerald-500' : 'text-slate-500'} mt-1">
-                            ${escapeHtml(week.title || `Неделя ${week.week_number}`)}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    function renderCurrentWeek(roadmap, weeks) {
-        const currentWeekNumber = roadmap?.current_week || 1;
-        let currentWeek = weeks.find(w => w.week_number === currentWeekNumber);
-
-        if (!currentWeek && weeks.length > 0) {
-            currentWeek = weeks[0];
-        }
-
-        const titleEl = document.getElementById('current-week-title');
-        const descEl = document.getElementById('current-week-description');
-        const badgeEl = document.getElementById('current-week-badge');
-        const listEl = document.getElementById('daily-tasks-list');
-
-        if (!currentWeek) {
-            if (titleEl) titleEl.textContent = 'Нет недель';
-            if (descEl) descEl.textContent = 'Roadmap пустой';
-            if (badgeEl) badgeEl.textContent = 'Неделя';
-            if (listEl) listEl.innerHTML = '';
-            return;
-        }
-
-        if (titleEl) {
-            titleEl.textContent = currentWeek.title || `Неделя ${currentWeek.week_number}`;
-        }
-
-        if (descEl) {
-            descEl.textContent = currentWeek.description || 'Описание отсутствует';
-        }
-
-        if (badgeEl) {
-            badgeEl.textContent = `Неделя ${currentWeek.week_number}`;
-        }
-
-        const tasks = Array.isArray(currentWeek.daily_tasks) ? currentWeek.daily_tasks : [];
-
-        if (!tasks.length) {
-            listEl.innerHTML = `
-                <div class="col-span-full bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 p-6 text-slate-500 font-bold">
-                    На этой неделе пока нет заданий.
-                </div>
-            `;
-            return;
-        }
-
-        listEl.innerHTML = tasks.map(task => {
-            const done = !!task.is_completed;
-
-            return `
-                <label class="flex items-start gap-4 p-5 rounded-[1.5rem] border-2 transition-all cursor-pointer ${done ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-200 hover:border-indigo-200 hover:bg-indigo-50/40'}">
-                    <input
-                        type="checkbox"
-                        class="task-checkbox mt-1 w-5 h-5 accent-emerald-500 cursor-pointer"
-                        data-task-id="${task.id}"
-                        ${done ? 'checked disabled' : ''}
-                    />
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="text-xl">${getTaskTypeEmoji(task.task_type)}</span>
-                            <span class="text-[10px] uppercase font-black tracking-widest ${done ? 'text-emerald-500' : 'text-slate-400'}">
-                                День ${task.day_number || '-'} • ${escapeHtml(task.task_type || 'task')}
-                            </span>
-                        </div>
-
-                        <div class="font-black text-sm ${done ? 'text-emerald-700 line-through' : 'text-slate-800'}">
-                            ${escapeHtml(task.title || 'Без названия')}
-                        </div>
-
-                        <div class="text-sm mt-1 ${done ? 'text-emerald-600' : 'text-slate-500'}">
-                            ${escapeHtml(task.description || '')}
+                        <div class="text-center max-w-[110px] md:max-w-[120px]">
+                            <div class="text-[10px] uppercase font-black tracking-widest text-slate-400">
+                                Неделя ${week.week_number}
+                            </div>
+                            <div class="text-xs font-black ${isCurrent ? 'text-indigo-500' : isDone ? 'text-emerald-500' : 'text-slate-500'} mt-1">
+                                ${escapeHtml(week.title || `Неделя ${week.week_number}`)}
+                            </div>
                         </div>
                     </div>
-                </label>
-            `;
-        }).join('');
+                `;
+            }).join('');
+        }
 
-        bindTaskCheckboxes();
-    }
+        function renderCurrentWeek(roadmap, weeks) {
+            const currentWeekNumber = roadmap?.current_week || 1;
+            let currentWeek = weeks.find(w => w.week_number === currentWeekNumber);
 
-    function bindTaskCheckboxes() {
-        const checkboxes = document.querySelectorAll('.task-checkbox');
+            if (!currentWeek && weeks.length > 0) {
+                currentWeek = weeks[0];
+            }
 
-        checkboxes.forEach((checkbox) => {
-            checkbox.addEventListener('click', async function () {
-                const taskId = this.dataset.taskId;
-                if (!taskId || this.disabled) return;
+            const titleEl = document.getElementById('current-week-title');
+            const descEl = document.getElementById('current-week-description');
+            const badgeEl = document.getElementById('current-week-badge');
+            const listEl = document.getElementById('daily-tasks-list');
 
-                this.disabled = true;
+            if (!currentWeek) {
+                if (titleEl) titleEl.textContent = 'План ещё не готов';
+                if (descEl) descEl.textContent = 'Пройди тест чтобы получить план';
+                if (badgeEl) badgeEl.textContent = 'Неделя';
+                if (listEl) {
+                    listEl.innerHTML = renderEmptyState(
+                        'Пока нет плана',
+                        'Пройди тест чтобы получить план',
+                        '🧭',
+                        `
+                            <div class="mt-5">
+                                <a
+                                    href="test.html"
+                                    class="ghost-btn inline-flex items-center justify-center px-6 py-3 bg-indigo-500 text-white rounded-2xl shadow-[0_8px_0_#4338ca] active:translate-y-[4px]"
+                                    aria-label="Перейти к тесту"
+                                >
+                                    Перейти к тесту
+                                </a>
+                            </div>
+                        `
+                    );
+                }
+                return;
+            }
 
-                try {
-                    await window.roChessApi.completeRoadmapTask(taskId);
-                    await loadRoadmap();
-                    await initDashboard();
-                } catch (error) {
-                    console.error('Ошибка завершения задачи:', error);
-                    alert(error.message || 'Не удалось отметить задачу как выполненную');
-                    this.disabled = false;
-                    this.checked = false;
+            if (titleEl) {
+                titleEl.textContent = currentWeek.title || `Неделя ${currentWeek.week_number}`;
+            }
+
+            if (descEl) {
+                descEl.textContent = currentWeek.description || 'Описание отсутствует';
+            }
+
+            if (badgeEl) {
+                badgeEl.textContent = `Неделя ${currentWeek.week_number}`;
+            }
+
+            const tasks = Array.isArray(currentWeek.daily_tasks) ? currentWeek.daily_tasks : [];
+
+            if (!tasks.length) {
+                listEl.innerHTML = renderEmptyState(
+                    'На этой неделе пока нет заданий',
+                    'Как только задания появятся, они будут показаны здесь.',
+                    '📋'
+                );
+                return;
+            }
+
+            listEl.innerHTML = tasks.map(task => {
+                const done = !!task.is_completed;
+
+                return `
+                    <label class="flex items-start gap-4 p-4 md:p-5 rounded-[1.3rem] md:rounded-[1.5rem] border-2 transition-all cursor-pointer ${done ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-200 hover:border-indigo-200 hover:bg-indigo-50/40'} fade-swap">
+                        <input
+                            type="checkbox"
+                            class="task-checkbox mt-1 w-5 h-5 accent-emerald-500 cursor-pointer"
+                            data-task-id="${task.id}"
+                            ${done ? 'checked disabled' : ''}
+                            aria-label="Отметить задачу ${escapeHtml(task.title || 'без названия')} выполненной"
+                        />
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-xl">${getTaskTypeEmoji(task.task_type)}</span>
+                                <span class="text-[10px] uppercase font-black tracking-widest ${done ? 'text-emerald-500' : 'text-slate-400'}">
+                                    День ${task.day_number || '-'} • ${escapeHtml(task.task_type || 'task')}
+                                </span>
+                            </div>
+
+                            <div class="font-black text-sm ${done ? 'text-emerald-700 line-through' : 'text-slate-800'}">
+                                ${escapeHtml(task.title || 'Без названия')}
+                            </div>
+
+                            <div class="text-sm mt-1 ${done ? 'text-emerald-600' : 'text-slate-500'}">
+                                ${escapeHtml(task.description || '')}
+                            </div>
+                        </div>
+                    </label>
+                `;
+            }).join('');
+
+            bindTaskCheckboxes();
+        }
+
+        function bindTaskCheckboxes() {
+            const checkboxes = document.querySelectorAll('.task-checkbox');
+
+            checkboxes.forEach((checkbox) => {
+                checkbox.addEventListener('click', async function () {
+                    const taskId = this.dataset.taskId;
+                    if (!taskId || this.disabled) return;
+
+                    this.disabled = true;
+
+                    try {
+                        await window.roChessApi.completeRoadmapTask(taskId);
+                        showToast('Задача отмечена как выполненная', 'success');
+                        await loadRoadmap();
+                        await initDashboard();
+                    } catch (error) {
+                        console.error('Ошибка завершения задачи:', error);
+                        showToast(error.message || 'Не удалось отметить задачу как выполненную', 'error');
+                        this.disabled = false;
+                        this.checked = false;
+                    }
+                });
+            });
+        }
+
+        async function initPage() {
+            await initDashboard();
+            await loadRoadmap();
+        }
+
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileOverlay = document.getElementById('mobile-overlay');
+        const sidebar = document.getElementById('sidebar');
+
+        function openMobileMenu() {
+            sidebar.classList.remove('-translate-x-full');
+            mobileOverlay.classList.remove('hidden');
+            mobileMenuBtn.setAttribute('aria-label', 'Закрыть меню');
+        }
+
+        function closeMobileMenu() {
+            if (window.innerWidth < 1280) {
+                sidebar.classList.add('-translate-x-full');
+            }
+            mobileOverlay.classList.add('hidden');
+            mobileMenuBtn.setAttribute('aria-label', 'Открыть меню');
+        }
+
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', () => {
+                if (sidebar.classList.contains('-translate-x-full')) {
+                    openMobileMenu();
+                } else {
+                    closeMobileMenu();
                 }
             });
+        }
+
+        if (mobileOverlay) {
+            mobileOverlay.addEventListener('click', closeMobileMenu);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeMobileMenu();
+            }
         });
-    }
 
-    async function initPage() {
-        await initDashboard();
-        await loadRoadmap();
-    }
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1280) {
+                mobileOverlay?.classList.add('hidden');
+                sidebar?.classList.remove('-translate-x-full');
+            } else {
+                sidebar?.classList.add('-translate-x-full');
+            }
+        });
 
-    initPage();
-</script>
+        initPage();
+    </script>
 </body>
 </html>
