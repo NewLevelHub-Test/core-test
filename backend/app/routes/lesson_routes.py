@@ -9,17 +9,20 @@ lesson_bp = Blueprint('lessons', __name__)
 @jwt_required()
 @limiter.limit("30 per minute")
 def get_topics():
-    result, status = LessonService.get_topics()
+    page = request.args.get('page', 1, type=int)
+    result, status = LessonService.get_topics(page=page)
     return jsonify(result), status
 
 @lesson_bp.route('/', methods=['GET'])
 @jwt_required()
 def get_lessons():
     topic_id = request.args.get('topic_id', type=int)
+    page = request.args.get('page', 1, type=int)
+    
     if topic_id is not None and topic_id < 0:
         return jsonify({'error': 'Некорректный ID темы'}), 400
         
-    result, status = LessonService.get_lessons(topic_id)
+    result, status = LessonService.get_lessons(topic_id=topic_id, page=page)
     return jsonify(result), status
 
 @lesson_bp.route('/<int:lesson_id>', methods=['GET'])

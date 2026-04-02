@@ -10,6 +10,7 @@ from app.models.game import Game
 from app.models.progress import Progress
 
 
+
 class AdminService:
 
     @staticmethod
@@ -64,22 +65,38 @@ class AdminService:
     def delete_user(user_id):
         user = User.query.get(user_id)
         if not user:
-            return {'error': 'Пользователь не найден'}, 404
-        db.session.delete(user)
-        db.session.commit()
-        return {'message': 'Пользователь удалён'}, 200
+            return {"error": "User not found"}, 404
+
+        try:
+            Game.query.filter((Game.white_id == user_id) | (Game.black_id == user_id)).delete(synchronize_session=False)
+
+            db.session.delete(user)
+            db.session.commit()
+            return {"message": "User and their games deleted successfully"}, 200
+            
+        except Exception as e:
+            db.session.rollback() 
+            return {"error": str(e)}, 500
+        
 
     # --- Topics ---
 
     @staticmethod
-    def get_topics():
-        topics = Topic.query.order_by(Topic.order).all()
+    def get_topics(page=1):
+        pagination = Topic.query.order_by(Topic.order).paginate(
+        page=page, per_page=20, error_out=False
+    )
         result = []
-        for t in topics:
+        for t in pagination.items:
             d = t.to_dict()
             d['lesson_count'] = Lesson.query.filter_by(topic_id=t.id).count()
             result.append(d)
-        return {'topics': result}, 200
+        return {
+        'topics': result,
+        'total': pagination.total,
+        'page': pagination.page,
+        'pages': pagination.pages
+    }, 200
 
     @staticmethod
     def create_topic(data):
@@ -188,6 +205,18 @@ class AdminService:
         db.session.delete(exercise)
         db.session.commit()
         return {'message': 'Упражнение удалено'}, 200
+
+    @staticmethod
+    def get_all_exercises(page=1, per_page=20):
+        pagination = Exercise.query.order_by(Exercise.id.desc()).paginate(
+            page=page, per_page=per_page, error_out=False
+        )
+        return {
+            'exercises': [e.to_dict() for e in pagination.items],
+            'total': pagination.total,
+            'page': pagination.page,
+            'pages': pagination.pages
+        }, 200
 
     # --- Tests & Questions ---
 

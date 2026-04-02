@@ -1,5 +1,12 @@
 from datetime import datetime
 
+import bleach
+
+def clean_html(text):
+    if not text or not isinstance(text, str):
+        return text
+    return bleach.clean(text, tags=[], attributes={}, strip=True)
+
 
 def format_datetime(dt):
     if not dt:

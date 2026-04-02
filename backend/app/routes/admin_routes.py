@@ -1,16 +1,29 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
 from app.admin.admin_service import AdminService
 from app import limiter
 
 admin_bp = Blueprint('admin', __name__)
 
 @admin_bp.before_request
-@jwt_required()
 def check_admin():
-    user_id = get_jwt_identity()
-    if not AdminService.is_admin(user_id):
-        return jsonify({'error': 'Доступ запрещён'}), 403
+    if request.method == 'OPTIONS':
+        return
+
+    try:
+        verify_jwt_in_request()
+        user_id = get_jwt_identity()
+        
+        from app.models.user import User
+        user = User.query.get(user_id)
+
+        # МЕНЯЕМ ПРОВЕРКУ ТУТ:
+        # Теперь мы проверяем, что роль именно 'admin'
+        if not user or user.role != 'admin':
+            return jsonify({"message": "Доступ разрешен только администраторам"}), 403
+            
+    except Exception as e:
+        return jsonify({"message": "Ошибка авторизации", "error": str(e)}), 401
 
 # --- Users ---
 
@@ -35,13 +48,15 @@ def delete_user(user_id):
 
 @admin_bp.route('/topics', methods=['GET'])
 def get_topics():
-    result, status = AdminService.get_topics()
+    page = request.args.get('page', 1, type=int)
+    
+    result, status = AdminService.get_topics(page=page)
     return jsonify(result), status
 
 @admin_bp.route('/topics', methods=['POST'])
 def create_topic():
     data = request.get_json() or {}
-    if not data.get('title'):
+    if not data.get('name'): 
         return jsonify({'error': 'Название темы обязательно'}), 400
     result, status = AdminService.create_topic(data)
     return jsonify(result), status
@@ -101,6 +116,12 @@ def delete_exercise(exercise_id):
     result, status = AdminService.delete_exercise(exercise_id)
     return jsonify(result), status
 
+@admin_bp.route('/exercises', methods=['GET'])
+def get_all_exercises():
+    page = request.args.get('page', 1, type=int)
+    result, status = AdminService.get_all_exercises(page=page)
+    return jsonify(result), status
+
 # --- Tests ---
 
 @admin_bp.route('/tests', methods=['POST'])
@@ -120,7 +141,7 @@ def update_test(test_id):
 @admin_bp.route('/tests/<int:test_id>/questions', methods=['POST'])
 def add_question(test_id):
     data = request.get_json() or {}
-    if not data.get('text'):
+    if not data.get('question_text'):
         return jsonify({'error': 'Текст вопроса обязателен'}), 400
     result, status = AdminService.add_question(test_id, data)
     return jsonify(result), status

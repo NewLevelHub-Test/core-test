@@ -9,6 +9,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
+
+
+
 from app.config import config_by_name
 
 db = SQLAlchemy()
@@ -55,6 +58,9 @@ def create_app(config_name=None):
     from app.routes.photo_routes import photo_bp
     from app.routes.admin_routes import admin_bp
     from app.routes.roadmap_routes import roadmap_bp
+    from app.routes.chat_routes import chat_bp
+
+
 
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(user_bp, url_prefix='/api/users')
@@ -66,6 +72,7 @@ def create_app(config_name=None):
     app.register_blueprint(photo_bp, url_prefix='/api/photo')
     app.register_blueprint(roadmap_bp, url_prefix='/api/roadmap')
     app.register_blueprint(admin_bp, url_prefix='/api/admin')
+    app.register_blueprint(chat_bp, url_prefix='/api/chat')
 
     logging.basicConfig(level=logging.INFO)
 
@@ -86,5 +93,20 @@ def create_app(config_name=None):
     def handle_unexpected_error(error):
         app.logger.exception("Unexpected error occurred")
         return jsonify({"error": "Unexpected Error", "message": "Что-то пошло не так"}), 500
+
+    from app.models.analysis_cache import AnalysisCache
+
+    from flask_limiter.errors import RateLimitExceeded
+
+
+
+    @app.errorhandler(RateLimitExceeded)
+    def handle_ratelimit_error(e):
+        return jsonify({
+            "error": "Too Many Requests",
+            "message": "Вы отправляете запросы слишком часто. Подождите немного.",
+            "limit": str(e.description)
+        }), 429
+
 
     return app

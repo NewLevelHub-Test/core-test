@@ -12,9 +12,10 @@ from app.models.roadmap_week import RoadmapWeek
 from app.models.daily_task import DailyTask
 from app.models.progress import Progress
 from app.models.mistake import Mistake
+from app.models.chat import ChatSession, ChatMessage
 
 __all__ = [
     'User', 'Game', 'Move', 'Lesson', 'Topic', 'Exercise',
     'Test', 'TestQuestion', 'TestAttempt', 'Roadmap', 'RoadmapWeek',
-    'DailyTask', 'Progress', 'Mistake',
+    'DailyTask', 'Progress', 'Mistake', 'ChatSession', 'ChatMessage'
 ]

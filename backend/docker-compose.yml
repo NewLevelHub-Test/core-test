@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: chess_db_container
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "2005"
+      POSTGRES_DB: chess_db   
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: chess_backend_container
+    restart: always
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://postgres:2005@db:5432/chess_db
+      - STOCKFISH_PATH=/usr/games/stockfish
+    volumes:
+      - ./backend:/app 
+
+  nginx:
+    image: nginx:latest
+    container_name: chess_nginx_container
+    restart: always
+    ports:
+      - "80:80"  
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

@@ -1,4 +1,5 @@
 import re
+import bleach
 
 
 def validate_registration(data):
@@ -48,3 +49,8 @@ def _is_valid_email(email):
 def _is_valid_phone(phone):
     cleaned = re.sub(r'[\s\-\(\)]', '', phone)
     return bool(re.match(r'^\+?\d{10,15}$', cleaned))
+
+def clean_html(text):
+    if not text or not isinstance(text, str):
+        return text
+    return bleach.clean(text, tags=[], strip=True)

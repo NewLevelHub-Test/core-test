@@ -6,7 +6,7 @@ from app import db
 from app.models.user import User
 from app.utils.validators import validate_registration
 from app.utils.sms import generate_sms_code, code_expiry, send_sms
-
+from app.utils.helpers import clean_html  
 
 class AuthService:
 
@@ -26,7 +26,7 @@ class AuthService:
             return {'error': 'Имя пользователя занято'}, 409
 
         user = User(
-            username=data['username'],
+            username=clean_html(data['username']),
             email=data.get('email'),
             phone=data.get('phone'),
             age=data.get('age'),

@@ -60,12 +60,14 @@ def get_stats():
 @jwt_required()
 def get_progress():
     user_id = get_jwt_identity()
-    result, status = UserService.get_learning_progress(user_id)
+    page = request.args.get('page', 1, type=int)
+    result, status = UserService.get_learning_progress(user_id, page=page)
     return jsonify(result), status
 
 @user_bp.route('/activity', methods=['GET'])
 @jwt_required()
 def get_activity():
     user_id = get_jwt_identity()
-    result, status = UserService.get_activity_history(user_id)
+    page = request.args.get('page', 1, type=int)
+    result, status = UserService.get_activity_history(user_id, page=page)
     return jsonify(result), status
