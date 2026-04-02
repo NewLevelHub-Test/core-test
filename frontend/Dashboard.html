@@ -161,6 +161,21 @@
             transform: translateY(2px);
         }
 
+        .task-card-completed {
+            background: #ecfdf5;
+            border-color: #a7f3d0;
+        }
+
+        .task-card-pending {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+        }
+
+        .task-card-pending:hover {
+            background: rgba(238, 242, 255, 0.55);
+            border-color: #c7d2fe;
+        }
+
         @keyframes float {
             0% { transform: translateY(0px) rotate(-3deg); }
             50% { transform: translateY(-15px) rotate(2deg); }
@@ -220,7 +235,6 @@
     <div id="live-region" class="sr-only" aria-live="polite"></div>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-    <!-- MOBILE HEADER -->
     <header class="xl:hidden sticky top-0 z-[90] bg-white/90 backdrop-blur-xl border-b border-slate-100 px-4 py-3 flex items-center justify-between">
         <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-lg px-3 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block">
             RO-CHESS
@@ -238,7 +252,6 @@
 
     <div id="mobile-overlay" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-[80] xl:hidden"></div>
 
-    <!-- SIDEBAR -->
     <aside id="sidebar" class="w-72 desktop-sidebar h-screen fixed xl:sticky top-0 left-0 flex flex-col p-8 z-[85] -translate-x-full xl:translate-x-0 transition-transform duration-300">
         <div class="mb-12 text-center">
             <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-2xl px-4 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block transform -rotate-2">
@@ -273,10 +286,8 @@
         </a>
     </aside>
 
-    <!-- MAIN -->
     <main class="flex-1 p-4 md:p-6 xl:p-12 max-w-[1200px] mx-auto w-full space-y-6 md:space-y-8 xl:space-y-10">
 
-        <!-- HERO -->
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8 items-stretch page-transition">
             <section id="hero-card" class="xl:col-span-2 quest-gradient rounded-[2rem] md:rounded-[2.5rem] xl:rounded-[3rem] p-6 md:p-8 xl:p-10 relative overflow-hidden text-white border-2 border-white/20 flex flex-col justify-center min-h-[280px] md:min-h-[320px]" aria-live="polite">
                 <div class="relative z-10 max-w-xl">
@@ -288,8 +299,8 @@
                         Загрузка цели...
                     </h3>
 
-                    <a href="study.html" id="hero-action-btn" class="inline-flex items-center justify-center bg-white text-blue-600 font-black px-8 md:px-10 py-4 rounded-[1.3rem] md:rounded-[1.5rem] shadow-[0_8px_0_#e2e8f0] uppercase italic text-xs md:text-sm active:translate-y-2 active:shadow-none transition-all min-h-[52px]" aria-label="Начать урок">
-                        Начать Урок 🚀
+                    <a href="study.html" id="hero-action-btn" class="inline-flex items-center justify-center bg-white text-blue-600 font-black px-8 md:px-10 py-4 rounded-[1.3rem] md:rounded-[1.5rem] shadow-[0_8px_0_#e2e8f0] uppercase italic text-xs md:text-sm active:translate-y-2 active:shadow-none transition-all min-h-[52px]" aria-label="Открыть рекомендованное действие">
+                        Начать 🚀
                     </a>
                 </div>
 
@@ -299,24 +310,23 @@
             </section>
 
             <section id="season-pass-card" class="luxury-card p-6 md:p-8 flex flex-col justify-center text-center" aria-live="polite">
-                <span class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">Сезонный пропуск</span>
+                <span class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">Прогресс плана</span>
 
                 <div class="relative w-28 h-28 md:w-32 md:h-32 mx-auto mb-4">
-                    <svg class="w-full h-full transform -rotate-90" aria-hidden="true">
+                    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 128 128" aria-hidden="true">
                         <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="12" fill="transparent" class="text-slate-100" />
                         <circle id="roadmap-svg-circle" cx="64" cy="64" r="58" stroke="currentColor" stroke-width="12" fill="transparent" class="text-emerald-400 transition-all duration-1000" stroke-dasharray="364.4" stroke-dashoffset="364.4" stroke-linecap="round" />
                     </svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center">
                         <span id="roadmap-percent" class="text-2xl md:text-3xl font-black text-slate-800">0%</span>
-                        <span class="text-[8px] font-black text-slate-400 uppercase">Опыт</span>
+                        <span class="text-[8px] font-black text-slate-400 uppercase">задач</span>
                     </div>
                 </div>
 
-                <p id="xp-left-text" class="text-[10px] font-bold text-slate-400 uppercase italic">До нового ранга: ...</p>
+                <p id="xp-left-text" class="text-[10px] font-bold text-slate-400 uppercase italic">Загрузка прогресса...</p>
             </section>
         </div>
 
-        <!-- QUICK ACTIONS -->
         <div class="grid grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6 page-transition">
             <a href="test.html" class="luxury-card p-5 md:p-6 xl:p-8 flex flex-col items-center gap-4 min-h-[170px] focus-ring" aria-label="Перейти к испытаниям">
                 <div class="w-16 h-16 md:w-20 md:h-20 bg-orange-100 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center text-4xl md:text-5xl shadow-inner">📝</div>
@@ -339,7 +349,6 @@
             </a>
         </div>
 
-        <!-- ROADMAP -->
         <section id="roadmap-section" class="luxury-card p-5 md:p-8 xl:p-10 bg-indigo-50/20 border-dashed border-4 border-indigo-100 page-transition" aria-live="polite">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
                 <div>
@@ -348,7 +357,7 @@
                 </div>
                 <div class="text-left md:text-right">
                     <div id="roadmap-mini-progress" class="text-2xl font-black text-emerald-500">0%</div>
-                    <div class="text-[10px] uppercase font-black text-slate-400 tracking-widest">Прогресс</div>
+                    <div class="text-[10px] uppercase font-black text-slate-400 tracking-widest">Прогресс по задачам</div>
                 </div>
             </div>
 
@@ -424,6 +433,66 @@
                 case 'test': return '📝';
                 default: return '⭐';
             }
+        }
+
+        function getActionUrl(recommendation) {
+            if (!recommendation || !recommendation.action) return 'study.html';
+
+            switch (recommendation.action) {
+                case 'lesson':
+                    return recommendation.reference_id ? `study.html?lesson_id=${recommendation.reference_id}` : 'study.html';
+                case 'test':
+                    return 'test.html';
+                case 'game':
+                    return 'wbots.html';
+                case 'exercise':
+                    return recommendation.reference_id ? `study.html?exercise_id=${recommendation.reference_id}` : 'study.html';
+                default:
+                    return 'study.html';
+            }
+        }
+
+        function getActionLabel(recommendation) {
+            if (!recommendation || !recommendation.action) return 'Открыть уроки 📖';
+
+            switch (recommendation.action) {
+                case 'lesson': return 'Начать урок 🚀';
+                case 'test': return 'Пройти тест 📝';
+                case 'game': return 'Играть с ботом ♟️';
+                case 'exercise': return 'Решить задачу 🧩';
+                default: return 'Продолжить 🚀';
+            }
+        }
+
+        function clampPercent(value) {
+            const number = Number(value);
+            if (!Number.isFinite(number)) return 0;
+            return Math.max(0, Math.min(100, Math.round(number)));
+        }
+
+        function calculateTaskProgressFromWeeks(weeks) {
+            const allTasks = (Array.isArray(weeks) ? weeks : []).flatMap(week =>
+                Array.isArray(week.daily_tasks) ? week.daily_tasks : []
+            );
+
+            const totalTasks = allTasks.length;
+            const completedTasks = allTasks.filter(task => !!task.is_completed).length;
+            const progressPercent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+            return { totalTasks, completedTasks, progressPercent };
+        }
+
+        function setProgressCircle(percent) {
+            const roadmapCircle = document.getElementById('roadmap-svg-circle');
+            if (!roadmapCircle) return;
+
+            const radius = 58;
+            const circumference = 2 * Math.PI * radius;
+            roadmapCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+
+            const safePercent = clampPercent(percent);
+            const offset = circumference - (safePercent / 100) * circumference;
+            roadmapCircle.style.strokeDashoffset = `${offset}`;
         }
 
         function renderHeroSkeleton() {
@@ -517,7 +586,7 @@
 
             try {
                 const data = await window.roChessApi.getDashboardData();
-                console.log("Dashboard data:", data);
+                console.log('Dashboard data:', data);
 
                 const sidebarName = document.getElementById('sidebar-user-name');
                 const sidebarLevel = document.getElementById('sidebar-user-level');
@@ -527,53 +596,48 @@
                 }
 
                 if (sidebarLevel) {
-                    const level = data?.user?.level ?? data?.roadmap_widget?.level ?? '—';
-                    sidebarLevel.textContent = `LVL ${level} ⭐`;
+                    const level = data?.user?.level ?? data?.roadmap_widget?.roadmap?.level ?? '—';
+                    sidebarLevel.textContent = `LVL ${String(level).toUpperCase()} ⭐`;
                 }
 
                 const goalText = document.getElementById('daily-goal-text');
                 const heroActionBtn = document.getElementById('hero-action-btn');
+                const recommendation = data?.recommendation || null;
 
                 if (goalText) {
-                    goalText.textContent =
-                        (data.recommendation && data.recommendation.description)
-                        ? data.recommendation.description
-                        : 'Готов к новым победам?';
+                    goalText.textContent = recommendation?.description || 'Готов к новым победам?';
                 }
 
                 if (heroActionBtn) {
-                    const hasRecommendation = !!(data.recommendation && data.recommendation.description);
-                    heroActionBtn.textContent = hasRecommendation ? 'Начать Урок 🚀' : 'Открыть Уроки 📖';
-                    heroActionBtn.setAttribute('aria-label', hasRecommendation ? 'Начать рекомендованный урок' : 'Открыть уроки');
+                    heroActionBtn.textContent = getActionLabel(recommendation);
+                    heroActionBtn.href = getActionUrl(recommendation);
+                    heroActionBtn.setAttribute('aria-label', recommendation?.title || 'Открыть рекомендованное действие');
                 }
 
-                const roadmapCircle = document.getElementById('roadmap-svg-circle');
                 const progressPercent = document.getElementById('roadmap-percent');
-                const xpLeftText = document.getElementById('xp-left-text');
-                const percentage = data?.roadmap_widget?.completed_percentage || 0;
+                const progressMeta = document.getElementById('xp-left-text');
+
+                const percentage = clampPercent(data?.roadmap_widget?.progress_percent || 0);
+                const weeksCompleted = Number(data?.roadmap_widget?.weeks_completed || 0);
+                const totalWeeks = Number(data?.roadmap_widget?.roadmap?.total_weeks || 0);
+                const currentWeekNumber = Number(data?.roadmap_widget?.roadmap?.current_week || 1);
 
                 if (progressPercent) {
                     progressPercent.textContent = `${percentage}%`;
                 }
 
-                if (xpLeftText) {
-                    const xpLeft = data?.roadmap_widget?.xp_left ?? data?.roadmap_widget?.xp_to_next_level;
-                    xpLeftText.textContent = xpLeft != null
-                        ? `До нового ранга: ${xpLeft} XP`
-                        : 'Продолжай учиться каждый день';
+                if (progressMeta) {
+                    if (totalWeeks > 0) {
+                        progressMeta.textContent = `Завершено недель: ${weeksCompleted} из ${totalWeeks} • текущая: ${currentWeekNumber}`;
+                    } else {
+                        progressMeta.textContent = 'Продолжай учиться каждый день';
+                    }
                 }
 
-                if (roadmapCircle) {
-                    const radius = 58;
-                    const circumference = 2 * Math.PI * radius;
-                    roadmapCircle.style.strokeDasharray = `${circumference} ${circumference}`;
-                    const offset = circumference - (percentage / 100) * circumference;
-                    roadmapCircle.style.strokeDashoffset = offset;
-                }
-
+                setProgressCircle(percentage);
                 announce('Dashboard загружен');
             } catch (error) {
-                console.error("Ошибка Dashboard:", error);
+                console.error('Ошибка Dashboard:', error);
 
                 if (String(error.message).includes('401')) {
                     window.location.href = 'h1.html';
@@ -590,7 +654,7 @@
                 if (seasonPassCard) {
                     seasonPassCard.innerHTML = `
                         <div class="text-center">
-                            <div class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">Сезонный пропуск</div>
+                            <div class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">Прогресс плана</div>
                             <div class="text-2xl font-black text-slate-700">—</div>
                             <p class="text-slate-400 text-sm mt-3">Данные временно недоступны</p>
                         </div>
@@ -612,7 +676,7 @@
 
             try {
                 const data = await window.roChessApi.getRoadmap();
-                console.log("Roadmap:", data);
+                console.log('Roadmap:', data);
 
                 const roadmap = data.roadmap || {};
                 const weeks = Array.isArray(data.weeks) ? data.weeks : [];
@@ -622,7 +686,7 @@
 
                 announce('Дорожная карта загружена');
             } catch (error) {
-                console.error("Ошибка загрузки roadmap:", error);
+                console.error('Ошибка загрузки roadmap:', error);
 
                 const subtitle = document.getElementById('roadmap-subtitle');
                 const timeline = document.getElementById('roadmap-timeline');
@@ -721,14 +785,11 @@
 
             const totalWeeks = roadmap?.total_weeks || weeks.length || 0;
             const currentWeekNumber = roadmap?.current_week || 1;
-            const completedWeeks = weeks.filter(w => w.is_completed).length;
-
-            const progressPercent = totalWeeks > 0
-                ? Math.round((completedWeeks / totalWeeks) * 100)
-                : 0;
+            const { totalTasks, completedTasks, progressPercent } = calculateTaskProgressFromWeeks(weeks);
 
             if (subtitle) {
-                subtitle.textContent = `${roadmap?.title || 'План обучения'} • текущая неделя: ${currentWeekNumber}`;
+                const baseTitle = roadmap?.title || 'План обучения';
+                subtitle.textContent = `${baseTitle} • текущая неделя: ${currentWeekNumber} • задач: ${completedTasks}/${totalTasks}`;
             }
 
             if (miniProgress) {
@@ -745,45 +806,48 @@
             }
 
             timeline.innerHTML = weeks.map((week) => {
-                const isCurrent = week.week_number === currentWeekNumber;
-                const isDone = !!week.is_completed;
-
-                let cardClass = 'bg-white text-slate-500 border-slate-200 shadow-[0_6px_0_#e2e8f0]';
-                let icon = '🔒';
-
-                if (isDone) {
-                    cardClass = 'bg-emerald-500 text-white border-white shadow-[0_8px_0_#059669]';
-                    icon = '✅';
-                } else if (isCurrent) {
-                    cardClass = 'bg-indigo-500 text-white border-white shadow-[0_10px_0_#2563eb] scale-105';
-                    icon = '🚀';
-                }
+                const isCurrent = Number(week.week_number) === Number(currentWeekNumber);
+                const isCompleted = !!week.is_completed;
 
                 return `
-                    <div class="flex flex-col items-center gap-3 shrink-0 fade-swap">
-                        <div class="w-16 h-16 md:w-20 md:h-20 rounded-[1.5rem] md:rounded-[2rem] border-4 ${cardClass} flex items-center justify-center text-2xl md:text-3xl font-black transition-all">
-                            ${icon}
+                    <button
+                        type="button"
+                        class="week-pill flex flex-col items-center gap-3 shrink-0 text-center"
+                        data-week-number="${week.week_number}"
+                        aria-label="Открыть неделю ${week.week_number}"
+                    >
+                        <div class="w-16 h-16 md:w-20 md:h-20 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center text-3xl md:text-4xl font-black border-4 transition-all
+                            ${isCompleted ? 'bg-emerald-500 text-white border-emerald-200 shadow-[0_8px_0_#10b981]' : ''}
+                            ${!isCompleted && isCurrent ? 'bg-indigo-500 text-white border-indigo-200 shadow-[0_8px_0_#4f46e5]' : ''}
+                            ${!isCompleted && !isCurrent ? 'bg-white text-slate-400 border-slate-200 shadow-[0_8px_0_#e2e8f0]' : ''}">
+                            ${isCompleted ? '✅' : isCurrent ? '🚀' : '🔒'}
                         </div>
-                        <div class="text-center max-w-[110px] md:max-w-[120px]">
-                            <div class="text-[10px] uppercase font-black tracking-widest text-slate-400">
+                        <div class="w-24">
+                            <div class="text-[11px] font-black uppercase tracking-widest ${isCompleted ? 'text-emerald-600' : isCurrent ? 'text-indigo-600' : 'text-slate-400'}">
                                 Неделя ${week.week_number}
                             </div>
-                            <div class="text-xs font-black ${isCurrent ? 'text-indigo-500' : isDone ? 'text-emerald-500' : 'text-slate-500'} mt-1">
-                                ${escapeHtml(week.title || `Неделя ${week.week_number}`)}
+                            <div class="text-xs font-bold text-slate-600 mt-1">
+                                ${escapeHtml((week.title || '').replace(/^Неделя\s+\d+:\s*/i, '') || week.title || 'Без темы')}
                             </div>
                         </div>
-                    </div>
+                    </button>
                 `;
             }).join('');
+
+            timeline.querySelectorAll('.week-pill').forEach((button) => {
+                button.addEventListener('click', () => {
+                    const selectedWeekNumber = Number(button.dataset.weekNumber);
+                    renderCurrentWeek(roadmap, weeks, selectedWeekNumber);
+                });
+            });
         }
 
-        function renderCurrentWeek(roadmap, weeks) {
-            const currentWeekNumber = roadmap?.current_week || 1;
-            let currentWeek = weeks.find(w => w.week_number === currentWeekNumber);
-
-            if (!currentWeek && weeks.length > 0) {
-                currentWeek = weeks[0];
-            }
+        function renderCurrentWeek(roadmap, weeks, selectedWeekNumber = null) {
+            const currentWeekNumber = selectedWeekNumber || roadmap?.current_week || 1;
+            const currentWeek =
+                weeks.find(w => Number(w.week_number) === Number(currentWeekNumber)) ||
+                weeks[0] ||
+                null;
 
             const titleEl = document.getElementById('current-week-title');
             const descEl = document.getElementById('current-week-description');
@@ -791,27 +855,10 @@
             const listEl = document.getElementById('daily-tasks-list');
 
             if (!currentWeek) {
-                if (titleEl) titleEl.textContent = 'План ещё не готов';
-                if (descEl) descEl.textContent = 'Пройди тест чтобы получить план';
+                if (titleEl) titleEl.textContent = 'Нет недель';
+                if (descEl) descEl.textContent = 'Roadmap пустой';
                 if (badgeEl) badgeEl.textContent = 'Неделя';
-                if (listEl) {
-                    listEl.innerHTML = renderEmptyState(
-                        'Пока нет плана',
-                        'Пройди тест чтобы получить план',
-                        '🧭',
-                        `
-                            <div class="mt-5">
-                                <a
-                                    href="test.html"
-                                    class="ghost-btn inline-flex items-center justify-center px-6 py-3 bg-indigo-500 text-white rounded-2xl shadow-[0_8px_0_#4338ca] active:translate-y-[4px]"
-                                    aria-label="Перейти к тесту"
-                                >
-                                    Перейти к тесту
-                                </a>
-                            </div>
-                        `
-                    );
-                }
+                if (listEl) listEl.innerHTML = '';
                 return;
             }
 
@@ -830,25 +877,23 @@
             const tasks = Array.isArray(currentWeek.daily_tasks) ? currentWeek.daily_tasks : [];
 
             if (!tasks.length) {
-                listEl.innerHTML = renderEmptyState(
-                    'На этой неделе пока нет заданий',
-                    'Как только задания появятся, они будут показаны здесь.',
-                    '📋'
-                );
+                listEl.innerHTML = `
+                    <div class="col-span-full bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 p-6 text-slate-500 font-bold">
+                        На этой неделе пока нет заданий.
+                    </div>
+                `;
                 return;
             }
 
             listEl.innerHTML = tasks.map(task => {
                 const done = !!task.is_completed;
-
                 return `
-                    <label class="flex items-start gap-4 p-4 md:p-5 rounded-[1.3rem] md:rounded-[1.5rem] border-2 transition-all cursor-pointer ${done ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-200 hover:border-indigo-200 hover:bg-indigo-50/40'} fade-swap">
+                    <label class="task-card flex items-start gap-4 p-4 md:p-5 rounded-[1.3rem] md:rounded-[1.5rem] border-2 transition-all cursor-pointer ${done ? 'task-card-completed' : 'task-card-pending'}">
                         <input
                             type="checkbox"
                             class="task-checkbox mt-1 w-5 h-5 accent-emerald-500 cursor-pointer"
                             data-task-id="${task.id}"
-                            ${done ? 'checked disabled' : ''}
-                            aria-label="Отметить задачу ${escapeHtml(task.title || 'без названия')} выполненной"
+                            ${done ? 'checked' : ''}
                         />
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2 mb-2">
@@ -870,87 +915,81 @@
                 `;
             }).join('');
 
-            bindTaskCheckboxes();
+            bindTaskCheckboxes(currentWeek.week_number);
         }
 
-        function bindTaskCheckboxes() {
+        function bindTaskCheckboxes(selectedWeekNumber) {
             const checkboxes = document.querySelectorAll('.task-checkbox');
 
             checkboxes.forEach((checkbox) => {
-                checkbox.addEventListener('click', async function () {
+                checkbox.addEventListener('change', async function () {
                     const taskId = this.dataset.taskId;
                     if (!taskId || this.disabled) return;
 
                     this.disabled = true;
 
                     try {
-                        await window.roChessApi.completeRoadmapTask(taskId);
-                        showToast('Задача отмечена как выполненная', 'success');
+                        const response = await window.roChessApi.completeRoadmapTask(taskId);
+                        console.log('Task toggled:', response);
+
+                        showToast('Прогресс обновлен', 'success');
                         await loadRoadmap();
                         await initDashboard();
+
+                        const timelineButtons = document.querySelectorAll('.week-pill');
+                        timelineButtons.forEach(btn => {
+                            if (Number(btn.dataset.weekNumber) === Number(selectedWeekNumber)) {
+                                btn.click();
+                            }
+                        });
                     } catch (error) {
-                        console.error('Ошибка завершения задачи:', error);
-                        showToast(error.message || 'Не удалось отметить задачу как выполненную', 'error');
+                        console.error('Ошибка переключения задания:', error);
+                        this.checked = !this.checked;
                         this.disabled = false;
-                        this.checked = false;
+                        showToast(error.message || 'Не удалось обновить задание', 'error');
                     }
                 });
             });
         }
 
-        async function initPage() {
-            await initDashboard();
-            await loadRoadmap();
-        }
+        function setupMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            const menuBtn = document.getElementById('mobile-menu-btn');
 
-        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-        const mobileOverlay = document.getElementById('mobile-overlay');
-        const sidebar = document.getElementById('sidebar');
+            if (!sidebar || !overlay || !menuBtn) return;
 
-        function openMobileMenu() {
-            sidebar.classList.remove('-translate-x-full');
-            mobileOverlay.classList.remove('hidden');
-            mobileMenuBtn.setAttribute('aria-label', 'Закрыть меню');
-        }
-
-        function closeMobileMenu() {
-            if (window.innerWidth < 1280) {
-                sidebar.classList.add('-translate-x-full');
+            function openMenu() {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
             }
-            mobileOverlay.classList.add('hidden');
-            mobileMenuBtn.setAttribute('aria-label', 'Открыть меню');
-        }
 
-        if (mobileMenuBtn) {
-            mobileMenuBtn.addEventListener('click', () => {
-                if (sidebar.classList.contains('-translate-x-full')) {
-                    openMobileMenu();
+            function closeMenu() {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            }
+
+            menuBtn.addEventListener('click', openMenu);
+            overlay.addEventListener('click', closeMenu);
+
+            window.addEventListener('resize', () => {
+                if (window.innerWidth >= 1280) {
+                    overlay.classList.add('hidden');
+                    document.body.classList.remove('overflow-hidden');
+                    sidebar.classList.remove('-translate-x-full');
                 } else {
-                    closeMobileMenu();
+                    sidebar.classList.add('-translate-x-full');
                 }
             });
         }
 
-        if (mobileOverlay) {
-            mobileOverlay.addEventListener('click', closeMobileMenu);
-        }
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeMobileMenu();
-            }
+        document.addEventListener('DOMContentLoaded', async () => {
+            setupMobileMenu();
+            await initDashboard();
+            await loadRoadmap();
         });
-
-        window.addEventListener('resize', () => {
-            if (window.innerWidth >= 1280) {
-                mobileOverlay?.classList.add('hidden');
-                sidebar?.classList.remove('-translate-x-full');
-            } else {
-                sidebar?.classList.add('-translate-x-full');
-            }
-        });
-
-        initPage();
     </script>
 </body>
 </html>
