@@ -309,7 +309,6 @@
     <div id="live-region" class="sr-only" aria-live="polite"></div>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-    <!-- MOBILE HEADER -->
     <header class="xl:hidden sticky top-0 z-[90] bg-white/90 backdrop-blur-xl border-b border-slate-100 px-4 py-3 flex items-center justify-between">
         <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-lg px-3 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block">
             RO-CHESS
@@ -322,7 +321,6 @@
 
     <div id="mobile-overlay" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-[80] xl:hidden"></div>
 
-    <!-- SIDEBAR -->
     <aside id="sidebar" class="w-72 desktop-sidebar h-screen fixed xl:sticky top-0 left-0 flex flex-col p-8 z-[85] -translate-x-full xl:translate-x-0 transition-transform duration-300">
         <div class="mb-12 text-center">
             <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-2xl px-4 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block transform -rotate-2">
@@ -346,12 +344,10 @@
         </nav>
     </aside>
 
-    <!-- MAIN -->
     <main class="flex-1 p-4 md:p-6 xl:p-12 max-w-[1200px] mx-auto w-full">
         <div id="page-message" class="hidden mb-5" aria-live="polite"></div>
 
         <div class="grid grid-cols-12 gap-6 md:gap-8 xl:gap-10">
-            <!-- LEFT -->
             <div class="col-span-12 xl:col-span-5">
                 <div class="luxury-card p-6 md:p-8 xl:p-10 text-center xl:sticky xl:top-12 page-transition">
                     <div class="relative mb-8 inline-block">
@@ -379,8 +375,8 @@
                     </p>
 
                     <div class="space-y-4">
-                        <a href="admin.html" class="block w-full bg-slate-800 text-white font-black py-4 md:py-5 rounded-[1.3rem] md:rounded-[1.5rem] text-center uppercase italic roblox-font tracking-widest text-xs md:text-sm hover:bg-black transition-all shadow-xl min-h-[52px] flex items-center justify-center" aria-label="Редактировать профиль">
-                            Редактировать ⚙️
+                        <a href="Dashboard.html" class="block w-full bg-slate-800 text-white font-black py-4 md:py-5 rounded-[1.3rem] md:rounded-[1.5rem] text-center uppercase italic roblox-font tracking-widest text-xs md:text-sm hover:bg-black transition-all shadow-xl min-h-[52px] flex items-center justify-center" aria-label="Вернуться на главную">
+                            На главную 🏠
                         </a>
 
                         <button id="logout-btn" class="block w-full bg-white text-rose-400 font-black py-4 rounded-[1.3rem] md:rounded-[1.5rem] text-center uppercase text-[10px] tracking-widest border-2 border-slate-50 hover:bg-rose-50 hover:text-rose-600 transition-all min-h-[52px]" aria-label="Выйти из аккаунта" type="button">
@@ -390,7 +386,6 @@
                 </div>
             </div>
 
-            <!-- RIGHT -->
             <div class="col-span-12 xl:col-span-7 space-y-6 md:space-y-8">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                     <div class="luxury-card p-6 md:p-8 flex flex-col items-center text-center page-transition" aria-live="polite">
@@ -399,7 +394,7 @@
                     </div>
 
                     <div class="luxury-card p-6 md:p-8 flex flex-col items-center text-center border-l-0 sm:border-l-8 sm:border-l-indigo-500 page-transition" aria-live="polite">
-                        <span class="text-indigo-400 text-[11px] font-black uppercase mb-2 tracking-widest">Текущий ранг</span>
+                        <span class="text-indigo-400 text-[11px] font-black uppercase mb-2 tracking-widest">Текущий уровень</span>
                         <span id="profile-rank" class="text-2xl md:text-3xl font-black text-indigo-600 roblox-font italic">Загрузка</span>
                     </div>
                 </div>
@@ -407,10 +402,10 @@
                 <div class="luxury-card p-6 md:p-8 xl:p-10 page-transition">
                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3 mb-5 px-1 md:px-2">
                         <h3 class="font-black text-slate-800 uppercase text-[10px] md:text-xs tracking-widest">
-                            Уровень мастерства (XP)
+                            Учебный уровень
                         </h3>
                         <span id="xp-text" class="text-indigo-600 font-black text-xs md:text-sm italic bg-indigo-50 px-4 py-2 rounded-2xl w-fit">
-                            0 / 0
+                            Beginner
                         </span>
                     </div>
 
@@ -421,7 +416,7 @@
                     </div>
 
                     <p id="next-rank-text" class="mt-4 text-[10px] md:text-[11px] text-slate-400 text-center font-bold uppercase italic tracking-widest">
-                        Следующее звание: PLATINUM I 🏆
+                        Загрузка уровня...
                     </p>
                 </div>
 
@@ -451,7 +446,6 @@
         </div>
     </main>
 
-    <!-- LOGOUT CONFIRM -->
     <div id="logout-confirm" class="confirm-overlay" aria-hidden="true">
         <div class="confirm-card" role="dialog" aria-modal="true" aria-labelledby="logout-title">
             <div class="text-center">
@@ -520,6 +514,16 @@
             pageMessage.textContent = '';
         }
 
+        function escapeHtml(text) {
+            if (text == null) return '';
+            return String(text)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
         function renderProfileSkeleton() {
             document.getElementById('profile-username').innerHTML = `
                 <div class="h-8 w-40 rounded-xl skeleton mx-auto"></div>
@@ -534,7 +538,7 @@
                 <div class="h-8 w-32 rounded-xl skeleton"></div>
             `;
             document.getElementById('xp-text').innerHTML = `
-                <div class="h-5 w-20 rounded-xl skeleton"></div>
+                <div class="h-5 w-24 rounded-xl skeleton"></div>
             `;
             document.getElementById('xp-bar').style.width = '24%';
             document.getElementById('next-rank-text').innerHTML = `
@@ -548,35 +552,88 @@
             `).join('');
         }
 
-        function rankFromLevel(level = 1) {
-            if (level >= 30) return 'DIAMOND I';
-            if (level >= 20) return 'PLATINUM I';
-            if (level >= 10) return 'GOLD V';
-            return 'SILVER I';
+        function normalizeLevel(level) {
+            const value = String(level || '').toLowerCase().trim();
+            if (value === 'advanced') return 'advanced';
+            if (value === 'intermediate') return 'intermediate';
+            return 'beginner';
         }
 
-        function nextRankLabel(level = 1) {
-            if (level < 10) return 'Следующее звание: GOLD V 🏆';
-            if (level < 20) return 'Следующее звание: PLATINUM I 🏆';
-            if (level < 30) return 'Следующее звание: DIAMOND I 💎';
-            return 'Максимальное звание достигнуто 👑';
+        function getLevelUi(level) {
+            const normalized = normalizeLevel(level);
+
+            if (normalized === 'advanced') {
+                return {
+                    label: 'ADVANCED',
+                    title: 'Продвинутый',
+                    percent: 100,
+                    nextText: 'Ты уже на продвинутом уровне 👑',
+                    badgeText: 'ADVANCED'
+                };
+            }
+
+            if (normalized === 'intermediate') {
+                return {
+                    label: 'INTERMEDIATE',
+                    title: 'Средний',
+                    percent: 66,
+                    nextText: 'Следующая ступень: Advanced 🚀',
+                    badgeText: 'INTERMEDIATE'
+                };
+            }
+
+            return {
+                label: 'BEGINNER',
+                title: 'Начальный',
+                percent: 33,
+                nextText: 'Следующая ступень: Intermediate 🌟',
+                badgeText: 'BEGINNER'
+            };
         }
 
         function renderBadges(user) {
             const badgesGrid = document.getElementById('badges-grid');
-            const xp = user?.xp || 0;
-            const level = user?.level || 1;
+            const level = normalizeLevel(user?.level);
+            const eloRating = Number(user?.elo_rating || 0);
+            const weakTopicsCount = Array.isArray(user?.weak_topics) ? user.weak_topics.length : 0;
 
             const badges = [
-                { icon: '🏆', title: 'Чемпион', unlocked: level >= 5 },
-                { icon: '🧠', title: 'Тактик', unlocked: xp >= 1000 },
-                { icon: '🔥', title: 'В огне', unlocked: level >= 10 }
+                {
+                    icon: '🌱',
+                    title: 'Первые шаги',
+                    unlocked: true
+                },
+                {
+                    icon: '🧠',
+                    title: 'Тактик',
+                    unlocked: level === 'intermediate' || level === 'advanced'
+                },
+                {
+                    icon: '🏆',
+                    title: 'Чемпион',
+                    unlocked: eloRating >= 1400 || level === 'advanced'
+                },
+                {
+                    icon: '🔥',
+                    title: 'В огне',
+                    unlocked: weakTopicsCount > 0
+                },
+                {
+                    icon: '📘',
+                    title: 'Ученик',
+                    unlocked: level !== 'beginner'
+                },
+                {
+                    icon: '💎',
+                    title: 'Мастер',
+                    unlocked: level === 'advanced'
+                }
             ];
 
-            badgesGrid.innerHTML = badges.map((badge, index) => `
-                <div class="badge-slot p-4 md:p-6 flex flex-col items-center gap-3 ${badge.unlocked ? '' : 'opacity-30 grayscale'} ${index === 2 ? 'col-span-2 md:col-span-1' : ''}">
+            badgesGrid.innerHTML = badges.map((badge) => `
+                <div class="badge-slot p-4 md:p-6 flex flex-col items-center gap-3 ${badge.unlocked ? '' : 'opacity-30 grayscale'}">
                     <span class="text-4xl md:text-5xl">${badge.icon}</span>
-                    <span class="text-[9px] font-black text-slate-400 uppercase text-center">${badge.title}</span>
+                    <span class="text-[9px] font-black text-slate-400 uppercase text-center">${escapeHtml(badge.title)}</span>
                 </div>
             `).join('');
         }
@@ -589,34 +646,31 @@
             try {
                 const response = await window.roChessApi.getUserProfile();
                 const user = response.user || response || {};
+                const levelUi = getLevelUi(user.level);
 
                 document.getElementById('profile-username').textContent = user.username || 'Игрок';
                 document.getElementById('profile-email').textContent = user.email ? `@${user.email.split('@')[0]}` : '@no-email';
                 document.getElementById('profile-age').textContent = `${user.age || '--'} ЛЕТ`;
-                document.getElementById('profile-rank').textContent = rankFromLevel(user.level || 1);
+                document.getElementById('profile-rank').textContent = levelUi.title;
 
                 if (user.avatar_url) {
-                    document.getElementById('profile-avatar').src = user.avatar_url;
+                    document.getElementById('profile-avatar').src = resolveMediaUrl(user.avatar_url);
                 }
 
-                const currentXP = user.xp || 0;
-                const targetXP = user.next_level_xp || 3000;
-                const progress = targetXP > 0 ? Math.min((currentXP / targetXP) * 100, 100) : 0;
-
-                document.getElementById('xp-text').textContent = `${currentXP.toLocaleString()} / ${targetXP.toLocaleString()}`;
-                document.getElementById('xp-bar').style.width = `${progress}%`;
-                document.getElementById('next-rank-text').textContent = nextRankLabel(user.level || 1);
+                document.getElementById('xp-text').textContent = levelUi.badgeText;
+                document.getElementById('xp-bar').style.width = `${levelUi.percent}%`;
+                document.getElementById('next-rank-text').textContent = levelUi.nextText;
 
                 renderBadges(user);
                 announce('Профиль загружен');
             } catch (error) {
-                console.error("Ошибка при загрузке профиля:", error.message);
+                console.error('Ошибка при загрузке профиля:', error.message);
 
                 document.getElementById('profile-username').textContent = 'Профиль недоступен';
                 document.getElementById('profile-email').textContent = '@error';
                 document.getElementById('profile-age').textContent = '-- ЛЕТ';
                 document.getElementById('profile-rank').textContent = '—';
-                document.getElementById('xp-text').textContent = '0 / 0';
+                document.getElementById('xp-text').textContent = '—';
                 document.getElementById('xp-bar').style.width = '0%';
                 document.getElementById('next-rank-text').textContent = 'Данные временно недоступны';
                 document.getElementById('badges-grid').innerHTML = `
@@ -642,7 +696,7 @@
 
             try {
                 const response = await window.roChessApi.uploadAvatar(file);
-                document.getElementById('profile-avatar').src = response.avatar_url;
+                document.getElementById('profile-avatar').src = resolveMediaUrl(response.avatar_url);
                 showPageMessage('Аватар успешно обновлён! 📸', 'success');
                 showToast('Аватар обновлён', 'success');
             } catch (error) {
@@ -654,8 +708,6 @@
                 avatarInput.value = '';
             }
         });
-
-        document.querySelector('label[for], #profile-avatar')?.addEventListener?.('keydown', () => {});
 
         const avatarLabel = avatarInput.closest('label');
         if (avatarLabel) {
@@ -737,6 +789,20 @@
                 sidebar?.classList.add('-translate-x-full');
             }
         });
+
+        function resolveMediaUrl(path) {
+            if (!path) return 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Chess';
+
+            if (path.startsWith('http')) return path;
+
+            const baseUrl = 'http://10.120.104.178:5000/api';
+
+            if (path.startsWith('/users/avatar/')) {
+                return `${baseUrl}${path}`;
+            }
+
+            return `${baseUrl}/users/avatar/${path}`;
+        }
 
         loadUserProfile();
     </script>

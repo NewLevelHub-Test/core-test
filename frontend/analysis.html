@@ -189,24 +189,24 @@
         }
 
         .mistake-mini-board {
-            width: 100%;
-            aspect-ratio: 1 / 1;
             display: grid;
             grid-template-columns: repeat(8, 1fr);
             grid-template-rows: repeat(8, 1fr);
-            border-radius: 18px;
+            aspect-ratio: 1 / 1;
+            width: 100%;
+            max-width: 160px;
             overflow: hidden;
-            border: 6px solid #334155;
-            background: white;
+            border-radius: 18px;
         }
 
         .mini-sq {
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: clamp(12px, 1.8vw, 22px);
+            min-width: 0;
+            min-height: 0;
+            font-size: 18px;
             line-height: 1;
-            user-select: none;
         }
 
         .mini-w { background: #ffffff; }
@@ -1010,67 +1010,129 @@
             const container = document.getElementById('mistake-cards');
             if (!container) return;
 
-            if (!Array.isArray(keyMistakes) || !keyMistakes.length) {
+            // если нет ошибок
+            if (!keyMistakes || keyMistakes.length === 0) {
                 container.innerHTML = renderEmptyState(
-                    'Ошибок не найдено',
-                    'Для этой партии пока нет карточек с ключевыми ошибками.',
-                    '♟️'
+                    'Нет ошибок',
+                    'Отличная игра! Ошибок не найдено 🎉'
                 );
                 return;
             }
 
-            container.innerHTML = keyMistakes.slice(0, 3).map((mistake, index) => `
+            // берем максимум 3 ошибки
+            const mistakesToShow = keyMistakes.slice(0, 3);
+
+            container.innerHTML = mistakesToShow.map((m, index) => {
+                // защита от undefined
+                const fen = m.fen || '';
+                const played = m.move_played || '—';
+                const best = m.best_move || '—';
+                const explanation = m.explanation || 'Без объяснения';
+                const category = m.category || 'Ошибка';
+
+                return `
                 <div class="mistake-card p-4">
+                    
+                    <!-- мини доска -->
                     <div class="mb-4">
-                        <div class="mistake-mini-board">
-                            ${buildMiniBoardHtml(mistake.fen)}
-                        </div>
+                        <div class="mistake-mini-board" id="mini-board-${index}"></div>
                     </div>
 
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between gap-3">
-                            <div class="font-black text-slate-800">Ошибка ${index + 1}</div>
-                            <span class="mistake-tag">${escapeHtml(mistake.category || 'mistake')}</span>
+                    <!-- инфо -->
+                    <div class="space-y-2">
+                        <div class="mistake-tag">${escapeHtml(category)}</div>
+
+                        <div class="text-sm font-black text-slate-700">
+                            Ход: <span class="text-red-500">${escapeHtml(played)}</span>
                         </div>
 
-                        <div class="text-sm text-slate-600 font-bold">
-                            <span class="text-red-500">Сыграно:</span>
-                            ${escapeHtml(mistake.move_played || '—')}
+                        <div class="text-sm font-black text-emerald-600">
+                            Лучший: ${escapeHtml(best)}
                         </div>
 
-                        <div class="text-sm text-slate-600 font-bold">
-                            <span class="text-emerald-500">Лучше:</span>
-                            ${escapeHtml(mistake.best_move || '—')}
-                        </div>
-
-                        <div class="text-sm text-slate-500 leading-relaxed font-bold min-h-[90px]">
-                            ${escapeHtml(mistake.explanation || 'Объяснение отсутствует')}
-                        </div>
-
-                        <div class="text-sm font-black text-red-500">
-                            Потеря оценки: ${Number(mistake.evaluation_loss || 0).toFixed(1)}
+                        <div class="text-xs text-slate-500 font-bold">
+                            ${escapeHtml(explanation)}
                         </div>
 
                         <button
-                            class="solve-similar-btn w-full mt-2 px-4 py-3 min-h-[48px] rounded-2xl bg-blue-500 text-white font-black uppercase text-xs tracking-widest shadow-[0_6px_0_#2563eb] active:translate-y-[3px]"
+                            class="solve-similar-btn mt-3 w-full bg-blue-500 text-white font-black text-xs py-3 rounded-2xl shadow-md"
                             type="button"
-                            data-mistake-id="${mistake.id}"
-                            aria-label="Решить похожие задачи по ошибке ${index + 1}"
+                            data-mistake-id="${m.id}"
                         >
-                            Решить похожие задачи
+                            Решить похожие
                         </button>
                         <button
-                            onclick="askAIMistake('${escapeHtml(m.fen)}','${escapeHtml(m.move_played)}','${escapeHtml(m.best_move)}')"
-                            class="mt-3 w-full bg-indigo-500 hover:bg-indigo-600 text-white font-black text-[10px] uppercase rounded-2xl py-3 shadow-lg"
+                            class="askAIMistake mt-3 w-full bg-blue-500 text-white font-black text-xs py-3 rounded-2xl shadow-md"
                             type="button"
+                            data-mistake-id="${m.id}"
+                            data-fen="${m.fen || ''}"
+                            data-move="${m.move_played || ''}"
+                            data-best-move="${m.best_move || ''}"
                         >
-                            Спросить ИИ 🤖
+                            Спросить ИИ
                         </button>
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
+
+            // после рендера рисуем доски
+            mistakesToShow.forEach((m, index) => {
+                if (m.fen) {
+                    renderMiniBoard(`mini-board-${index}`, m.fen);
+                }
+            });
 
             bindMistakeCardButtons();
+        }
+
+        function renderMiniBoard(containerId, fen) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            const boardFen = String(fen || '').split(' ')[0];
+            const rows = boardFen.split('/');
+
+            container.innerHTML = '';
+
+            rows.forEach((row, rIndex) => {
+                let col = 0;
+
+                row.split('').forEach(cell => {
+                    if (!isNaN(cell)) {
+                        const emptyCount = parseInt(cell, 10);
+
+                        for (let i = 0; i < emptyCount; i++) {
+                            const square = document.createElement('div');
+                            const isWhite = (rIndex + col) % 2 === 0;
+
+                            square.className = `mini-sq ${isWhite ? 'mini-w' : 'mini-b'}`;
+                            square.innerHTML = '';
+
+                            container.appendChild(square);
+                            col++;
+                        }
+                    } else {
+                        const square = document.createElement('div');
+                        const isWhite = (rIndex + col) % 2 === 0;
+
+                        square.className = `mini-sq ${isWhite ? 'mini-w' : 'mini-b'}`;
+                        square.innerHTML = PIECES[cell] || '';
+
+                        container.appendChild(square);
+                        col++;
+                    }
+                });
+            });
+        }
+
+        function solveMistake(id) {
+            if (!id) {
+                showToast('Ошибка: нет ID задачи', 'error');
+                return;
+            }
+
+            window.location.href = `/exercises.html?mistake_id=${id}`;
         }
 
         function updateInfoPanel() {
@@ -1300,8 +1362,7 @@
 
         // спросить про конкретную ошибку
         function askAIMistake(fen, move, bestMove) {
-            const prompt = `
-        Вот позиция: ${fen}
+            const prompt = `Вот позиция: ${fen}
 
         Я сыграл: ${move}
         Лучше было: ${bestMove}
@@ -1309,20 +1370,30 @@
         Объясни:
         - почему мой ход плохой
         - как думать в таких позициях
-        - как не допускать такую ошибку
-        `;
+        - как не допускать такую ошибку`;
 
             localStorage.setItem('chat_prefill', prompt);
 
             localStorage.setItem('chat_context', JSON.stringify({
                 type: 'mistake',
-                fen,
-                move,
-                bestMove
+                fen: fen || '',
+                move: move || '',
+                bestMove: bestMove || ''
             }));
 
             window.location.href = 'chat.html';
         }
+
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.askAIMistake');
+            if (!btn) return;
+
+            const fen = btn.dataset.fen || '';
+            const move = btn.dataset.move || '';
+            const bestMove = btn.dataset.bestMove || '';
+
+            askAIMistake(fen, move, bestMove);
+        });
 
         buildBoard('8/8/8/8/8/8/8/8 w - - 0 1', null);
         loadAnalysis();
