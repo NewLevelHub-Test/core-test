@@ -10,19 +10,34 @@ from app.chess.pgn_utils import moves_to_pgn
 
 
 class GameService:
-
     @staticmethod
     def create_game(user_id, data):
         mode = data.get('mode', 'ai')
         player_color = data.get('color', 'white')
         bot_level = data.get('bot_level', 5)
-        time_control = data.get('time_control')
+
+        bot_user = User.query.filter_by(username="ChessBot").first()
+        
+        if not bot_user:
+            bot_user = User(
+                username="ChessBot", 
+                email="bot@system.chess",
+                role="admin", 
+                elo_rating=1500
+            )
+
+            bot_user.set_password("system_bot_secret_999") 
+            
+            db.session.add(bot_user)
+            db.session.commit()
+
+        bot_id = bot_user.id
 
         if player_color == 'white':
             white_id = user_id
-            black_id = data.get('opponent_id')
+            black_id = bot_id
         else:
-            white_id = data.get('opponent_id') or 0  # 0 = bot
+            white_id = bot_id
             black_id = user_id
 
         game = Game(
@@ -31,18 +46,20 @@ class GameService:
             mode=mode,
             player_color=player_color,
             bot_level=bot_level,
-            time_control=time_control,
+            status='in_progress',
+            fen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
         )
+        
         db.session.add(game)
         db.session.commit()
 
         result = {'game': game.to_dict()}
 
-        
         if mode == 'ai' and player_color == 'black':
             ai_result, _ = GameService._ai_move(game)
             if ai_result:
                 result['ai_move'] = ai_result
+                db.session.commit() 
 
         return result, 201
 

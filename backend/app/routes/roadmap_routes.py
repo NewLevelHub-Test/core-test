@@ -19,12 +19,8 @@ def get_roadmap():
 def generate_roadmap():
     user_id = get_jwt_identity()
     data = request.get_json() or {}
-    level = data.get('level')
+    level = data.get('level') 
     
-    allowed_levels = ['beginner', 'intermediate', 'advanced']
-    if not level or level not in allowed_levels:
-        return jsonify({'error': 'Некорректный уровень обучения'}), 400
-        
     result, status = RoadmapService.generate_roadmap(user_id, level)
     return jsonify(result), status
 

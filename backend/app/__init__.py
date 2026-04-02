@@ -39,7 +39,7 @@ def create_app(config_name=None):
 
     CORS(app, resources={
         r"/api/*": {
-            "origins": re.compile(r"https?://(localhost|127\.0\.0\.1)(:\d+)?"),
+            "origins": ["http://127.0.0.1:5500", "http://localhost:5500", "http://127.0.0.1:5000", "http://localhost:5000"],
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"],
             "supports_credentials": True
