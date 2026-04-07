@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.services.user_service import UserService
 from app import limiter
+from flask import send_from_directory, current_app
 
 user_bp = Blueprint('users', __name__)
 
@@ -71,3 +72,8 @@ def get_activity():
     page = request.args.get('page', 1, type=int)
     result, status = UserService.get_activity_history(user_id, page=page)
     return jsonify(result), status
+
+
+@user_bp.route('/avatar/<filename>')
+def get_avatar(filename):
+    return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)

@@ -6,6 +6,7 @@ from app.models.daily_task import DailyTask
 from app.models.topic import Topic
 from app.models.lesson import Lesson
 from app.models.user import User
+from datetime import datetime
 
 WEEK_TEMPLATES = [
     [
@@ -156,6 +157,8 @@ class RoadmapService:
 
     @staticmethod
     def complete_daily_task(user_id, task_id):
+        from app.models.progress import Progress
+        
         task = DailyTask.query.get(task_id)
         if not task:
             return {'error': 'Задание не найдено'}, 404
@@ -165,18 +168,67 @@ class RoadmapService:
         if int(roadmap.user_id) != int(user_id):
             return {'error': 'Доступ запрещён'}, 403
 
-        task.is_completed = True
+        # 1. МЕНЯЕМ СТАТУС (Toggle)
+        task.is_completed = not task.is_completed
 
+        # 2. ОБНОВЛЯЕМ ТАБЛИЦУ PROGRESS
+        if task.reference_id:
+            # Ищем существующую запись
+            existing_progress = Progress.query.filter_by(
+                user_id=user_id,
+                lesson_id=task.reference_id if task.task_type == 'lesson' else None,
+                exercise_id=task.reference_id if task.task_type == 'exercise' else None
+            ).first()
+
+            if task.is_completed:
+                # Если поставили галочку
+                if not existing_progress:
+                    new_progress = Progress(
+                        user_id=user_id,
+                        lesson_id=task.reference_id if task.task_type == 'lesson' else None,
+                        exercise_id=task.reference_id if task.task_type == 'exercise' else None,
+                        status='completed',
+                        completed_at=datetime.utcnow()
+                    )
+                    db.session.add(new_progress)
+                else:
+                    existing_progress.status = 'completed'
+                    existing_progress.completed_at = datetime.utcnow()
+            else:
+                # Если УБРАЛИ галочку
+                if existing_progress:
+                    existing_progress.status = 'in_progress'
+                    existing_progress.completed_at = None
+
+        # 3. ПРОВЕРКА ЗАВЕРШЕННОСТИ НЕДЕЛИ
         all_done = not DailyTask.query.filter_by(
             week_id=week.id, is_completed=False
         ).first()
-        if all_done:
-            week.is_completed = True
-            if roadmap.current_week == week.week_number:
-                roadmap.current_week = min(week.week_number + 1, roadmap.total_weeks)
+        
+        week.is_completed = all_done
+        
+        # Обновляем текущую неделю роадмапа, если нужно
+        if all_done and roadmap.current_week == week.week_number:
+            roadmap.current_week = min(week.week_number + 1, roadmap.total_weeks)
 
         db.session.commit()
-        return {'task': task.to_dict(), 'week_completed': all_done}, 200
+
+        # 4. СЧИТАЕМ НОВЫЙ ПРОЦЕНТ ДЛЯ ОТВЕТА
+        total_tasks = DailyTask.query.join(RoadmapWeek).filter(RoadmapWeek.roadmap_id == roadmap.id).count()
+        completed_tasks = DailyTask.query.join(RoadmapWeek).filter(
+            RoadmapWeek.roadmap_id == roadmap.id, 
+            DailyTask.is_completed == True
+        ).count()
+        
+        new_percent = round(completed_tasks / total_tasks * 100) if total_tasks else 0
+
+        return {
+            'task': task.to_dict(), 
+            'week_completed': all_done,
+            'roadmap_progress': new_percent # Отправляем новый процент фронтенду
+        }, 200
+
+        
 
     @staticmethod
     def get_progress(user_id):

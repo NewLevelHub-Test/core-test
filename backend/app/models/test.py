@@ -17,6 +17,7 @@ class Test(db.Model):
     questions = db.relationship('TestQuestion', backref='test', lazy='dynamic')
     attempts = db.relationship('TestAttempt', backref='test', lazy='dynamic')
 
+
     def to_dict(self):
         return {
             'id': self.id,

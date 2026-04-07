@@ -81,56 +81,33 @@ class TestService:
             answers_list = {}
 
         score = 0
-        wrong_topics = []
+        wrong_topic_ids = set()
         details = []
         saved_answers = {}
 
-        if isinstance(answers_list, list):
-            for item in answers_list:
-                qid = item.get('question_id')
-                user_answer = item.get('selected_option')
-                if qid is None: continue
-                
-                question = TestQuestion.query.get(int(qid))
-                if not question: continue
+        items = answers_list.items() if isinstance(answers_list, dict) else [(item.get('question_id'), item.get('selected_option')) for item in answers_list]
 
-                is_correct = str(question.correct_answer) == str(user_answer)
-                if is_correct:
-                    score += 1
-                else:
-                    test_obj = Test.query.get(question.test_id)
-                    if test_obj and test_obj.topic_id and test_obj.topic_id not in wrong_topics:
-                        wrong_topics.append(test_obj.topic_id)
+        for qid, user_answer in items:
+            if qid is None: continue
+            question = db.session.get(TestQuestion, int(qid))
+            if not question: continue
 
-                saved_answers[str(qid)] = user_answer
-                details.append({
-                    'question_id': question.id,
-                    'user_answer': user_answer,
-                    'correct_answer': question.correct_answer,
-                    'is_correct': is_correct,
-                    'explanation': question.explanation,
-                })
-        else:
-            for qid_str, user_answer in answers_list.items():
-                question = TestQuestion.query.get(int(qid_str))
-                if not question: continue
+            is_correct = str(question.correct_answer).strip() == str(user_answer).strip()
+            
+            if is_correct:
+                score += 1
+            else:
+                if hasattr(question, 'topic_id') and question.topic_id:
+                    wrong_topic_ids.add(question.topic_id)
 
-                is_correct = str(question.correct_answer) == str(user_answer)
-                if is_correct:
-                    score += 1
-                else:
-                    test_obj = Test.query.get(question.test_id)
-                    if test_obj and test_obj.topic_id and test_obj.topic_id not in wrong_topics:
-                        wrong_topics.append(test_obj.topic_id)
-
-                saved_answers[qid_str] = user_answer
-                details.append({
-                    'question_id': question.id,
-                    'user_answer': user_answer,
-                    'correct_answer': question.correct_answer,
-                    'is_correct': is_correct,
-                    'explanation': question.explanation,
-                })
+            saved_answers[str(qid)] = user_answer
+            details.append({
+                'question_id': question.id,
+                'user_answer': user_answer,
+                'correct_answer': question.correct_answer,
+                'is_correct': is_correct,
+                'explanation': question.explanation,
+            })
 
         attempt.answers = saved_answers
         attempt.score = score
@@ -143,19 +120,34 @@ class TestService:
                 level = lvl
                 break
 
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         if user:
             user.level = level
-            user.weak_topics = list(set((user.weak_topics or []) + wrong_topics))
+            current_weak = set(user.weak_topics or [])
+            user.weak_topics = list(current_weak.union(wrong_topic_ids))
 
         db.session.commit()
+
+        # --- АВТОГЕНЕРАЦИЯ РОАДМАПА ---
+        try:
+            from app.services.roadmap_service import RoadmapService
+            # Генерируем план обучения автоматически
+            RoadmapService.generate_roadmap(user_id=user.id, level=level)
+        except Exception as e:
+            print(f"Ошибка автоматической генерации роадмапа: {e}")
+
+        weak_topics_formatted = []
+        if wrong_topic_ids:
+            topics = Topic.query.filter(Topic.id.in_(list(wrong_topic_ids))).all()
+            weak_topics_formatted = [t.to_dict() for t in topics]
 
         return {
             'attempt': attempt.to_dict(),
             'details': details,
             'percent': percent,
             'level': level,
-            'weak_topics': wrong_topics,
+            'weak_topics': weak_topics_formatted,
+            'roadmap_status': 'generated'
         }, 200
 
     @staticmethod

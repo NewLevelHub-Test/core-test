@@ -75,20 +75,20 @@ class UserService:
         if not user:
             return {'error': 'Пользователь не найден'}, 404
 
-        total_games = Game.query.filter(
-            (Game.white_id == user_id) | (Game.black_id == user_id)
-        ).count()
+        total_games = Game.query.filter((Game.white_id == user_id) | (Game.black_id == user_id)).count()
+        wins = Game.query.filter(((Game.white_id == user_id) & (Game.result == '1-0')) | 
+                                 ((Game.black_id == user_id) & (Game.result == '0-1'))).count()
 
-        wins = Game.query.filter(
-            ((Game.white_id == user_id) & (Game.result == '1-0')) |
-            ((Game.black_id == user_id) & (Game.result == '0-1'))
-        ).count()
+        completed_lessons = Progress.query.filter_by(user_id=user_id, status='completed').filter(Progress.lesson_id.isnot(None)).count()
+        
+        test_attempts = TestAttempt.query.filter_by(user_id=user_id).all()
+        test_count = len(test_attempts)
 
-        completed_lessons = Progress.query.filter_by(
-            user_id=user_id, status='completed'
-        ).filter(Progress.lesson_id.isnot(None)).count()
+        from app.models.lesson import Lesson
+        total_system_lessons = Lesson.query.count()
+        progress_percent = round((completed_lessons / total_system_lessons * 100)) if total_system_lessons > 0 else 0
 
-        test_count = TestAttempt.query.filter_by(user_id=user_id).count()
+        total_errors = sum([1 for t in test_attempts if t.score < (t.total_questions or 0)])
 
         return {
             'elo_rating': user.elo_rating,
@@ -98,7 +98,11 @@ class UserService:
             'losses': total_games - wins,
             'completed_lessons': completed_lessons,
             'tests_taken': test_count,
+            'total_errors': total_errors,
+            'progress_percent': progress_percent  
         }, 200
+
+
 
     @staticmethod
     def get_learning_progress(user_id, page=1):
@@ -117,27 +121,20 @@ class UserService:
 
     @staticmethod
     def get_activity_history(user_id, page=1):
-        pagination = Progress.query.filter_by(
-            user_id=user_id, status='completed'
-        ).order_by(Progress.completed_at.desc()).paginate(
-            page=page, per_page=15, error_out=False
-        )
+        pagination = Progress.query.filter_by(user_id=user_id, status='completed')\
+            .order_by(Progress.completed_at.desc())\
+            .paginate(page=page, per_page=10, error_out=False)
+
+        recent_tests = TestAttempt.query.filter_by(user_id=user_id)\
+            .order_by(TestAttempt.started_at.desc())\
+            .limit(5).all()
 
         return {
-            'progress': [p.to_dict() for p in pagination.items],
+            'activities': [p.to_dict() for p in pagination.items],
+            'recent_tests': [t.to_dict() for t in recent_tests],
             'total': pagination.total,
             'page': pagination.page,
             'pages': pagination.pages
         }, 200
 
-        tests = TestAttempt.query.filter_by(
-            user_id=user_id
-        ).order_by(TestAttempt.started_at.desc()).limit(5).all()
 
-        return {
-            'games': [g.to_dict() for g in pagination.items],
-            'total_games': pagination.total,
-            'page': pagination.page,
-            'pages': pagination.pages,
-            'recent_tests': [t.to_dict() for t in tests],
-        }, 200

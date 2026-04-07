@@ -31,9 +31,12 @@ def make_move(game_id):
     user_id = get_jwt_identity()
     data = request.get_json() or {}
     
+    is_bot_move = data.get('is_bot_opening') is True or data.get('is_bot_move') is True
     move = data.get('move')
-    if not move or not isinstance(move, str) or len(move) < 4:
-        return jsonify({'error': 'Некорректный формат хода'}), 400
+
+    if not is_bot_move:
+        if not move or not isinstance(move, str) or len(move) < 4:
+            return jsonify({'error': 'Некорректный формат хода'}), 400
         
     result, status = GameService.make_move(user_id, game_id, data)
     return jsonify(result), status

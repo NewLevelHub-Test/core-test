@@ -9,3 +9,4 @@ Pillow>=10.2
 bcrypt>=4.1
 Flask-CORS>=4.0
 python-dotenv
+openai>=2.30.0
