@@ -344,7 +344,6 @@
     <div id="live-region" class="sr-only" aria-live="polite"></div>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-    <!-- MOBILE HEADER -->
     <header class="xl:hidden sticky top-0 z-[90] bg-white/90 backdrop-blur-xl border-b border-slate-100 px-4 py-3 flex items-center justify-between">
         <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-lg px-3 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block">
             RO-CHESS
@@ -362,7 +361,6 @@
 
     <div id="mobile-overlay" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-[80] xl:hidden"></div>
 
-    <!-- SIDEBAR -->
     <aside id="sidebar" class="w-72 desktop-sidebar h-screen fixed xl:sticky top-0 left-0 flex flex-col p-8 z-[85] -translate-x-full xl:translate-x-0 transition-transform duration-300">
         <div class="mb-12 text-center">
             <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-2xl px-4 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block transform -rotate-2">
@@ -383,7 +381,6 @@
         </nav>
     </aside>
 
-    <!-- MAIN -->
     <main class="flex-1 p-4 md:p-6 xl:p-12 max-w-[1500px] mx-auto w-full">
         <header class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-5 md:gap-6 mb-8 md:mb-10">
             <div>
@@ -443,7 +440,6 @@
         </div>
     </main>
 
-    <!-- FLOATING BUTTON -->
     <button
         id="floating-add-btn"
         class="floating-add fixed bottom-6 right-6 md:bottom-8 md:right-8 w-16 h-16 md:w-20 md:h-20 xl:w-24 xl:h-24 text-white text-3xl md:text-4xl xl:text-5xl rounded-[2rem] xl:rounded-[2.5rem] border-t-2 border-white/20 flex items-center justify-center z-50"
@@ -453,7 +449,6 @@
         +
     </button>
 
-    <!-- LESSON MODAL -->
     <div id="lesson-modal" class="modal-backdrop" aria-hidden="true">
         <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="lesson-modal-title">
             <div class="flex items-center justify-between mb-6">
@@ -476,8 +471,13 @@
                 </div>
 
                 <div>
-                    <div class="section-title">Описание</div>
-                    <textarea id="lesson-description-input" class="ghost-textarea" placeholder="Краткое описание урока" aria-label="Описание урока"></textarea>
+                    <div class="section-title">Контент урока</div>
+                    <textarea
+                        id="lesson-description-input"
+                        class="ghost-textarea"
+                        placeholder="Введите полный текст теории урока"
+                        aria-label="Контент урока"
+                    ></textarea>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -506,7 +506,6 @@
         </div>
     </div>
 
-    <!-- EXERCISE MODAL -->
     <div id="exercise-modal" class="modal-backdrop" aria-hidden="true">
         <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="exercise-modal-title">
             <div class="flex items-center justify-between mb-6">
@@ -634,30 +633,29 @@
             if (Array.isArray(data)) return data;
             if (!data || typeof data !== 'object') return [];
 
-            const possibleKeys = [
-                'items',
-                'results',
-                'data',
-                'users',
-                'lessons',
-                'exercises',
-                'topics',
-                'rows'
-            ];
-
+            const possibleKeys = ['items', 'results', 'data', 'users', 'lessons', 'exercises', 'topics', 'rows'];
             for (const key of possibleKeys) {
                 if (Array.isArray(data[key])) return data[key];
             }
-
             return [];
         }
 
-        function renderEmptyState(title, text, icon = '📭') {
+        function escapeHtml(text) {
+            if (text == null) return '';
+            return String(text)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        function renderEmptyState(title, text = '', icon = '📭') {
             return `
                 <div class="empty-state">
                     <div class="empty-state-icon">${icon}</div>
-                    <div class="text-slate-700 text-lg font-black mb-2">${title}</div>
-                    <div class="text-slate-500 font-bold">${text}</div>
+                    <div class="text-slate-700 text-lg font-black mb-2">${escapeHtml(title)}</div>
+                    <div class="text-slate-500 font-bold">${escapeHtml(text)}</div>
                 </div>
             `;
         }
@@ -667,7 +665,7 @@
                 <div class="error-state">
                     <div class="text-4xl mb-3">😵</div>
                     <div class="error-state-title">Ой, что-то пошло не так!</div>
-                    <div class="text-rose-700 font-bold">${text}</div>
+                    <div class="text-rose-700 font-bold">${escapeHtml(text)}</div>
                     ${withRetry ? `
                         <button
                             type="button"
@@ -740,6 +738,22 @@
             return value || '—';
         }
 
+        function normalizeLevel(value) {
+            const level = String(value || '').toLowerCase();
+            if (level === 'advanced') return 'Продвинутый';
+            if (level === 'intermediate') return 'Средний';
+            return 'Начальный';
+        }
+
+        function getProgressValue(data) {
+            return Number(
+                data?.progress_percent ??
+                data?.progress ??
+                data?.learning_progress ??
+                0
+            ) || 0;
+        }
+
         function showSideInfo(html) {
             sidePanel.innerHTML = html;
             sidePanel.classList.remove('fade-swap');
@@ -779,7 +793,7 @@
                 <option value="">Без темы</option>
                 ${cachedTopics.map(topic => `
                     <option value="${topic.id}" ${String(topic.id) === String(selectedId) ? 'selected' : ''}>
-                        ${topic.title || topic.name || `Тема #${topic.id}`}
+                        ${escapeHtml(topic.title || topic.name || `Тема #${topic.id}`)}
                     </option>
                 `).join('')}
             `;
@@ -790,7 +804,7 @@
                 <option value="">Выбери урок</option>
                 ${cachedLessons.map(lesson => `
                     <option value="${lesson.id}" ${String(lesson.id) === String(selectedId) ? 'selected' : ''}>
-                        ${lesson.title || `Урок #${lesson.id}`}
+                        ${escapeHtml(lesson.title || `Урок #${lesson.id}`)}
                     </option>
                 `).join('')}
             `;
@@ -801,8 +815,8 @@
             lessonModalTitle.textContent = mode === 'edit' ? 'Редактировать урок' : 'Создать урок';
 
             lessonTitleInput.value = lesson?.title || '';
-            lessonDescriptionInput.value = lesson?.description || '';
-            lessonOrderInput.value = lesson?.order_index || lesson?.order || 1;
+            lessonDescriptionInput.value = lesson?.content || '';
+            lessonOrderInput.value = lesson?.order || lesson?.order_index || 1;
             lessonStatusInput.value = lesson?.status || 'published';
 
             fillTopicsSelect(lesson?.topic_id || null);
@@ -899,32 +913,34 @@
                     <div class="admin-card-lux p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 page-transition">
                         <button
                             type="button"
-                            class="flex items-center gap-4 md:gap-5 min-w-0 cursor-pointer flex-1 text-left"
+                            class="flex items-center gap-4 md:gap-5 min-w-0 cursor-pointer flex-1 text-left user-open-btn"
                             data-user-id="${user.id}"
-                            aria-label="Открыть профиль пользователя ${user.username || user.name || user.email || `User ${user.id}`}"
+                            aria-label="Открыть профиль пользователя ${escapeHtml(user.username || user.name || user.email || `User ${user.id}`)}"
                         >
                             <div class="w-14 h-14 md:w-16 md:h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-3xl md:text-4xl shadow-inner border border-white">
                                 👤
                             </div>
                             <div class="min-w-0">
                                 <p class="font-black text-slate-700 text-base md:text-lg leading-tight truncate">
-                                    ${user.username || user.name || user.email || `User #${user.id}`}
+                                    ${escapeHtml(user.username || user.name || user.email || `User #${user.id}`)}
                                 </p>
                                 <p class="text-[10px] md:text-[11px] text-slate-400 font-black uppercase tracking-widest mt-1">
-                                    ID: ${user.id} • Уровень: ${user.level || 1} •
-                                    <span class="text-emerald-500">${user.status || 'Active'}</span>
+                                    ID: ${user.id} • Уровень: ${escapeHtml(normalizeLevel(user.level))}
+                                </p>
+                                <p class="text-slate-500 font-bold mt-2">
+                                    <span class="text-emerald-500">Открыть прогресс и статистику</span>
                                 </p>
                             </div>
                         </button>
                         <div class="flex gap-3 shrink-0">
-                            <button class="action-btn bg-slate-50 border-b-4 border-slate-100 hover:bg-white user-detail-btn" data-user-id="${user.id}" aria-label="Посмотреть прогресс пользователя ${user.username || user.name || user.email || user.id}" type="button">📈</button>
-                            <button class="action-btn bg-rose-50 border-b-4 border-rose-100 text-rose-500 hover:bg-rose-100 user-delete-btn" data-user-id="${user.id}" aria-label="Удалить пользователя ${user.username || user.name || user.email || user.id}" type="button">🗑️</button>
+                            <button class="action-btn bg-slate-50 border-b-4 border-slate-100 hover:bg-white user-detail-btn" data-user-id="${user.id}" aria-label="Посмотреть статистику пользователя ${escapeHtml(user.username || user.id)}" type="button">📊</button>
+                            <button class="action-btn bg-rose-50 border-b-4 border-rose-100 text-rose-500 hover:bg-rose-100 user-delete-btn" data-user-id="${user.id}" aria-label="Удалить пользователя ${escapeHtml(user.username || user.id)}" type="button">🗑️</button>
                         </div>
                     </div>
                 `).join('');
 
-                document.querySelectorAll('[data-user-id]').forEach(el => {
-                    el.addEventListener('click', () => loadUserDetail(el.dataset.userId));
+                document.querySelectorAll('.user-open-btn').forEach(btn => {
+                    btn.addEventListener('click', () => loadUserDetail(btn.dataset.userId));
                 });
 
                 document.querySelectorAll('.user-detail-btn').forEach(btn => {
@@ -935,60 +951,65 @@
                 });
 
                 document.querySelectorAll('.user-delete-btn').forEach(btn => {
-                    btn.addEventListener('click', async (e) => {
+                    btn.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        await deleteUser(btn.dataset.userId);
+                        deleteUser(btn.dataset.userId);
                     });
                 });
 
                 showSideInfo(`
                     <div class="section-title">Пользователи</div>
                     <div class="text-3xl font-black text-slate-800 mb-2">${users.length}</div>
-                    <div class="text-slate-500 font-bold">Нажми на пользователя, чтобы открыть его прогресс.</div>
+                    <div class="text-slate-500 font-bold">Нажми на пользователя, чтобы открыть его учебный прогресс.</div>
                 `);
-
-                announce('Пользователи загружены');
             } catch (e) {
                 console.error('Ошибка загрузки пользователей:', e);
-                adminContent.innerHTML = renderErrorState('Не удалось загрузить список пользователей.', true, 'retryCurrentTab()');
+                adminContent.innerHTML = renderErrorState('Не удалось загрузить пользователей.');
                 showSideInfo(`
                     <div class="section-title">Ошибка</div>
-                    <div class="text-rose-500 font-black">Не удалось загрузить данные пользователей.</div>
+                    <div class="text-rose-500 font-black">Не удалось загрузить список пользователей.</div>
                 `);
-                announce('Ошибка загрузки пользователей');
             }
         }
 
         async function loadUserDetail(userId) {
-            showSideInfo(`
-                <div class="section-title">Профиль игрока</div>
-                <div class="space-y-3">
-                    <div class="h-6 w-2/3 rounded-xl skeleton"></div>
-                    <div class="h-4 w-full rounded-xl skeleton"></div>
-                    <div class="h-4 w-5/6 rounded-xl skeleton"></div>
-                    <div class="h-4 w-4/6 rounded-xl skeleton"></div>
-                </div>
-            `);
-
             try {
                 const data = await window.roChessApi.getAdminUserDetail(userId);
+                const username = data.username || data.name || `User #${userId}`;
+                const levelLabel = normalizeLevel(data.level);
+                const progressPercent = getProgressValue(data);
+                const completedLessons = data.lessons_completed ?? data.completed_lessons ?? 0;
+                const completedTests = data.tests_completed ?? data.completed_tests ?? data.tests_taken ?? 0;
+                const mistakes = data.mistakes ?? data.mistakes_count ?? data.total_errors ?? 0;
+                const elo = data.elo_rating ?? data.rating ?? '—';
 
                 showSideInfo(`
                     <div class="section-title">Профиль игрока</div>
-                    <div class="text-2xl font-black text-slate-800 mb-3">${data.username || data.name || `User #${userId}`}</div>
+                    <div class="text-2xl font-black text-slate-800 mb-3">${escapeHtml(username)}</div>
+
+                    <div class="mb-5">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-slate-400 font-black uppercase text-[10px] tracking-widest">Учебный прогресс</span>
+                            <span class="font-black text-indigo-600">${progressPercent}%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-4 rounded-full overflow-hidden border border-white shadow-inner">
+                            <div class="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 rounded-full transition-all duration-700" style="width: ${Math.max(0, Math.min(100, progressPercent))}%"></div>
+                        </div>
+                    </div>
+
                     <div class="space-y-3">
-                        <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">Уроков завершено</span><span class="font-black text-slate-700">${data.lessons_completed ?? data.completed_lessons ?? 0}</span></div>
-                        <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">Тестов пройдено</span><span class="font-black text-slate-700">${data.tests_completed ?? data.completed_tests ?? 0}</span></div>
-                        <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">Ошибок</span><span class="font-black text-amber-500">${data.mistakes ?? data.mistakes_count ?? 0}</span></div>
-                        <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">Прогресс</span><span class="font-black text-indigo-600">${data.progress ?? data.progress_percent ?? 0}%</span></div>
+                        <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">Уровень</span><span class="font-black text-slate-700">${escapeHtml(levelLabel)}</span></div>
+                        <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">ELO</span><span class="font-black text-slate-700">${elo}</span></div>
+                        <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">Уроков завершено</span><span class="font-black text-slate-700">${completedLessons}</span></div>
+                        <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">Тестов пройдено</span><span class="font-black text-slate-700">${completedTests}</span></div>
+                        <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">Ошибок</span><span class="font-black text-amber-500">${mistakes}</span></div>
                     </div>
                 `);
             } catch (e) {
                 console.error(e);
                 showSideInfo(`
                     <div class="section-title">Ошибка</div>
-                    <div class="text-rose-500 font-black mb-2">Ой, что-то пошло не так!</div>
-                    <div class="text-slate-500 font-bold">Не удалось загрузить прогресс пользователя.</div>
+                    <div class="text-rose-500 font-black">Не удалось загрузить прогресс пользователя.</div>
                 `);
             }
         }
@@ -1036,90 +1057,88 @@
                             type="button"
                             class="flex items-center gap-4 md:gap-5 min-w-0 flex-1 lesson-open-btn text-left"
                             data-lesson-id="${lesson.id}"
-                            aria-label="Открыть урок ${lesson.title || `Урок ${lesson.id}`}"
+                            aria-label="Открыть урок ${escapeHtml(lesson.title || `Урок ${lesson.id}`)}"
                         >
                             <div class="w-14 h-14 md:w-16 md:h-16 bg-indigo-50 rounded-2xl flex items-center justify-center text-3xl md:text-4xl shadow-inner border border-white">
                                 📖
                             </div>
                             <div class="min-w-0">
                                 <p class="font-black text-slate-700 text-base md:text-lg leading-tight truncate">
-                                    ${lesson.title || `Урок #${lesson.id}`}
+                                    ${escapeHtml(lesson.title || `Урок #${lesson.id}`)}
                                 </p>
                                 <p class="text-[10px] md:text-[11px] text-slate-400 font-black uppercase tracking-widest mt-1">
-                                    ID: ${lesson.id} • Статус: ${formatStatus(lesson.status)} • Порядок: ${lesson.order_index || lesson.order || 1}
+                                    ID: ${lesson.id} • Статус: ${formatStatus(lesson.status)} • Порядок: ${lesson.order || lesson.order_index || 1}
                                 </p>
-                                <p class="text-slate-500 font-bold mt-2 line-clamp-2">
-                                    ${lesson.description || 'Описание отсутствует'}
+                                <p class="text-slate-500 font-bold mt-2 line-clamp-2 whitespace-pre-line">
+                                    ${lesson.content || 'Контент урока отсутствует'}
                                 </p>
                             </div>
                         </button>
                         <div class="flex gap-3 shrink-0">
-                            <button class="action-btn bg-slate-50 border-b-4 border-slate-100 hover:bg-white lesson-edit-btn" data-lesson-id="${lesson.id}" aria-label="Редактировать урок ${lesson.title || lesson.id}" type="button">✏️</button>
-                            <button class="action-btn bg-rose-50 border-b-4 border-rose-100 text-rose-500 hover:bg-rose-100 lesson-delete-btn" data-lesson-id="${lesson.id}" aria-label="Удалить урок ${lesson.title || lesson.id}" type="button">🗑️</button>
+                            <button class="action-btn bg-slate-50 border-b-4 border-slate-100 hover:bg-white lesson-edit-btn" data-lesson-id="${lesson.id}" aria-label="Редактировать урок ${escapeHtml(lesson.title || lesson.id)}" type="button">✏️</button>
+                            <button class="action-btn bg-rose-50 border-b-4 border-rose-100 text-rose-500 hover:bg-rose-100 lesson-delete-btn" data-lesson-id="${lesson.id}" aria-label="Удалить урок ${escapeHtml(lesson.title || lesson.id)}" type="button">🗑️</button>
                         </div>
                     </div>
                 `).join('');
 
                 document.querySelectorAll('.lesson-open-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
-                        const lesson = cachedLessons.find(l => String(l.id) === String(btn.dataset.lessonId));
+                        const lesson = cachedLessons.find(item => String(item.id) === String(btn.dataset.lessonId));
+                        if (!lesson) return;
+
                         showSideInfo(`
                             <div class="section-title">Урок</div>
-                            <div class="text-2xl font-black text-slate-800 mb-2">${lesson?.title || 'Без названия'}</div>
-                            <div class="text-slate-500 font-bold mb-3">${lesson?.description || 'Описание отсутствует'}</div>
-                            <div class="space-y-2">
-                                <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">ID</span><span class="font-black text-slate-700">${lesson?.id ?? '—'}</span></div>
-                                <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">Статус</span><span class="font-black text-indigo-600">${formatStatus(lesson?.status)}</span></div>
-                                <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">Порядок</span><span class="font-black text-slate-700">${lesson?.order_index || lesson?.order || 1}</span></div>
+                            <div class="text-2xl font-black text-slate-800 mb-3">${escapeHtml(lesson.title || `Урок #${lesson.id}`)}</div>
+                            <div class="space-y-3">
+                                <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">ID</span><span class="font-black text-slate-700">${lesson.id}</span></div>
+                                <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">Статус</span><span class="font-black text-slate-700">${formatStatus(lesson.status)}</span></div>
+                                <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">Порядок</span><span class="font-black text-slate-700">${lesson.order_index || lesson.order || 1}</span></div>
+                                <div class="pt-2 text-slate-500 font-bold">${escapeHtml(lesson.description || lesson.content || 'Описание отсутствует')}</div>
                             </div>
                         `);
                     });
                 });
 
                 document.querySelectorAll('.lesson-edit-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const lesson = cachedLessons.find(l => String(l.id) === String(btn.dataset.lessonId));
-                        if (lesson) editLesson(lesson);
+                    btn.addEventListener('click', () => {
+                        const lesson = cachedLessons.find(item => String(item.id) === String(btn.dataset.lessonId));
+                        if (lesson) openLessonModal('edit', lesson);
                     });
                 });
 
                 document.querySelectorAll('.lesson-delete-btn').forEach(btn => {
-                    btn.addEventListener('click', async (e) => {
-                        e.stopPropagation();
-                        await deleteLesson(btn.dataset.lessonId);
-                    });
+                    btn.addEventListener('click', () => deleteLesson(btn.dataset.lessonId));
                 });
 
                 showSideInfo(`
                     <div class="section-title">Уроки</div>
                     <div class="text-3xl font-black text-slate-800 mb-2">${lessons.length}</div>
-                    <div class="text-slate-500 font-bold">Список уроков успешно загружен.</div>
+                    <div class="text-slate-500 font-bold">Создавай и редактируй уроки через модалку.</div>
                 `);
-
-                announce('Уроки загружены');
             } catch (e) {
-                console.error('Ошибка загрузки уроков:', e);
-                adminContent.innerHTML = renderErrorState('Не удалось загрузить уроки.', true, 'retryCurrentTab()');
-                showSideInfo(`
-                    <div class="section-title">Ошибка</div>
-                    <div class="text-rose-500 font-black">Ой, что-то пошло не так! Не удалось загрузить уроки.</div>
-                `);
+                console.error(e);
+                adminContent.innerHTML = renderErrorState('Ошибка загрузки уроков');
             }
         }
 
         async function saveLesson() {
             const payload = {
                 title: lessonTitleInput.value.trim(),
-                description: lessonDescriptionInput.value.trim(),
+                content: lessonDescriptionInput.value.trim(),
                 topic_id: lessonTopicInput.value ? Number(lessonTopicInput.value) : null,
-                order_index: Number(lessonOrderInput.value || 1),
+                order: Number(lessonOrderInput.value || 1),
                 status: lessonStatusInput.value
             };
 
             if (!payload.title) {
                 showToast('Введите название урока', 'error');
                 lessonTitleInput.focus();
+                return;
+            }
+
+            if (!payload.content) {
+                showToast('Введите контент урока', 'error');
+                lessonDescriptionInput.focus();
                 return;
             }
 
@@ -1136,20 +1155,16 @@
                 }
 
                 closeLessonModal();
-                await preloadLessonsAndTopics();
                 await loadLessons();
                 await loadStats();
+                await preloadLessonsAndTopics();
             } catch (e) {
-                console.error(e);
+                console.error('Ошибка сохранения урока:', e);
                 showToast('Ой, не удалось сохранить урок', 'error');
             } finally {
                 saveLessonBtn.disabled = false;
                 saveLessonBtn.textContent = 'Сохранить';
             }
-        }
-
-        function editLesson(lesson) {
-            openLessonModal('edit', lesson);
         }
 
         async function deleteLesson(lessonId) {
@@ -1179,7 +1194,7 @@
                             <option value="">Выбери урок</option>
                             ${cachedLessons.map(lesson => `
                                 <option value="${lesson.id}" ${String(lesson.id) === String(selectedLessonForExercises) ? 'selected' : ''}>
-                                    ${lesson.title || `Урок #${lesson.id}`}
+                                    ${escapeHtml(lesson.title || `Урок #${lesson.id}`)}
                                 </option>
                             `).join('')}
                         </select>
@@ -1206,8 +1221,8 @@
                 await loadExercisesForLesson(selectedLessonForExercises);
             } else {
                 document.getElementById('exercise-list-area').innerHTML = renderEmptyState(
-                    'Задачи ещё не выбраны',
-                    'Выбери урок, чтобы увидеть его задачи.',
+                    'Выбери урок, чтобы увидеть его задачи',
+                    '',
                     '🧩'
                 );
             }
@@ -1225,19 +1240,21 @@
 
             try {
                 const response = await window.roChessApi.getLessonExercises(lessonId);
-                const exercises = safeArray(response);
+                const exercises = safeArray(response.exercises || response);
                 cachedExercises = exercises;
 
                 if (!exercises.length) {
                     area.innerHTML = renderEmptyState(
                         'Пока нет задач',
-                        'У этого урока ещё нет задач. Нажми на +, чтобы создать первую.',
+                        'Для этого урока задачи ещё не добавлены.',
                         '♟️'
                     );
 
+                    const lesson = cachedLessons.find(item => String(item.id) === String(lessonId));
                     showSideInfo(`
                         <div class="section-title">Задачи</div>
-                        <div class="text-slate-500 font-bold">Для урока ID ${lessonId} задач пока нет.</div>
+                        <div class="text-2xl font-black text-slate-800 mb-3">${escapeHtml(lesson?.title || `Урок #${lessonId}`)}</div>
+                        <div class="text-slate-500 font-bold">У этого урока пока нет задач.</div>
                     `);
                     return;
                 }
@@ -1248,75 +1265,77 @@
                             type="button"
                             class="flex items-center gap-4 md:gap-5 min-w-0 flex-1 exercise-open-btn text-left"
                             data-exercise-id="${exercise.id}"
-                            aria-label="Открыть задачу ${exercise.title || `Задача ${exercise.id}`}"
+                            aria-label="Открыть задачу ${escapeHtml(exercise.title || `Задача ${exercise.id}`)}"
                         >
                             <div class="w-14 h-14 md:w-16 md:h-16 bg-amber-50 rounded-2xl flex items-center justify-center text-3xl md:text-4xl shadow-inner border border-white">
                                 🧩
                             </div>
                             <div class="min-w-0">
                                 <p class="font-black text-slate-700 text-base md:text-lg leading-tight truncate">
-                                    ${exercise.title || `Задача #${exercise.id}`}
+                                    ${escapeHtml(exercise.title || `Задача #${exercise.id}`)}
                                 </p>
                                 <p class="text-[10px] md:text-[11px] text-slate-400 font-black uppercase tracking-widest mt-1">
                                     ID: ${exercise.id} • Сложность: ${formatDifficulty(exercise.difficulty)}
                                 </p>
                                 <p class="text-slate-500 font-bold mt-2 line-clamp-2">
-                                    ${exercise.fen || 'FEN не указан'}
+                                    ${escapeHtml(exercise.hint || exercise.description || 'Подсказка отсутствует')}
                                 </p>
                             </div>
                         </button>
                         <div class="flex gap-3 shrink-0">
-                            <button class="action-btn bg-slate-50 border-b-4 border-slate-100 hover:bg-white exercise-edit-btn" data-exercise-id="${exercise.id}" aria-label="Редактировать задачу ${exercise.title || exercise.id}" type="button">✏️</button>
-                            <button class="action-btn bg-rose-50 border-b-4 border-rose-100 text-rose-500 hover:bg-rose-100 exercise-delete-btn" data-exercise-id="${exercise.id}" aria-label="Удалить задачу ${exercise.title || exercise.id}" type="button">🗑️</button>
+                            <button class="action-btn bg-slate-50 border-b-4 border-slate-100 hover:bg-white exercise-edit-btn" data-exercise-id="${exercise.id}" aria-label="Редактировать задачу ${escapeHtml(exercise.title || exercise.id)}" type="button">✏️</button>
+                            <button class="action-btn bg-rose-50 border-b-4 border-rose-100 text-rose-500 hover:bg-rose-100 exercise-delete-btn" data-exercise-id="${exercise.id}" aria-label="Удалить задачу ${escapeHtml(exercise.title || exercise.id)}" type="button">🗑️</button>
                         </div>
                     </div>
                 `).join('');
 
                 document.querySelectorAll('.exercise-open-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
-                        const exercise = cachedExercises.find(ex => String(ex.id) === String(btn.dataset.exerciseId));
+                        const exercise = cachedExercises.find(item => String(item.id) === String(btn.dataset.exerciseId));
+                        if (!exercise) return;
+
                         showSideInfo(`
                             <div class="section-title">Задача</div>
-                            <div class="text-2xl font-black text-slate-800 mb-2">${exercise?.title || 'Без названия'}</div>
-                            <div class="text-slate-500 font-bold break-all mb-3">${exercise?.fen || 'FEN не указан'}</div>
-                            <div class="space-y-2">
-                                <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">ID</span><span class="font-black text-slate-700">${exercise?.id ?? '—'}</span></div>
-                                <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">Сложность</span><span class="font-black text-amber-500">${formatDifficulty(exercise?.difficulty)}</span></div>
-                                <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">Ход</span><span class="font-black text-slate-700">${exercise?.correct_move || exercise?.answer || '—'}</span></div>
-                                <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">Подсказка</span><span class="font-black text-slate-700">${exercise?.hint || '—'}</span></div>
+                            <div class="text-2xl font-black text-slate-800 mb-3">${escapeHtml(exercise.title || `Задача #${exercise.id}`)}</div>
+                            <div class="space-y-3">
+                                <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">ID</span><span class="font-black text-slate-700">${exercise.id}</span></div>
+                                <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">Сложность</span><span class="font-black text-slate-700">${formatDifficulty(exercise.difficulty)}</span></div>
+                                <div class="pt-2">
+                                    <div class="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-2">Подсказка</div>
+                                    <div class="text-slate-500 font-bold">${escapeHtml(exercise.hint || 'Подсказка отсутствует')}</div>
+                                </div>
+                                <div class="pt-2">
+                                    <div class="text-slate-400 font-black uppercase text-[10px] tracking-widest mb-2">FEN</div>
+                                    <div class="text-slate-700 font-black break-all">${escapeHtml(exercise.fen || '—')}</div>
+                                </div>
                             </div>
                         `);
                     });
                 });
 
                 document.querySelectorAll('.exercise-edit-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const exercise = cachedExercises.find(ex => String(ex.id) === String(btn.dataset.exerciseId));
-                        if (exercise) editExercise(exercise);
+                    btn.addEventListener('click', () => {
+                        const exercise = cachedExercises.find(item => String(item.id) === String(btn.dataset.exerciseId));
+                        if (exercise) openExerciseModal('edit', exercise);
                     });
                 });
 
                 document.querySelectorAll('.exercise-delete-btn').forEach(btn => {
-                    btn.addEventListener('click', async (e) => {
-                        e.stopPropagation();
-                        await deleteExercise(btn.dataset.exerciseId);
-                    });
+                    btn.addEventListener('click', () => deleteExercise(btn.dataset.exerciseId));
                 });
 
+                const lesson = cachedLessons.find(item => String(item.id) === String(lessonId));
                 showSideInfo(`
-                    <div class="section-title">Упражнения</div>
-                    <div class="text-3xl font-black text-slate-800 mb-2">${exercises.length}</div>
-                    <div class="text-slate-500 font-bold">Урок ID: ${lessonId}. Список задач загружен.</div>
+                    <div class="section-title">Задачи</div>
+                    <div class="text-2xl font-black text-slate-800 mb-3">${escapeHtml(lesson?.title || `Урок #${lessonId}`)}</div>
+                    <div class="text-slate-500 font-bold">Задач у урока: ${exercises.length}</div>
                 `);
-
-                announce('Задачи загружены');
             } catch (e) {
-                console.error('Ошибка загрузки задач:', e);
-                area.innerHTML = renderErrorState('Не удалось загрузить задачи для выбранного урока.', true, `loadExercisesForLesson(${lessonId})`);
+                console.error(e);
+                area.innerHTML = renderErrorState('Не удалось загрузить задачи.');
                 showSideInfo(`
                     <div class="section-title">Ошибка</div>
-                    <div class="text-rose-500 font-black">Ой, что-то пошло не так! Не удалось загрузить задачи.</div>
+                    <div class="text-rose-500 font-black">Не удалось загрузить задачи выбранного урока.</div>
                 `);
             }
         }
@@ -1337,9 +1356,9 @@
                 return;
             }
 
-            if (!payload.fen) {
-                showToast('Вставь FEN', 'error');
-                exerciseFenInput.focus();
+            if (!payload.title) {
+                showToast('Введите название задачи', 'error');
+                exerciseTitleInput.focus();
                 return;
             }
 
@@ -1357,6 +1376,7 @@
 
                 selectedLessonForExercises = payload.lesson_id;
                 closeExerciseModal();
+                await preloadLessonsAndTopics();
                 await loadExercisesTab();
                 await loadStats();
             } catch (e) {
@@ -1368,18 +1388,18 @@
             }
         }
 
-        function editExercise(exercise) {
-            openExerciseModal('edit', exercise);
-        }
-
         async function deleteExercise(exerciseId) {
-            const ok = confirm('Удалить упражнение?');
+            const ok = confirm('Удалить задачу?');
             if (!ok) return;
 
             try {
                 await window.roChessApi.deleteAdminExercise(exerciseId);
                 showToast('Задача удалена', 'success');
-                await loadExercisesTab();
+                if (selectedLessonForExercises) {
+                    await loadExercisesForLesson(selectedLessonForExercises);
+                } else {
+                    await loadExercisesTab();
+                }
                 await loadStats();
             } catch (e) {
                 console.error(e);
@@ -1387,20 +1407,8 @@
             }
         }
 
-        function retryCurrentTab() {
-            if (activeTab === 'users') {
-                loadUsers();
-            } else if (activeTab === 'lessons') {
-                loadLessons();
-            } else if (activeTab === 'exercises') {
-                loadExercisesTab();
-            }
-        }
-
         tabs.forEach(btn => {
-            btn.addEventListener('click', () => {
-                setActiveTab(btn.dataset.tab);
-            });
+            btn.addEventListener('click', () => setActiveTab(btn.dataset.tab));
         });
 
         floatingAddBtn.addEventListener('click', async () => {
@@ -1429,14 +1437,6 @@
             if (e.target === exerciseModal) closeExerciseModal();
         });
 
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeLessonModal();
-                closeExerciseModal();
-                closeMobileMenu();
-            }
-        });
-
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
         const mobileOverlay = document.getElementById('mobile-overlay');
         const sidebar = document.getElementById('sidebar');
@@ -1444,25 +1444,15 @@
         function openMobileMenu() {
             sidebar.classList.remove('-translate-x-full');
             mobileOverlay.classList.remove('hidden');
-            mobileMenuBtn.setAttribute('aria-label', 'Закрыть меню');
         }
 
         function closeMobileMenu() {
-            if (window.innerWidth < 1280) {
-                sidebar.classList.add('-translate-x-full');
-            }
+            sidebar.classList.add('-translate-x-full');
             mobileOverlay.classList.add('hidden');
-            mobileMenuBtn.setAttribute('aria-label', 'Открыть меню');
         }
 
         if (mobileMenuBtn) {
-            mobileMenuBtn.addEventListener('click', () => {
-                if (sidebar.classList.contains('-translate-x-full')) {
-                    openMobileMenu();
-                } else {
-                    closeMobileMenu();
-                }
-            });
+            mobileMenuBtn.addEventListener('click', openMobileMenu);
         }
 
         if (mobileOverlay) {

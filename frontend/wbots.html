@@ -601,7 +601,6 @@
         let isBotThinking = false;
         let isCreatingGame = false;
         let pendingPlayerMove = null;
-        
 
         const liveRegion = document.getElementById('live-region');
         const toast = document.getElementById('toast');
@@ -765,6 +764,130 @@
             logContainer.scrollTop = logContainer.scrollHeight;
         }
 
+        function applyAiMoveToBoard(aiMoveData) {
+            if (!aiMoveData) {
+                throw new Error("Пустой ход бота");
+            }
+
+            if (typeof aiMoveData === 'string') {
+                const botMove = game.move({
+                    from: aiMoveData.slice(0, 2),
+                    to: aiMoveData.slice(2, 4),
+                    promotion: aiMoveData.length > 4 ? aiMoveData.slice(4) : 'q'
+                });
+
+                if (!botMove) {
+                    throw new Error("Не удалось применить ход бота строкой");
+                }
+
+                board.position(game.fen());
+                updateMoveLog(botMove);
+                updateStatus();
+                return;
+            }
+
+            if (aiMoveData.from && aiMoveData.to) {
+                const botMove = game.move({
+                    from: aiMoveData.from,
+                    to: aiMoveData.to,
+                    promotion: aiMoveData.promotion || 'q'
+                });
+
+                if (!botMove) {
+                    throw new Error("Не удалось применить ход бота from/to");
+                }
+
+                board.position(game.fen());
+                updateMoveLog(botMove);
+                updateStatus();
+                return;
+            }
+
+            if (aiMoveData.fen_after) {
+                const loaded = game.load(aiMoveData.fen_after);
+
+                if (!loaded) {
+                    throw new Error("Не удалось загрузить позицию после хода бота");
+                }
+
+                board.position(game.fen());
+
+                const fakeBotMove = {
+                    san: aiMoveData.notation || aiMoveData.move || "бот сходил"
+                };
+
+                updateMoveLog(fakeBotMove);
+                updateStatus();
+                return;
+            }
+
+            throw new Error("Неизвестный формат ai_move");
+        }
+
+        function checkForGameEnd(response = null, botJustMoved = false) {
+            if (game.in_checkmate()) {
+                lastFinishedGameId = gameId;
+                if (botJustMoved) {
+                    showEndScreen("ПОРАЖЕНИЕ", "Бот поставил вам мат! 🤖");
+                } else {
+                    showEndScreen("ПОБЕДА", "Вы поставили мат боту! 🔥");
+                }
+                return true;
+            }
+
+            if (game.in_draw()) {
+                lastFinishedGameId = gameId;
+                showEndScreen("НИЧЬЯ", "Партия завершилась вничью");
+                return true;
+            }
+
+            if (response && response.game_over) {
+                lastFinishedGameId = gameId;
+                showEndScreen("ИГРА ОКОНЧЕНА", response.result || "Игра завершена");
+                return true;
+            }
+
+            return false;
+        }
+
+        async function requestBotOpeningMove() {
+            if (!gameId || game.game_over()) return;
+
+            setBotThinkingState(true);
+
+            try {
+                const response = await window.roChessApi.fetchWithAuth(`games/${gameId}/move`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        is_bot_opening: true
+                    })
+                });
+
+                const aiMoveData = response.ai_move || response.bot_move || response.engine_move || null;
+
+                if (!aiMoveData) {
+                    throw new Error('Сервер не прислал первый ход бота');
+                }
+
+                setTimeout(() => {
+                    try {
+                        applyAiMoveToBoard(aiMoveData);
+                        checkForGameEnd(response, true);
+                    } catch (innerErr) {
+                        console.error(innerErr);
+                        showPageMessage('Ой, что-то пошло не так! Не удалось применить первый ход бота.', 'error');
+                    } finally {
+                        setBotThinkingState(false);
+                    }
+                }, 650);
+
+            } catch (err) {
+                console.error("Ошибка первого хода бота:", err);
+                setBotThinkingState(false);
+                showPageMessage(`Ой, что-то пошло не так! ${err.message || 'Бот не смог начать партию.'}`, 'error');
+            }
+        }
+
         async function startNewGame() {
             if (isCreatingGame) return;
 
@@ -787,9 +910,11 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        difficulty: parseInt(difficulty, 10),
+                        difficulty: Number(difficulty),
+                        color: color,
                         user_color: color,
-                        time_control: timeLimit
+                        time_limit: Number(timeLimit),
+                        time_control: Number(timeLimit)
                     })
                 });
 
@@ -806,8 +931,13 @@
                     game.reset();
                     board.start();
                 } else {
-                    game.load(initialFen);
-                    board.position(game.fen());
+                    const loaded = game.load(initialFen);
+                    if (!loaded) {
+                        game.reset();
+                        board.start();
+                    } else {
+                        board.position(game.fen());
+                    }
                 }
 
                 lastFinishedGameId = null;
@@ -822,16 +952,40 @@
                     if (board) board.resize();
                 }, 120);
 
+                const openingAiMove = data.ai_move || data.bot_move || data.engine_move || null;
+
+                if (openingAiMove) {
+                    setBotThinkingState(true);
+
+                    setTimeout(() => {
+                        try {
+                            applyAiMoveToBoard(openingAiMove);
+                            checkForGameEnd(data, true);
+                        } catch (innerErr) {
+                            console.error(innerErr);
+                            showPageMessage('Ой, что-то пошло не так! Не удалось применить первый ход бота.', 'error');
+                            showToast('Ошибка первого хода бота', 'error');
+                        } finally {
+                            setBotThinkingState(false);
+                        }
+                    }, 650);
+                } else {
+                    const botShouldMoveFirst =
+                        (color === 'black' && game.turn() === 'w');
+
+                    if (botShouldMoveFirst) {
+                        await requestBotOpeningMove();
+                    }
+                }
+
             } catch (err) {
                 console.error("Ошибка создания игры:", err);
-                document.getElementById('game-status').innerHTML = `
-                    <div class="error-state w-full">
-                        <div class="text-lg font-black text-red-700 mb-2">Ой, что-то пошло не так!</div>
-                        <div class="text-red-600 font-bold">${err.message || 'Не удалось создать игру.'}</div>
-                    </div>
-                `;
                 showPageMessage(`Ой, что-то пошло не так! ${err.message || 'Не удалось создать игру.'}`, 'error');
                 showToast('Не удалось создать игру', 'error');
+                renderMoveLogEmpty();
+                game.reset();
+                board.start();
+                updateStatus();
             } finally {
                 isCreatingGame = false;
                 setControlsDisabled(false);
@@ -840,7 +994,11 @@
         }
 
         async function onDrop(source, target) {
+            hidePageMessage();
+
             if (isBotThinking || isCreatingGame) return 'snapback';
+            if (source === target) return;
+            if (!gameId) return 'snapback';
 
             const move = game.move({
                 from: source,
@@ -850,7 +1008,6 @@
 
             if (move === null) return 'snapback';
 
-            pendingPlayerMove = { source, target, move };
             board.position(game.fen());
             updateMoveLog(move);
             updateStatus();
@@ -860,88 +1017,25 @@
 
                 const response = await window.roChessApi.fetchWithAuth(`games/${gameId}/move`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ move: source + target })
+                    body: JSON.stringify({
+                        move: move.from + move.to + (move.promotion || ''),
+                        fen: game.fen()
+                    })
                 });
 
-                console.log("Ответ сервера после хода:", response);
-
-                const aiMoveData = response.ai_move || response.bot_move || response.engine_move || null;
-
-                if (response.game_over && !aiMoveData) {
+                if (checkForGameEnd(response, false)) {
                     setBotThinkingState(false);
-                    lastFinishedGameId = gameId;
-                    showEndScreen("ИГРА ОКОНЧЕНА", response.result || "Игра завершена");
                     return;
                 }
+
+                const aiMoveData = response.ai_move || response.bot_move || response.engine_move || null;
 
                 if (aiMoveData) {
                     setTimeout(() => {
                         try {
-                            if (typeof aiMoveData === 'string') {
-                                const botMove = game.move({
-                                    from: aiMoveData.slice(0, 2),
-                                    to: aiMoveData.slice(2, 4),
-                                    promotion: aiMoveData.length > 4 ? aiMoveData.slice(4) : 'q'
-                                });
+                            applyAiMoveToBoard(aiMoveData);
 
-                                if (!botMove) {
-                                    throw new Error("Не удалось применить строковый ход бота");
-                                }
-
-                                board.position(game.fen());
-                                updateMoveLog(botMove);
-                                updateStatus();
-                            } else if (aiMoveData.from && aiMoveData.to) {
-                                const botMove = game.move({
-                                    from: aiMoveData.from,
-                                    to: aiMoveData.to,
-                                    promotion: aiMoveData.promotion || 'q'
-                                });
-
-                                if (!botMove) {
-                                    throw new Error("Не удалось применить ход бота from/to");
-                                }
-
-                                board.position(game.fen());
-                                updateMoveLog(botMove);
-                                updateStatus();
-                            } else if (aiMoveData.fen_after) {
-                                const loaded = game.load(aiMoveData.fen_after);
-
-                                if (!loaded) {
-                                    throw new Error("Не удалось загрузить позицию после хода бота");
-                                }
-
-                                board.position(game.fen());
-
-                                const fakeBotMove = {
-                                    san: aiMoveData.notation || aiMoveData.move || "бот сходил"
-                                };
-
-                                updateMoveLog(fakeBotMove);
-                                updateStatus();
-                            } else {
-                                throw new Error("Неизвестный формат ai_move");
-                            }
-
-                            if (game.in_checkmate()) {
-                                lastFinishedGameId = gameId;
-                                showEndScreen("ПОРАЖЕНИЕ", "Бот поставил вам мат! 🤖");
-                                return;
-                            }
-
-                            if (game.in_draw()) {
-                                lastFinishedGameId = gameId;
-                                showEndScreen("НИЧЬЯ", "Партия завершилась вничью");
-                                return;
-                            }
-
-                            if (response.game_over) {
-                                lastFinishedGameId = gameId;
-                                showEndScreen("ИГРА ОКОНЧЕНА", response.result || "Игра завершена");
+                            if (checkForGameEnd(response, true)) {
                                 return;
                             }
                         } catch (innerErr) {
@@ -954,6 +1048,7 @@
                     }, 650);
                 } else {
                     setBotThinkingState(false);
+                    updateStatus();
                 }
 
             } catch (err) {
@@ -1097,80 +1192,42 @@
         function openMobileMenu() {
             sidebar.classList.remove('-translate-x-full');
             mobileOverlay.classList.remove('hidden');
-            mobileMenuBtn.setAttribute('aria-label', 'Закрыть меню');
+            document.body.classList.add('overflow-hidden');
         }
 
         function closeMobileMenu() {
-            if (window.innerWidth < 1280) {
-                sidebar.classList.add('-translate-x-full');
-            }
+            sidebar.classList.add('-translate-x-full');
             mobileOverlay.classList.add('hidden');
-            mobileMenuBtn.setAttribute('aria-label', 'Открыть меню');
+            document.body.classList.remove('overflow-hidden');
         }
 
-        if (mobileMenuBtn) {
-            mobileMenuBtn.addEventListener('click', () => {
-                if (sidebar.classList.contains('-translate-x-full')) {
-                    openMobileMenu();
-                } else {
-                    closeMobileMenu();
-                }
-            });
-        }
+        mobileMenuBtn?.addEventListener('click', openMobileMenu);
+        mobileOverlay?.addEventListener('click', closeMobileMenu);
 
-        if (mobileOverlay) {
-            mobileOverlay.addEventListener('click', closeMobileMenu);
-        }
+        document.getElementById('difficulty').addEventListener('change', () => {
+            updateBotDifficultyLabel();
+        });
+
+        document.getElementById('time-limit').addEventListener('change', () => {
+            // только меняем значение, новую игру не стартуем автоматически
+        });
 
         document.getElementById('cancel-resign-btn').addEventListener('click', closeResignConfirm);
         document.getElementById('confirm-resign-btn').addEventListener('click', confirmResign);
-        document.getElementById('difficulty').addEventListener('change', updateBotDifficultyLabel);
-
-        resignModal.addEventListener('click', (e) => {
-            if (e.target === resignModal) {
-                closeResignConfirm();
-            }
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeMobileMenu();
-                closeResignConfirm();
-            }
-        });
 
         window.addEventListener('resize', () => {
-            if (window.innerWidth >= 1280) {
-                mobileOverlay?.classList.add('hidden');
-                sidebar?.classList.remove('-translate-x-full');
-            } else {
-                sidebar?.classList.add('-translate-x-full');
-            }
-
             if (board) {
-                setTimeout(() => {
-                    board.resize();
-                }, 100);
+                board.resize();
             }
         });
 
-        window.addEventListener('load', () => {
-            if (board) {
-                setTimeout(() => {
-                    board.resize();
-                }, 150);
-            }
+        document.addEventListener('DOMContentLoaded', async () => {
+            updateBotDifficultyLabel();
+            board = Chessboard('myBoard', config);
+            updateOrientationButtons('white');
+            updateStatus();
+            await startNewGame();
         });
-
-        board = Chessboard('myBoard', config);
-
-        setTimeout(() => {
-            board.resize();
-        }, 100);
-        
-        updateBotDifficultyLabel();
-        renderMoveLogEmpty();
-        startNewGame();
     </script>
 </body>
 </html>
