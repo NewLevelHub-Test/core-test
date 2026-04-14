@@ -12,223 +12,65 @@
             background: radial-gradient(circle at center, #ffffff 0%, #f8fafc 100%);
             min-height: 100vh;
         }
-
-        .roblox-font {
-            font-family: 'Montserrat', sans-serif;
-        }
-
+        .roblox-font { font-family: 'Montserrat', sans-serif; }
         .desktop-sidebar {
-            background: rgba(255, 255, 255, 0.82);
+            background: rgba(255,255,255,0.82);
             backdrop-filter: blur(20px);
             border-right: 2px solid white;
             box-shadow: 10px 0 30px rgba(0,0,0,0.03);
         }
-
         .luxury-card {
-            background: rgba(255, 255, 255, 0.92);
+            background: rgba(255,255,255,0.92);
             backdrop-filter: blur(12px);
             border-radius: 32px;
             border: 2px solid white;
             box-shadow: 0 15px 35px rgba(0,0,0,0.05), 0 8px 0 #e2e8f0;
             transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-
-        .luxury-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.08), 0 8px 0 #e2e8f0;
-        }
-
+        .luxury-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.08), 0 8px 0 #e2e8f0; }
         .quest-gradient {
             background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
-            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.25), 0 10px 0 #1d4ed8;
+            box-shadow: 0 20px 40px rgba(99,102,241,0.25), 0 10px 0 #1d4ed8;
         }
+        .btn-min { min-height: 48px; min-width: 48px; }
+        .skeleton { position: relative; overflow: hidden; background: #e2e8f0; }
+        .skeleton::after { content:""; position:absolute; inset:0; transform:translateX(-100%); background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,0.6) 50%,rgba(255,255,255,0) 100%); animation:shimmer 1.25s infinite; }
+        .toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); z-index:120; background:rgba(15,23,42,0.94); color:white; border-radius:18px; padding:14px 18px; font-weight:800; box-shadow:0 14px 30px rgba(0,0,0,0.18); opacity:0; pointer-events:none; transition:opacity 0.2s ease,transform 0.2s ease; max-width:calc(100vw - 32px); text-align:center; }
+        .toast.show { opacity:1; transform:translateX(-50%) translateY(-4px); }
+        .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+        .page-transition { animation: fadeInUp 0.25s ease; }
+        .error-state { background:linear-gradient(180deg,rgba(254,242,242,0.95),rgba(255,255,255,0.98)); border:2px solid #fecaca; border-radius:28px; padding:24px; text-align:center; color:#991b1b; font-weight:800; }
+        .empty-state { background:rgba(248,250,252,0.9); border:2px dashed #cbd5e1; border-radius:28px; padding:24px; text-align:center; color:#64748b; font-weight:800; }
+        .task-card-completed { background:#ecfdf5; border-color:#a7f3d0; }
+        .task-card-pending { background:#f8fafc; border-color:#e2e8f0; }
+        .task-card-pending:hover { background:rgba(238,242,255,0.55); border-color:#c7d2fe; }
+        .task-card-locked { background:#f1f5f9; border-color:#e2e8f0; opacity:0.6; cursor:not-allowed; }
 
-        .btn-min {
-            min-height: 48px;
-            min-width: 48px;
-        }
+        .modal-overlay { position:fixed; inset:0; z-index:200; display:none; }
+        .modal-overlay.active { display:flex; }
+        .modal-bg { position:absolute; inset:0; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); }
+        .modal-container { position:relative; z-index:10; background:white; border-radius:32px; max-width:800px; width:100%; max-height:90vh; overflow-y:auto; margin:auto; box-shadow:0 25px 50px rgba(0,0,0,0.15); }
 
-        .focus-ring:focus-visible,
-        button:focus-visible,
-        a:focus-visible,
-        input:focus-visible,
-        select:focus-visible,
-        textarea:focus-visible {
-            outline: 3px solid #60a5fa;
-            outline-offset: 3px;
-        }
+        .step-indicator { display:flex; gap:6px; }
+        .step-dot { width:10px; height:10px; border-radius:50%; background:#e2e8f0; transition:all 0.3s; }
+        .step-dot.active { background:#6366f1; transform:scale(1.3); }
+        .step-dot.done { background:#10b981; }
 
-        .skeleton {
-            position: relative;
-            overflow: hidden;
-            background: #e2e8f0;
-        }
+        .quiz-option { border:3px solid #e2e8f0; border-radius:20px; padding:16px 20px; cursor:pointer; transition:all 0.2s; font-weight:700; }
+        .quiz-option:hover { border-color:#c7d2fe; background:#eef2ff; }
+        .quiz-option.selected { border-color:#6366f1; background:#eef2ff; }
+        .quiz-option.correct { border-color:#10b981; background:#ecfdf5; }
+        .quiz-option.wrong { border-color:#ef4444; background:#fef2f2; }
 
-        .skeleton::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            transform: translateX(-100%);
-            background: linear-gradient(
-                90deg,
-                rgba(255,255,255,0) 0%,
-                rgba(255,255,255,0.6) 50%,
-                rgba(255,255,255,0) 100%
-            );
-            animation: shimmer 1.25s infinite;
-        }
+        .progress-fill { transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
 
-        .fade-swap {
-            animation: fadeIn 0.22s ease;
-        }
+        @keyframes shimmer { 100% { transform:translateX(100%); } }
+        @keyframes fadeInUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes float { 0% { transform:translateY(0px) rotate(-3deg); } 50% { transform:translateY(-15px) rotate(2deg); } 100% { transform:translateY(0px) rotate(-3deg); } }
+        .floating { animation: float 4s ease-in-out infinite; }
 
-        .page-transition {
-            animation: fadeInUp 0.25s ease;
-        }
-
-        .error-state {
-            background: linear-gradient(180deg, rgba(254,242,242,0.95), rgba(255,255,255,0.98));
-            border: 2px solid #fecaca;
-            border-radius: 28px;
-            padding: 24px;
-            text-align: center;
-            color: #991b1b;
-            font-weight: 800;
-            animation: fadeInUp 0.25s ease;
-        }
-
-        .empty-state {
-            background: rgba(248,250,252,0.9);
-            border: 2px dashed #cbd5e1;
-            border-radius: 28px;
-            padding: 24px;
-            text-align: center;
-            color: #64748b;
-            font-weight: 800;
-            animation: fadeInUp 0.25s ease;
-        }
-
-        .toast {
-            position: fixed;
-            left: 50%;
-            bottom: 24px;
-            transform: translateX(-50%);
-            z-index: 120;
-            background: rgba(15, 23, 42, 0.94);
-            color: white;
-            border-radius: 18px;
-            padding: 14px 18px;
-            font-weight: 800;
-            box-shadow: 0 14px 30px rgba(0,0,0,0.18);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s ease, transform 0.2s ease;
-            max-width: calc(100vw - 32px);
-            text-align: center;
-        }
-
-        .toast.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(-4px);
-        }
-
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0,0,0,0);
-            white-space: nowrap;
-            border: 0;
-        }
-
-        .ghost-btn {
-            min-height: 48px;
-            border-radius: 18px;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            transition: all 0.2s ease;
-        }
-
-        .ghost-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .ghost-btn:active {
-            transform: translateY(2px);
-        }
-
-        .task-card-completed {
-            background: #ecfdf5;
-            border-color: #a7f3d0;
-        }
-
-        .task-card-pending {
-            background: #f8fafc;
-            border-color: #e2e8f0;
-        }
-
-        .task-card-pending:hover {
-            background: rgba(238, 242, 255, 0.55);
-            border-color: #c7d2fe;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0px) rotate(-3deg); }
-            50% { transform: translateY(-15px) rotate(2deg); }
-            100% { transform: translateY(0px) rotate(-3deg); }
-        }
-
-        .floating {
-            animation: float 4s ease-in-out infinite;
-        }
-
-        @keyframes shimmer {
-            100% { transform: translateX(100%); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @media (max-width: 1279px) {
-            .desktop-sidebar {
-                box-shadow: 20px 0 40px rgba(0,0,0,0.12);
-            }
-        }
-
-        @media (max-width: 1024px) {
-            .luxury-card {
-                border-radius: 24px;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .luxury-card {
-                border-radius: 22px;
-            }
-
-            .error-state,
-            .empty-state {
-                border-radius: 22px;
-                padding: 20px;
-            }
-        }
+        @media (max-width:1279px) { .desktop-sidebar { box-shadow:20px 0 40px rgba(0,0,0,0.12); } }
+        @media (max-width:640px) { .luxury-card { border-radius:22px; } .modal-container { border-radius:22px; margin:16px; } }
     </style>
 </head>
 <body class="bg-slate-50 xl:flex">
@@ -236,48 +78,18 @@
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <header class="xl:hidden sticky top-0 z-[90] bg-white/90 backdrop-blur-xl border-b border-slate-100 px-4 py-3 flex items-center justify-between">
-        <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-lg px-3 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block">
-            RO-CHESS
-        </div>
-
-        <button
-            id="mobile-menu-btn"
-            class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl btn-min"
-            aria-label="Открыть меню"
-            type="button"
-        >
-            ☰
-        </button>
+        <img src="gml.png" alt="RO-CHESS" class="h-10 rounded-xl">
+        <button id="mobile-menu-btn" class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl btn-min" aria-label="Открыть меню" type="button">☰</button>
     </header>
 
     <div id="mobile-overlay" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-[80] xl:hidden"></div>
 
     <aside id="sidebar" class="w-72 desktop-sidebar h-screen fixed xl:sticky top-0 left-0 flex flex-col p-8 z-[85] -translate-x-full xl:translate-x-0 transition-transform duration-300">
         <div class="mb-12 text-center">
-            <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-2xl px-4 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block transform -rotate-2">
-                RO-CHESS
-            </div>
+            <img src="gml.png" alt="RO-CHESS" class="h-14 rounded-xl inline-block">
         </div>
-
-        <nav class="space-y-4 flex-1" aria-label="Основная навигация">
-            <a href="Dashboard.html" class="flex items-center gap-4 p-4 min-h-[52px] bg-indigo-50 rounded-2xl text-indigo-600 font-black uppercase text-xs tracking-widest border-b-4 border-indigo-100" aria-label="Перейти на главную">
-                <span class="text-2xl">🏠</span> Дом
-            </a>
-            <a href="profile.html" class="flex items-center gap-4 p-4 min-h-[52px] hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all" aria-label="Перейти в профиль">
-                <span class="text-2xl">👤</span> Профиль
-            </a>
-            <a href="study.html" class="flex items-center gap-4 p-4 min-h-[52px] hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all" aria-label="Перейти к урокам">
-                <span class="text-2xl">📖</span> Уроки
-            </a>
-            <a href="position.html" class="flex items-center gap-4 p-4 min-h-[52px] hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all" aria-label="Перейти к сканеру">
-                <span class="text-2xl">📸</span> Сканер
-            </a>
-            <a href="admin.html" class="flex items-center gap-4 p-4 min-h-[52px] hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all" aria-label="Перейти в админ-панель">
-                <span class="text-2xl">⚙️</span> Админ
-            </a>
-        </nav>
-
-        <a href="profile.html" class="mt-auto flex items-center gap-3 p-4 min-h-[56px] bg-white rounded-3xl border-2 border-slate-50 shadow-sm hover:scale-105 transition-transform" aria-label="Открыть профиль пользователя">
+        <nav class="space-y-4 flex-1" aria-label="Основная навигация"></nav>
+        <a href="profile.html" class="mt-auto flex items-center gap-3 p-4 min-h-[56px] bg-white rounded-3xl border-2 border-slate-50 shadow-sm hover:scale-105 transition-transform">
             <div class="w-10 h-10 bg-sky-400 rounded-xl flex items-center justify-center text-xl shadow-md">😎</div>
             <div class="leading-none min-w-0">
                 <p id="sidebar-user-name" class="font-black text-[10px] text-slate-800 uppercase tracking-tighter truncate">Загрузка...</p>
@@ -286,32 +98,84 @@
         </a>
     </aside>
 
+    <!-- LESSON MODAL -->
+    <div id="lesson-modal" class="modal-overlay" role="dialog" aria-modal="true">
+        <div class="modal-bg" id="modal-bg-close"></div>
+        <div class="modal-container p-6 md:p-10">
+            <div id="modal-loading" class="text-center py-16">
+                <div class="text-6xl mb-4">📖</div>
+                <div class="text-slate-400 font-black text-lg uppercase tracking-widest">Загружаем урок...</div>
+                <div class="mt-6 w-48 h-2 bg-slate-100 rounded-full mx-auto overflow-hidden"><div class="h-full bg-indigo-400 rounded-full animate-pulse w-2/3"></div></div>
+            </div>
+
+            <div id="modal-content" class="hidden">
+                <div class="flex items-center justify-between mb-8">
+                    <div class="flex-1 min-w-0">
+                        <span id="modal-type-badge" class="bg-indigo-100 text-indigo-600 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full"></span>
+                        <h2 id="modal-title" class="text-2xl md:text-3xl font-black text-slate-800 mt-3 roblox-font italic uppercase leading-tight"></h2>
+                    </div>
+                    <button id="modal-close-btn" type="button" class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl hover:bg-slate-200 transition-colors shrink-0 ml-4">✕</button>
+                </div>
+
+                <!-- Step indicators -->
+                <div class="flex items-center justify-between mb-8">
+                    <div id="step-indicators" class="step-indicator"></div>
+                    <span id="step-counter" class="text-sm font-black text-slate-400"></span>
+                </div>
+
+                <!-- Lesson step content -->
+                <div id="modal-step" class="page-transition">
+                    <h3 id="step-title" class="text-xl font-black text-slate-800 mb-4"></h3>
+                    <div id="step-content" class="text-slate-600 font-bold leading-relaxed text-[15px] mb-6"></div>
+                    <div id="step-tip" class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 mb-6 hidden">
+                        <span class="text-amber-600 font-black text-sm">💡 Совет: </span>
+                        <span id="step-tip-text" class="text-amber-700 font-bold text-sm"></span>
+                    </div>
+                </div>
+
+                <!-- Quiz section -->
+                <div id="modal-quiz" class="hidden page-transition">
+                    <div class="bg-indigo-50 rounded-3xl p-6 mb-6 text-center">
+                        <div class="text-4xl mb-2">📝</div>
+                        <h3 class="text-xl font-black text-indigo-700 uppercase">Проверь себя!</h3>
+                        <p class="text-indigo-500 font-bold text-sm mt-1">Ответь на вопросы, чтобы завершить урок</p>
+                    </div>
+                    <div id="quiz-questions-container"></div>
+                </div>
+
+                <!-- Results section -->
+                <div id="modal-results" class="hidden page-transition text-center py-6">
+                    <div id="results-icon" class="text-7xl mb-4"></div>
+                    <h3 id="results-title" class="text-2xl font-black mb-2"></h3>
+                    <p id="results-subtitle" class="text-slate-500 font-bold mb-6"></p>
+                    <div id="results-score" class="text-5xl font-black mb-6"></div>
+                    <div id="results-details" class="text-left space-y-3 mb-8"></div>
+                </div>
+
+                <!-- Navigation buttons -->
+                <div class="flex items-center justify-between mt-8 pt-6 border-t-2 border-slate-100">
+                    <button id="modal-prev-btn" type="button" class="bg-slate-100 text-slate-600 font-black uppercase tracking-widest rounded-2xl px-6 py-3 text-sm hover:bg-slate-200 transition-colors hidden">← Назад</button>
+                    <div class="flex-1"></div>
+                    <button id="modal-next-btn" type="button" class="bg-indigo-500 text-white font-black uppercase tracking-widest rounded-2xl px-8 py-3 text-sm shadow-[0_6px_0_#4338ca] active:translate-y-[3px] active:shadow-none transition-all">Далее →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <main class="flex-1 p-4 md:p-6 xl:p-12 max-w-[1200px] mx-auto w-full space-y-6 md:space-y-8 xl:space-y-10">
 
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8 items-stretch page-transition">
             <section id="hero-card" class="xl:col-span-2 quest-gradient rounded-[2rem] md:rounded-[2.5rem] xl:rounded-[3rem] p-6 md:p-8 xl:p-10 relative overflow-hidden text-white border-2 border-white/20 flex flex-col justify-center min-h-[280px] md:min-h-[320px]" aria-live="polite">
                 <div class="relative z-10 max-w-xl">
-                    <span class="bg-white/20 backdrop-blur-md text-[10px] font-black px-4 py-2 rounded-full uppercase mb-4 inline-block border border-white/30 tracking-widest">
-                        Цель Дня
-                    </span>
-
-                    <h3 id="daily-goal-text" class="text-3xl md:text-4xl xl:text-5xl font-black roblox-font italic uppercase mb-6 leading-[0.95] tracking-tighter">
-                        Загрузка цели...
-                    </h3>
-
-                    <a href="study.html" id="hero-action-btn" class="inline-flex items-center justify-center bg-white text-blue-600 font-black px-8 md:px-10 py-4 rounded-[1.3rem] md:rounded-[1.5rem] shadow-[0_8px_0_#e2e8f0] uppercase italic text-xs md:text-sm active:translate-y-2 active:shadow-none transition-all min-h-[52px]" aria-label="Открыть рекомендованное действие">
-                        Начать 🚀
-                    </a>
+                    <span class="bg-white/20 backdrop-blur-md text-[10px] font-black px-4 py-2 rounded-full uppercase mb-4 inline-block border border-white/30 tracking-widest">Цель Дня</span>
+                    <h3 id="daily-goal-text" class="text-3xl md:text-4xl xl:text-5xl font-black roblox-font italic uppercase mb-6 leading-[0.95] tracking-tighter">Загрузка цели...</h3>
+                    <a href="study.html" id="hero-action-btn" class="inline-flex items-center justify-center bg-white text-blue-600 font-black px-8 md:px-10 py-4 rounded-[1.3rem] md:rounded-[1.5rem] shadow-[0_8px_0_#e2e8f0] uppercase italic text-xs md:text-sm active:translate-y-2 active:shadow-none transition-all min-h-[52px]">Начать 🚀</a>
                 </div>
-
-                <div class="absolute -right-6 md:-right-10 -bottom-10 md:-bottom-12 text-[10rem] md:text-[14rem] xl:text-[18rem] opacity-20 floating select-none">
-                    🐴
-                </div>
+                <div class="absolute -right-6 md:-right-10 -bottom-10 md:-bottom-12 text-[10rem] md:text-[14rem] xl:text-[18rem] opacity-20 floating select-none">🐴</div>
             </section>
 
             <section id="season-pass-card" class="luxury-card p-6 md:p-8 flex flex-col justify-center text-center" aria-live="polite">
                 <span class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">Прогресс плана</span>
-
                 <div class="relative w-28 h-28 md:w-32 md:h-32 mx-auto mb-4">
                     <svg class="w-full h-full transform -rotate-90" viewBox="0 0 128 128" aria-hidden="true">
                         <circle cx="64" cy="64" r="58" stroke="currentColor" stroke-width="12" fill="transparent" class="text-slate-100" />
@@ -322,28 +186,24 @@
                         <span class="text-[8px] font-black text-slate-400 uppercase">задач</span>
                     </div>
                 </div>
-
                 <p id="xp-left-text" class="text-[10px] font-bold text-slate-400 uppercase italic">Загрузка прогресса...</p>
             </section>
         </div>
 
         <div class="grid grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6 page-transition">
-            <a href="test.html" class="luxury-card p-5 md:p-6 xl:p-8 flex flex-col items-center gap-4 min-h-[170px] focus-ring" aria-label="Перейти к испытаниям">
-                <div class="w-16 h-16 md:w-20 md:h-20 bg-orange-100 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center text-4xl md:text-5xl shadow-inner">📝</div>
-                <span class="text-slate-700 font-black text-[10px] md:text-xs uppercase tracking-widest text-center">Испытания</span>
+            <a href="chat.html" class="luxury-card p-5 md:p-6 xl:p-8 flex flex-col items-center gap-4 min-h-[170px]">
+                <div class="w-16 h-16 md:w-20 md:h-20 bg-orange-100 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center text-4xl md:text-5xl shadow-inner">💬</div>
+                <span class="text-slate-700 font-black text-[10px] md:text-xs uppercase tracking-widest text-center">ИИ-помощник</span>
             </a>
-
-            <a href="study.html" class="luxury-card p-5 md:p-6 xl:p-8 flex flex-col items-center gap-4 min-h-[170px] focus-ring" aria-label="Перейти к урокам">
+            <a href="study.html" class="luxury-card p-5 md:p-6 xl:p-8 flex flex-col items-center gap-4 min-h-[170px]">
                 <div class="w-16 h-16 md:w-20 md:h-20 bg-blue-100 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center text-4xl md:text-5xl shadow-inner">📖</div>
                 <span class="text-slate-700 font-black text-[10px] md:text-xs uppercase tracking-widest text-center">Уроки</span>
             </a>
-
-            <a href="wbots.html" class="luxury-card p-5 md:p-6 xl:p-8 flex flex-col items-center gap-4 min-h-[170px] focus-ring" aria-label="Играть с ботом">
+            <a href="wbots.html" class="luxury-card p-5 md:p-6 xl:p-8 flex flex-col items-center gap-4 min-h-[170px]">
                 <div class="w-16 h-16 md:w-20 md:h-20 bg-indigo-100 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center text-4xl md:text-5xl shadow-inner">⚔️</div>
                 <span class="text-slate-700 font-black text-[10px] md:text-xs uppercase tracking-widest text-center">Играть</span>
             </a>
-
-            <a href="hist.html" class="luxury-card p-5 md:p-6 xl:p-8 flex flex-col items-center gap-4 min-h-[170px] focus-ring" aria-label="Перейти к истории партий">
+            <a href="hist.html" class="luxury-card p-5 md:p-6 xl:p-8 flex flex-col items-center gap-4 min-h-[170px]">
                 <div class="w-16 h-16 md:w-20 md:h-20 bg-purple-100 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center text-4xl md:text-5xl shadow-inner">📜</div>
                 <span class="text-slate-700 font-black text-[10px] md:text-xs uppercase tracking-widest text-center">История</span>
             </a>
@@ -361,6 +221,12 @@
                 </div>
             </div>
 
+            <div class="mb-6">
+                <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                    <div id="roadmap-progress-bar" class="progress-fill h-full bg-gradient-to-r from-indigo-500 to-emerald-400 rounded-full" style="width:0%"></div>
+                </div>
+            </div>
+
             <div class="mb-8 md:mb-10 overflow-x-auto pb-4">
                 <div id="roadmap-timeline" class="flex items-center gap-4 md:gap-6 min-w-max"></div>
             </div>
@@ -371,11 +237,8 @@
                         <h4 id="current-week-title" class="text-xl md:text-2xl font-black text-slate-800">Текущая неделя</h4>
                         <p id="current-week-description" class="text-slate-500 mt-2">Загрузка...</p>
                     </div>
-                    <div id="current-week-badge" class="px-4 py-2 rounded-2xl bg-indigo-100 text-indigo-600 text-xs font-black uppercase tracking-widest w-fit">
-                        Неделя
-                    </div>
+                    <div id="current-week-badge" class="px-4 py-2 rounded-2xl bg-indigo-100 text-indigo-600 text-xs font-black uppercase tracking-widest w-fit">Неделя</div>
                 </div>
-
                 <div id="daily-tasks-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
         </section>
@@ -389,465 +252,227 @@
             window.location.href = 'h1.html';
         }
 
-        const liveRegion = document.getElementById('live-region');
         const toast = document.getElementById('toast');
         let toastTimer = null;
-
-        function announce(message) {
-            if (liveRegion) liveRegion.textContent = message;
-        }
+        let cachedRoadmapData = null;
 
         function showToast(message, type = 'default') {
             clearTimeout(toastTimer);
             toast.textContent = message;
             toast.className = 'toast show';
-
-            if (type === 'error') {
-                toast.style.background = 'rgba(127, 29, 29, 0.96)';
-            } else if (type === 'success') {
-                toast.style.background = 'rgba(6, 78, 59, 0.96)';
-            } else {
-                toast.style.background = 'rgba(15, 23, 42, 0.94)';
-            }
-
-            toastTimer = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 2400);
+            toast.style.background = type === 'error' ? 'rgba(127,29,29,0.96)' : type === 'success' ? 'rgba(6,78,59,0.96)' : 'rgba(15,23,42,0.94)';
+            toastTimer = setTimeout(() => toast.classList.remove('show'), 2400);
         }
 
         function escapeHtml(text) {
             if (text == null) return '';
-            return String(text)
-                .replaceAll('&', '&amp;')
-                .replaceAll('<', '&lt;')
-                .replaceAll('>', '&gt;')
-                .replaceAll('"', '&quot;')
-                .replaceAll("'", '&#039;');
+            return String(text).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
         }
 
         function getTaskTypeEmoji(type) {
-            switch (type) {
-                case 'lesson': return '📘';
-                case 'exercise': return '🧩';
-                case 'game': return '♟️';
-                case 'test': return '📝';
-                default: return '⭐';
-            }
+            return { lesson: '📘', exercise: '🧩', game: '♟️', test: '📝' }[type] || '⭐';
         }
 
-        function getActionUrl(recommendation) {
-            if (!recommendation || !recommendation.action) return 'study.html';
-
-            switch (recommendation.action) {
-                case 'lesson':
-                    return recommendation.reference_id ? `study.html?lesson_id=${recommendation.reference_id}` : 'study.html';
-                case 'test':
-                    return 'test.html';
-                case 'game':
-                    return 'wbots.html';
-                case 'exercise':
-                    return recommendation.reference_id ? `study.html?exercise_id=${recommendation.reference_id}` : 'study.html';
-                default:
-                    return 'study.html';
-            }
+        function getTaskTypeLabel(type) {
+            return { lesson: 'Урок', exercise: 'Практика', game: 'Игра', test: 'Тест' }[type] || 'Задание';
         }
 
-        function getActionLabel(recommendation) {
-            if (!recommendation || !recommendation.action) return 'Открыть уроки 📖';
-
-            switch (recommendation.action) {
-                case 'lesson': return 'Начать урок 🚀';
-                case 'test': return 'Пройти тест 📝';
-                case 'game': return 'Играть с ботом ♟️';
-                case 'exercise': return 'Решить задачу 🧩';
-                default: return 'Продолжить 🚀';
-            }
-        }
-
-        function clampPercent(value) {
-            const number = Number(value);
-            if (!Number.isFinite(number)) return 0;
-            return Math.max(0, Math.min(100, Math.round(number)));
+        function clampPercent(v) {
+            const n = Number(v);
+            return Number.isFinite(n) ? Math.max(0, Math.min(100, Math.round(n))) : 0;
         }
 
         function calculateTaskProgressFromWeeks(weeks) {
-            const allTasks = (Array.isArray(weeks) ? weeks : []).flatMap(week =>
-                Array.isArray(week.daily_tasks) ? week.daily_tasks : []
-            );
-
-            const totalTasks = allTasks.length;
-            const completedTasks = allTasks.filter(task => !!task.is_completed).length;
-            const progressPercent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-
-            return { totalTasks, completedTasks, progressPercent };
+            const allTasks = (Array.isArray(weeks) ? weeks : []).flatMap(w => Array.isArray(w.daily_tasks) ? w.daily_tasks : []);
+            const total = allTasks.length;
+            const completed = allTasks.filter(t => !!t.is_completed).length;
+            return { totalTasks: total, completedTasks: completed, progressPercent: total > 0 ? Math.round(completed / total * 100) : 0 };
         }
 
         function setProgressCircle(percent) {
-            const roadmapCircle = document.getElementById('roadmap-svg-circle');
-            if (!roadmapCircle) return;
-
-            const radius = 58;
-            const circumference = 2 * Math.PI * radius;
-            roadmapCircle.style.strokeDasharray = `${circumference} ${circumference}`;
-
-            const safePercent = clampPercent(percent);
-            const offset = circumference - (safePercent / 100) * circumference;
-            roadmapCircle.style.strokeDashoffset = `${offset}`;
+            const circle = document.getElementById('roadmap-svg-circle');
+            if (!circle) return;
+            const r = 58, c = 2 * Math.PI * r;
+            circle.style.strokeDasharray = `${c} ${c}`;
+            circle.style.strokeDashoffset = `${c - (clampPercent(percent) / 100) * c}`;
         }
 
-        function renderHeroSkeleton() {
-            document.getElementById('daily-goal-text').innerHTML = `
-                <div class="space-y-3">
-                    <div class="h-10 w-5/6 rounded-2xl skeleton"></div>
-                    <div class="h-10 w-2/3 rounded-2xl skeleton"></div>
-                </div>
-            `;
+        function getActionUrl(rec) {
+            if (!rec || !rec.action) return 'study.html';
+            switch (rec.action) {
+                case 'lesson': return rec.reference_id ? `study.html?lesson_id=${rec.reference_id}` : 'study.html';
+                case 'test': return 'study.html';
+                case 'game': return 'wbots.html';
+                case 'exercise': return rec.reference_id ? `study.html?exercise_id=${rec.reference_id}` : 'study.html';
+                default: return 'study.html';
+            }
         }
 
-        function renderSeasonPassSkeleton() {
-            document.getElementById('roadmap-percent').innerHTML = `<div class="h-8 w-16 rounded-xl skeleton mx-auto"></div>`;
-            document.getElementById('xp-left-text').innerHTML = `<div class="h-4 w-40 rounded-xl skeleton mx-auto"></div>`;
+        function getActionLabel(rec) {
+            if (!rec || !rec.action) return 'Открыть уроки 📖';
+            return { lesson: 'Начать урок 🚀', test: 'Открыть уроки 📖', game: 'Играть с ботом ♟️', exercise: 'Решить задачу 🧩' }[rec.action] || 'Продолжить 🚀';
+        }
+
+        /* ====================== DASHBOARD INIT ====================== */
+
+        async function initDashboard() {
+            document.getElementById('daily-goal-text').innerHTML = '<div class="space-y-3"><div class="h-10 w-5/6 rounded-2xl skeleton"></div><div class="h-10 w-2/3 rounded-2xl skeleton"></div></div>';
+            document.getElementById('roadmap-percent').innerHTML = '<div class="h-8 w-16 rounded-xl skeleton mx-auto"></div>';
+
+            try {
+                const data = await window.roChessApi.getDashboardData();
+
+                const sidebarName = document.getElementById('sidebar-user-name');
+                const sidebarLevel = document.getElementById('sidebar-user-level');
+                if (sidebarName && data.user) sidebarName.textContent = data.user.username || data.user.name || 'Игрок';
+                if (sidebarLevel) {
+                    const lvl = data?.user?.level ?? data?.roadmap_widget?.roadmap?.level ?? '—';
+                    sidebarLevel.textContent = `LVL ${String(lvl).toUpperCase()} ⭐`;
+                }
+
+                const goalText = document.getElementById('daily-goal-text');
+                const heroBtn = document.getElementById('hero-action-btn');
+                const rec = data?.recommendation || null;
+                if (goalText) goalText.textContent = rec?.description || 'Готов к новым победам?';
+                if (heroBtn) { heroBtn.textContent = getActionLabel(rec); heroBtn.href = getActionUrl(rec); }
+
+                const pct = clampPercent(data?.roadmap_widget?.progress_percent || 0);
+                const wDone = Number(data?.roadmap_widget?.weeks_completed || 0);
+                const wTotal = Number(data?.roadmap_widget?.roadmap?.total_weeks || 0);
+                const wCurr = Number(data?.roadmap_widget?.roadmap?.current_week || 1);
+
+                document.getElementById('roadmap-percent').textContent = `${pct}%`;
+                const meta = document.getElementById('xp-left-text');
+                if (meta) meta.textContent = wTotal > 0 ? `Недель: ${wDone}/${wTotal} • текущая: ${wCurr}` : 'Продолжай учиться каждый день';
+                setProgressCircle(pct);
+            } catch (error) {
+                if (String(error.message).includes('401')) { window.location.href = 'h1.html'; return; }
+                document.getElementById('daily-goal-text').textContent = 'Не удалось загрузить';
+                showToast('Не удалось загрузить Dashboard', 'error');
+            }
+        }
+
+        /* ====================== ROADMAP ====================== */
+
+        async function loadRoadmap() {
+            renderRoadmapSkeleton();
+            try {
+                const data = await window.roChessApi.getRoadmap();
+                cachedRoadmapData = data;
+                renderRoadmapTimeline(data.roadmap || {}, data.weeks || []);
+                renderCurrentWeek(data.roadmap || {}, data.weeks || []);
+            } catch (error) {
+                const subtitle = document.getElementById('roadmap-subtitle');
+                const timeline = document.getElementById('roadmap-timeline');
+                const list = document.getElementById('daily-tasks-list');
+                const title = document.getElementById('current-week-title');
+                const desc = document.getElementById('current-week-description');
+                const miniProg = document.getElementById('roadmap-mini-progress');
+                const bar = document.getElementById('roadmap-progress-bar');
+
+                if (subtitle) subtitle.textContent = 'План обучения пока не создан';
+                if (miniProg) miniProg.textContent = '0%';
+                if (bar) bar.style.width = '0%';
+                if (timeline) timeline.innerHTML = '';
+
+                const canGenerate = String(error.message || '').toLowerCase().includes('план обучения не создан') && typeof window.roChessApi.generateRoadmap === 'function';
+
+                if (title) title.textContent = canGenerate ? 'План пока не создан' : 'Дорожная карта недоступна';
+                if (desc) desc.textContent = canGenerate ? 'Пройди тест и создай план обучения на 12 недель' : (error.message || 'Ошибка загрузки');
+
+                if (list) {
+                    if (canGenerate) {
+                        list.innerHTML = `
+                            <div class="col-span-full empty-state">
+                                <div class="text-4xl mb-3">🗺️</div>
+                                <div class="text-slate-700 text-lg font-black mb-2">План ещё не готов</div>
+                                <div class="text-slate-500 font-bold mb-5">Нажми кнопку и мы создадим план обучения на 12 недель</div>
+                                <button id="generate-roadmap-btn" type="button"
+                                    class="inline-flex items-center justify-center px-8 py-3 bg-indigo-500 text-white font-black uppercase tracking-widest rounded-2xl shadow-[0_8px_0_#4338ca] active:translate-y-[4px] transition-all min-h-[48px]">
+                                    Создать план 🚀
+                                </button>
+                            </div>`;
+                        document.getElementById('generate-roadmap-btn')?.addEventListener('click', async function () {
+                            this.disabled = true; this.textContent = 'Создаём план...';
+                            try {
+                                await window.roChessApi.generateRoadmap();
+                                showToast('Дорожная карта создана!', 'success');
+                                await loadRoadmap();
+                                await initDashboard();
+                            } catch (e) {
+                                showToast(e.message || 'Ошибка', 'error');
+                                this.disabled = false; this.textContent = 'Создать план 🚀';
+                            }
+                        });
+                    } else {
+                        list.innerHTML = `<div class="col-span-full error-state"><div class="text-4xl mb-3">😵</div><div class="text-lg font-black text-red-700 mb-2">Ошибка</div><div class="text-red-600 font-bold">${escapeHtml(error.message)}</div></div>`;
+                    }
+                }
+            }
         }
 
         function renderRoadmapSkeleton() {
             const timeline = document.getElementById('roadmap-timeline');
             const list = document.getElementById('daily-tasks-list');
-            const subtitle = document.getElementById('roadmap-subtitle');
-            const currentWeekTitle = document.getElementById('current-week-title');
-            const currentWeekDescription = document.getElementById('current-week-description');
-            const miniProgress = document.getElementById('roadmap-mini-progress');
-
-            subtitle.innerHTML = `<div class="h-4 w-52 rounded-xl skeleton"></div>`;
-            currentWeekTitle.innerHTML = `<div class="h-8 w-56 rounded-xl skeleton"></div>`;
-            currentWeekDescription.innerHTML = `
-                <div class="space-y-3 mt-3">
-                    <div class="h-4 w-full rounded-xl skeleton"></div>
-                    <div class="h-4 w-4/5 rounded-xl skeleton"></div>
-                </div>
-            `;
-            miniProgress.innerHTML = `<div class="h-8 w-16 rounded-xl skeleton ml-0 md:ml-auto"></div>`;
-
-            timeline.innerHTML = Array.from({ length: 4 }).map(() => `
-                <div class="flex flex-col items-center gap-3 shrink-0">
-                    <div class="w-16 h-16 md:w-20 md:h-20 rounded-[1.5rem] md:rounded-[2rem] skeleton"></div>
-                    <div class="w-20 h-3 rounded-xl skeleton"></div>
-                    <div class="w-24 h-3 rounded-xl skeleton"></div>
-                </div>
-            `).join('');
-
-            list.innerHTML = Array.from({ length: 4 }).map(() => `
-                <div class="rounded-[1.3rem] md:rounded-[1.5rem] border-2 border-slate-100 bg-slate-50 p-4 md:p-5">
-                    <div class="flex items-start gap-4">
-                        <div class="w-5 h-5 rounded-md skeleton mt-1"></div>
-                        <div class="flex-1 space-y-3">
-                            <div class="h-4 w-2/3 rounded-xl skeleton"></div>
-                            <div class="h-5 w-4/5 rounded-xl skeleton"></div>
-                            <div class="h-4 w-full rounded-xl skeleton"></div>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderErrorState(message, withRetry = false, retryId = '') {
-            return `
-                <div class="error-state">
-                    <div class="text-4xl mb-3">😵</div>
-                    <div class="text-lg font-black text-red-700 mb-2">Ой, что-то пошло не так!</div>
-                    <div class="text-red-600 font-bold">${escapeHtml(message)}</div>
-                    ${withRetry ? `
-                        <button
-                            id="${retryId}"
-                            type="button"
-                            class="mt-5 bg-red-500 text-white font-black uppercase tracking-widest rounded-[1.2rem] px-6 py-3 min-h-[48px] shadow-[0_8px_0_#dc2626] active:translate-y-[4px]"
-                        >
-                            Попробовать снова
-                        </button>
-                    ` : ''}
-                </div>
-            `;
-        }
-
-        function renderEmptyState(title, text, icon = '📭', extra = '') {
-            return `
-                <div class="empty-state">
-                    <div class="text-4xl mb-3">${icon}</div>
-                    <div class="text-slate-700 text-lg font-black mb-2">${escapeHtml(title)}</div>
-                    <div class="text-slate-500 font-bold">${escapeHtml(text)}</div>
-                    ${extra}
-                </div>
-            `;
-        }
-
-        async function initDashboard() {
-            renderHeroSkeleton();
-            renderSeasonPassSkeleton();
-            announce('Загружается Dashboard');
-
-            try {
-                const data = await window.roChessApi.getDashboardData();
-                console.log('Dashboard data:', data);
-
-                const sidebarName = document.getElementById('sidebar-user-name');
-                const sidebarLevel = document.getElementById('sidebar-user-level');
-
-                if (sidebarName && data.user) {
-                    sidebarName.textContent = data.user.username || data.user.name || 'Игрок';
-                }
-
-                if (sidebarLevel) {
-                    const level = data?.user?.level ?? data?.roadmap_widget?.roadmap?.level ?? '—';
-                    sidebarLevel.textContent = `LVL ${String(level).toUpperCase()} ⭐`;
-                }
-
-                const goalText = document.getElementById('daily-goal-text');
-                const heroActionBtn = document.getElementById('hero-action-btn');
-                const recommendation = data?.recommendation || null;
-
-                if (goalText) {
-                    goalText.textContent = recommendation?.description || 'Готов к новым победам?';
-                }
-
-                if (heroActionBtn) {
-                    heroActionBtn.textContent = getActionLabel(recommendation);
-                    heroActionBtn.href = getActionUrl(recommendation);
-                    heroActionBtn.setAttribute('aria-label', recommendation?.title || 'Открыть рекомендованное действие');
-                }
-
-                const progressPercent = document.getElementById('roadmap-percent');
-                const progressMeta = document.getElementById('xp-left-text');
-
-                const percentage = clampPercent(data?.roadmap_widget?.progress_percent || 0);
-                const weeksCompleted = Number(data?.roadmap_widget?.weeks_completed || 0);
-                const totalWeeks = Number(data?.roadmap_widget?.roadmap?.total_weeks || 0);
-                const currentWeekNumber = Number(data?.roadmap_widget?.roadmap?.current_week || 1);
-
-                if (progressPercent) {
-                    progressPercent.textContent = `${percentage}%`;
-                }
-
-                if (progressMeta) {
-                    if (totalWeeks > 0) {
-                        progressMeta.textContent = `Завершено недель: ${weeksCompleted} из ${totalWeeks} • текущая: ${currentWeekNumber}`;
-                    } else {
-                        progressMeta.textContent = 'Продолжай учиться каждый день';
-                    }
-                }
-
-                setProgressCircle(percentage);
-                announce('Dashboard загружен');
-            } catch (error) {
-                console.error('Ошибка Dashboard:', error);
-
-                if (String(error.message).includes('401')) {
-                    window.location.href = 'h1.html';
-                    return;
-                }
-
-                const heroCard = document.getElementById('hero-card');
-                const seasonPassCard = document.getElementById('season-pass-card');
-
-                if (heroCard) {
-                    heroCard.innerHTML = renderErrorState('Не удалось загрузить главные данные страницы.', true, 'retry-dashboard-btn');
-                }
-
-                if (seasonPassCard) {
-                    seasonPassCard.innerHTML = `
-                        <div class="text-center">
-                            <div class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">Прогресс плана</div>
-                            <div class="text-2xl font-black text-slate-700">—</div>
-                            <p class="text-slate-400 text-sm mt-3">Данные временно недоступны</p>
-                        </div>
-                    `;
-                }
-
-                const retryBtn = document.getElementById('retry-dashboard-btn');
-                if (retryBtn) {
-                    retryBtn.addEventListener('click', initDashboard);
-                }
-
-                showToast('Не удалось загрузить Dashboard', 'error');
-            }
-        }
-
-        async function loadRoadmap() {
-            renderRoadmapSkeleton();
-            announce('Загружается дорожная карта');
-
-            try {
-                const data = await window.roChessApi.getRoadmap();
-                console.log('Roadmap:', data);
-
-                const roadmap = data.roadmap || {};
-                const weeks = Array.isArray(data.weeks) ? data.weeks : [];
-
-                renderRoadmapTimeline(roadmap, weeks);
-                renderCurrentWeek(roadmap, weeks);
-
-                announce('Дорожная карта загружена');
-            } catch (error) {
-                console.error('Ошибка загрузки roadmap:', error);
-
-                const subtitle = document.getElementById('roadmap-subtitle');
-                const timeline = document.getElementById('roadmap-timeline');
-                const title = document.getElementById('current-week-title');
-                const desc = document.getElementById('current-week-description');
-                const badge = document.getElementById('current-week-badge');
-                const list = document.getElementById('daily-tasks-list');
-                const miniProgress = document.getElementById('roadmap-mini-progress');
-
-                if (subtitle) subtitle.textContent = 'План обучения пока не создан';
-                if (miniProgress) miniProgress.textContent = '0%';
-                if (timeline) timeline.innerHTML = '';
-
-                const canGenerate =
-                    String(error.message || '').toLowerCase().includes('план обучения не создан') &&
-                    typeof window.roChessApi.generateRoadmap === 'function';
-
-                if (title) title.textContent = canGenerate ? 'План пока не создан' : 'Дорожная карта недоступна';
-                if (desc) {
-                    desc.textContent = canGenerate
-                        ? 'Пройди тест чтобы получить план'
-                        : (error.message || 'Не удалось загрузить roadmap');
-                }
-                if (badge) badge.textContent = 'Неделя';
-
-                if (list) {
-                    if (canGenerate) {
-                        list.innerHTML = renderEmptyState(
-                            'План ещё не готов',
-                            'Пройди тест чтобы получить план',
-                            '📝',
-                            `
-                                <div class="mt-5 flex flex-col sm:flex-row gap-3 justify-center">
-                                    <a
-                                        href="test.html"
-                                        class="ghost-btn inline-flex items-center justify-center px-6 py-3 bg-indigo-500 text-white rounded-2xl shadow-[0_8px_0_#4338ca] active:translate-y-[4px]"
-                                        aria-label="Перейти к тесту"
-                                    >
-                                        Пройти тест
-                                    </a>
-                                    <button
-                                        id="generate-roadmap-btn"
-                                        class="ghost-btn inline-flex items-center justify-center px-6 py-3 bg-white text-indigo-600 border-2 border-indigo-100 rounded-2xl"
-                                        type="button"
-                                        aria-label="Создать дорожную карту"
-                                    >
-                                        Создать сейчас
-                                    </button>
-                                </div>
-                            `
-                        );
-                    } else {
-                        list.innerHTML = renderErrorState(
-                            error.message || 'Не удалось загрузить дорожную карту',
-                            true,
-                            'retry-roadmap-btn'
-                        );
-                    }
-
-                    const retryRoadmapBtn = document.getElementById('retry-roadmap-btn');
-                    if (retryRoadmapBtn) {
-                        retryRoadmapBtn.addEventListener('click', loadRoadmap);
-                    }
-
-                    if (canGenerate) {
-                        const btn = document.getElementById('generate-roadmap-btn');
-                        if (btn) {
-                            btn.addEventListener('click', async () => {
-                                try {
-                                    btn.disabled = true;
-                                    btn.textContent = 'Создание...';
-
-                                    await window.roChessApi.generateRoadmap();
-                                    showToast('Дорожная карта создана', 'success');
-                                    await loadRoadmap();
-                                    await initDashboard();
-                                } catch (e) {
-                                    console.error('Ошибка генерации roadmap:', e);
-                                    showToast(e.message || 'Не удалось создать дорожную карту', 'error');
-                                    btn.disabled = false;
-                                    btn.textContent = 'Создать сейчас';
-                                }
-                            });
-                        }
-                    }
-                }
-            }
+            document.getElementById('roadmap-subtitle').innerHTML = '<div class="h-4 w-52 rounded-xl skeleton"></div>';
+            document.getElementById('current-week-title').innerHTML = '<div class="h-8 w-56 rounded-xl skeleton"></div>';
+            document.getElementById('current-week-description').innerHTML = '<div class="space-y-3 mt-3"><div class="h-4 w-full rounded-xl skeleton"></div></div>';
+            document.getElementById('roadmap-mini-progress').innerHTML = '<div class="h-8 w-16 rounded-xl skeleton ml-0 md:ml-auto"></div>';
+            if (timeline) timeline.innerHTML = Array.from({length:6}).map(() => '<div class="flex flex-col items-center gap-3 shrink-0"><div class="w-16 h-16 md:w-20 md:h-20 rounded-[1.5rem] skeleton"></div><div class="w-20 h-3 rounded-xl skeleton"></div></div>').join('');
+            if (list) list.innerHTML = Array.from({length:4}).map(() => '<div class="rounded-[1.3rem] border-2 border-slate-100 bg-slate-50 p-4"><div class="flex items-start gap-4"><div class="w-10 h-10 rounded-xl skeleton"></div><div class="flex-1 space-y-3"><div class="h-4 w-2/3 rounded-xl skeleton"></div><div class="h-5 w-4/5 rounded-xl skeleton"></div></div></div></div>').join('');
         }
 
         function renderRoadmapTimeline(roadmap, weeks) {
             const timeline = document.getElementById('roadmap-timeline');
             const subtitle = document.getElementById('roadmap-subtitle');
-            const miniProgress = document.getElementById('roadmap-mini-progress');
-
+            const miniProg = document.getElementById('roadmap-mini-progress');
+            const bar = document.getElementById('roadmap-progress-bar');
             if (!timeline) return;
 
-            const totalWeeks = roadmap?.total_weeks || weeks.length || 0;
-            const currentWeekNumber = roadmap?.current_week || 1;
+            const currentWeekNum = roadmap?.current_week || 1;
             const { totalTasks, completedTasks, progressPercent } = calculateTaskProgressFromWeeks(weeks);
 
-            if (subtitle) {
-                const baseTitle = roadmap?.title || 'План обучения';
-                subtitle.textContent = `${baseTitle} • текущая неделя: ${currentWeekNumber} • задач: ${completedTasks}/${totalTasks}`;
-            }
-
-            if (miniProgress) {
-                miniProgress.textContent = `${progressPercent}%`;
-            }
+            if (subtitle) subtitle.textContent = `${roadmap?.title || 'План обучения'} • неделя ${currentWeekNum} • ${completedTasks}/${totalTasks} задач`;
+            if (miniProg) miniProg.textContent = `${progressPercent}%`;
+            if (bar) bar.style.width = `${progressPercent}%`;
 
             if (!weeks.length) {
-                timeline.innerHTML = renderEmptyState(
-                    'Пока нет недель',
-                    'Когда план появится, здесь отобразится маршрут обучения.',
-                    '🗺️'
-                );
+                timeline.innerHTML = '<div class="empty-state w-full"><div class="text-4xl mb-3">🗺️</div><div class="text-slate-700 text-lg font-black">Пока нет недель</div></div>';
                 return;
             }
 
-            timeline.innerHTML = weeks.map((week) => {
-                const isCurrent = Number(week.week_number) === Number(currentWeekNumber);
+            timeline.innerHTML = weeks.map(week => {
+                const isCurrent = Number(week.week_number) === Number(currentWeekNum);
                 const isCompleted = !!week.is_completed;
+                const isLocked = !!week.is_locked;
+
+                let bgClass, icon;
+                if (isCompleted) { bgClass = 'bg-emerald-500 text-white border-emerald-200 shadow-[0_8px_0_#10b981]'; icon = '✅'; }
+                else if (isCurrent) { bgClass = 'bg-indigo-500 text-white border-indigo-200 shadow-[0_8px_0_#4f46e5]'; icon = '🚀'; }
+                else if (isLocked) { bgClass = 'bg-slate-200 text-slate-400 border-slate-200 shadow-[0_8px_0_#cbd5e1]'; icon = '🔒'; }
+                else { bgClass = 'bg-white text-slate-400 border-slate-200 shadow-[0_8px_0_#e2e8f0]'; icon = '📖'; }
+
+                const labelColor = isCompleted ? 'text-emerald-600' : isCurrent ? 'text-indigo-600' : 'text-slate-400';
 
                 return `
-                    <button
-                        type="button"
-                        class="week-pill flex flex-col items-center gap-3 shrink-0 text-center"
-                        data-week-number="${week.week_number}"
-                        aria-label="Открыть неделю ${week.week_number}"
-                    >
-                        <div class="w-16 h-16 md:w-20 md:h-20 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center text-3xl md:text-4xl font-black border-4 transition-all
-                            ${isCompleted ? 'bg-emerald-500 text-white border-emerald-200 shadow-[0_8px_0_#10b981]' : ''}
-                            ${!isCompleted && isCurrent ? 'bg-indigo-500 text-white border-indigo-200 shadow-[0_8px_0_#4f46e5]' : ''}
-                            ${!isCompleted && !isCurrent ? 'bg-white text-slate-400 border-slate-200 shadow-[0_8px_0_#e2e8f0]' : ''}">
-                            ${isCompleted ? '✅' : isCurrent ? '🚀' : '🔒'}
-                        </div>
+                    <button type="button" class="week-pill flex flex-col items-center gap-3 shrink-0 text-center ${isLocked ? 'cursor-not-allowed opacity-60' : ''}"
+                        data-week-number="${week.week_number}" ${isLocked ? 'disabled' : ''}>
+                        <div class="w-16 h-16 md:w-20 md:h-20 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center text-3xl md:text-4xl font-black border-4 transition-all ${bgClass}">${icon}</div>
                         <div class="w-24">
-                            <div class="text-[11px] font-black uppercase tracking-widest ${isCompleted ? 'text-emerald-600' : isCurrent ? 'text-indigo-600' : 'text-slate-400'}">
-                                Неделя ${week.week_number}
-                            </div>
-                            <div class="text-xs font-bold text-slate-600 mt-1">
-                                ${escapeHtml((week.title || '').replace(/^Неделя\s+\d+:\s*/i, '') || week.title || 'Без темы')}
-                            </div>
+                            <div class="text-[11px] font-black uppercase tracking-widest ${labelColor}">Нед. ${week.week_number}</div>
+                            <div class="text-[10px] font-bold text-slate-600 mt-1 truncate">${escapeHtml((week.title || '').replace(/^Неделя\s+\d+:\s*/i, ''))}</div>
                         </div>
-                    </button>
-                `;
+                    </button>`;
             }).join('');
 
-            timeline.querySelectorAll('.week-pill').forEach((button) => {
-                button.addEventListener('click', () => {
-                    const selectedWeekNumber = Number(button.dataset.weekNumber);
-                    renderCurrentWeek(roadmap, weeks, selectedWeekNumber);
-                });
+            timeline.querySelectorAll('.week-pill:not([disabled])').forEach(btn => {
+                btn.addEventListener('click', () => renderCurrentWeek(roadmap, weeks, Number(btn.dataset.weekNumber)));
             });
         }
 
-        function renderCurrentWeek(roadmap, weeks, selectedWeekNumber = null) {
-            const currentWeekNumber = selectedWeekNumber || roadmap?.current_week || 1;
-            const currentWeek =
-                weeks.find(w => Number(w.week_number) === Number(currentWeekNumber)) ||
-                weeks[0] ||
-                null;
+        function renderCurrentWeek(roadmap, weeks, selectedWeekNum = null) {
+            const currentWeekNum = selectedWeekNum || roadmap?.current_week || 1;
+            const currentWeek = weeks.find(w => Number(w.week_number) === Number(currentWeekNum)) || weeks[0];
 
             const titleEl = document.getElementById('current-week-title');
             const descEl = document.getElementById('current-week-description');
@@ -855,135 +480,320 @@
             const listEl = document.getElementById('daily-tasks-list');
 
             if (!currentWeek) {
-                if (titleEl) titleEl.textContent = 'Нет недель';
-                if (descEl) descEl.textContent = 'Roadmap пустой';
-                if (badgeEl) badgeEl.textContent = 'Неделя';
+                if (titleEl) titleEl.textContent = 'Нет данных';
                 if (listEl) listEl.innerHTML = '';
                 return;
             }
 
-            if (titleEl) {
-                titleEl.textContent = currentWeek.title || `Неделя ${currentWeek.week_number}`;
-            }
-
-            if (descEl) {
-                descEl.textContent = currentWeek.description || 'Описание отсутствует';
-            }
-
+            const isLocked = !!currentWeek.is_locked;
+            if (titleEl) titleEl.textContent = currentWeek.title || `Неделя ${currentWeek.week_number}`;
+            if (descEl) descEl.textContent = isLocked ? '🔒 Завершите предыдущую неделю, чтобы открыть эту' : (currentWeek.description || '');
             if (badgeEl) {
-                badgeEl.textContent = `Неделя ${currentWeek.week_number}`;
+                badgeEl.textContent = isLocked ? '🔒 Заблокировано' : `Неделя ${currentWeek.week_number}`;
+                badgeEl.className = `px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-widest w-fit ${isLocked ? 'bg-slate-100 text-slate-400' : 'bg-indigo-100 text-indigo-600'}`;
             }
 
             const tasks = Array.isArray(currentWeek.daily_tasks) ? currentWeek.daily_tasks : [];
-
             if (!tasks.length) {
-                listEl.innerHTML = `
-                    <div class="col-span-full bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 p-6 text-slate-500 font-bold">
-                        На этой неделе пока нет заданий.
-                    </div>
-                `;
+                listEl.innerHTML = '<div class="col-span-full bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 p-6 text-slate-500 font-bold">На этой неделе нет заданий.</div>';
                 return;
             }
 
             listEl.innerHTML = tasks.map(task => {
                 const done = !!task.is_completed;
+                const locked = isLocked;
+
+                let cardClass, statusText;
+                if (done) { cardClass = 'task-card-completed'; statusText = '✅ Завершено'; }
+                else if (locked) { cardClass = 'task-card-locked'; statusText = '🔒 Заблокировано'; }
+                else { cardClass = 'task-card-pending'; statusText = 'Начать →'; }
+
                 return `
-                    <label class="task-card flex items-start gap-4 p-4 md:p-5 rounded-[1.3rem] md:rounded-[1.5rem] border-2 transition-all cursor-pointer ${done ? 'task-card-completed' : 'task-card-pending'}">
-                        <input
-                            type="checkbox"
-                            class="task-checkbox mt-1 w-5 h-5 accent-emerald-500 cursor-pointer"
-                            data-task-id="${task.id}"
-                            ${done ? 'checked' : ''}
-                        />
+                    <div class="task-card flex items-start gap-4 p-4 md:p-5 rounded-[1.3rem] md:rounded-[1.5rem] border-2 transition-all ${cardClass} ${!done && !locked ? 'cursor-pointer hover:shadow-md' : ''}"
+                        ${!done && !locked ? `data-task-id="${task.id}" onclick="openLessonModal(${task.id})"` : ''}>
+                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl ${done ? 'bg-emerald-100' : locked ? 'bg-slate-100' : 'bg-indigo-100'} shrink-0">
+                            ${getTaskTypeEmoji(task.task_type)}
+                        </div>
                         <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="text-xl">${getTaskTypeEmoji(task.task_type)}</span>
-                                <span class="text-[10px] uppercase font-black tracking-widest ${done ? 'text-emerald-500' : 'text-slate-400'}">
-                                    День ${task.day_number || '-'} • ${escapeHtml(task.task_type || 'task')}
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-[10px] uppercase font-black tracking-widest ${done ? 'text-emerald-500' : locked ? 'text-slate-300' : 'text-slate-400'}">
+                                    День ${task.day_number} • ${getTaskTypeLabel(task.task_type)}
                                 </span>
                             </div>
-
-                            <div class="font-black text-sm ${done ? 'text-emerald-700 line-through' : 'text-slate-800'}">
+                            <div class="font-black text-sm ${done ? 'text-emerald-700 line-through' : locked ? 'text-slate-400' : 'text-slate-800'}">
                                 ${escapeHtml(task.title || 'Без названия')}
                             </div>
-
-                            <div class="text-sm mt-1 ${done ? 'text-emerald-600' : 'text-slate-500'}">
-                                ${escapeHtml(task.description || '')}
+                            <div class="text-xs mt-2 font-bold ${done ? 'text-emerald-500' : locked ? 'text-slate-300' : 'text-indigo-500'}">
+                                ${done && task.quiz_score != null ? `Тест: ${task.quiz_score}%` : statusText}
                             </div>
                         </div>
-                    </label>
-                `;
+                    </div>`;
             }).join('');
-
-            bindTaskCheckboxes(currentWeek.week_number);
         }
 
-        function bindTaskCheckboxes(selectedWeekNumber) {
-            const checkboxes = document.querySelectorAll('.task-checkbox');
+        /* ====================== LESSON MODAL ====================== */
 
-            checkboxes.forEach((checkbox) => {
-                checkbox.addEventListener('change', async function () {
-                    const taskId = this.dataset.taskId;
-                    if (!taskId || this.disabled) return;
+        let modalState = {
+            taskId: null,
+            steps: [],
+            quiz: [],
+            currentStep: 0,
+            phase: 'lesson', // lesson | quiz | results
+            quizAnswers: [],
+            taskData: null,
+        };
 
-                    this.disabled = true;
+        function openLessonModal(taskId) {
+            const modal = document.getElementById('lesson-modal');
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
 
-                    try {
-                        const response = await window.roChessApi.completeRoadmapTask(taskId);
-                        console.log('Task toggled:', response);
+            document.getElementById('modal-loading').classList.remove('hidden');
+            document.getElementById('modal-content').classList.add('hidden');
 
-                        showToast('Прогресс обновлен', 'success');
-                        await loadRoadmap();
-                        await initDashboard();
+            modalState = { taskId, steps: [], quiz: [], currentStep: 0, phase: 'lesson', quizAnswers: [], taskData: null };
 
-                        const timelineButtons = document.querySelectorAll('.week-pill');
-                        timelineButtons.forEach(btn => {
-                            if (Number(btn.dataset.weekNumber) === Number(selectedWeekNumber)) {
-                                btn.click();
-                            }
-                        });
-                    } catch (error) {
-                        console.error('Ошибка переключения задания:', error);
-                        this.checked = !this.checked;
-                        this.disabled = false;
-                        showToast(error.message || 'Не удалось обновить задание', 'error');
-                    }
-                });
+            window.roChessApi.getTaskContent(taskId).then(data => {
+                const task = data.task;
+                modalState.steps = task.lesson_content || [];
+                modalState.quiz = task.quiz_questions || [];
+                modalState.taskData = task;
+
+                document.getElementById('modal-loading').classList.add('hidden');
+                document.getElementById('modal-content').classList.remove('hidden');
+                document.getElementById('modal-title').textContent = task.title || 'Урок';
+                document.getElementById('modal-type-badge').textContent = getTaskTypeLabel(task.task_type);
+
+                if (modalState.steps.length === 0) {
+                    modalState.phase = 'quiz';
+                }
+
+                renderModalView();
+            }).catch(err => {
+                document.getElementById('modal-loading').innerHTML = `
+                    <div class="text-6xl mb-4">😵</div>
+                    <div class="text-red-500 font-black text-lg">${escapeHtml(err.message)}</div>
+                    <button onclick="closeLessonModal()" class="mt-6 bg-slate-100 text-slate-600 font-black uppercase rounded-2xl px-6 py-3">Закрыть</button>`;
             });
         }
+
+        function closeLessonModal() {
+            document.getElementById('lesson-modal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function renderModalView() {
+            const stepSection = document.getElementById('modal-step');
+            const quizSection = document.getElementById('modal-quiz');
+            const resultsSection = document.getElementById('modal-results');
+            const prevBtn = document.getElementById('modal-prev-btn');
+            const nextBtn = document.getElementById('modal-next-btn');
+
+            stepSection.classList.add('hidden');
+            quizSection.classList.add('hidden');
+            resultsSection.classList.add('hidden');
+
+            if (modalState.phase === 'lesson') {
+                renderLessonStep();
+                stepSection.classList.remove('hidden');
+
+                const isFirst = modalState.currentStep === 0;
+                const isLast = modalState.currentStep >= modalState.steps.length - 1;
+
+                prevBtn.classList.toggle('hidden', isFirst);
+                nextBtn.textContent = isLast ? (modalState.quiz.length > 0 ? 'Перейти к тесту →' : 'Завершить ✓') : 'Далее →';
+                nextBtn.classList.remove('hidden');
+                nextBtn.disabled = false;
+                nextBtn.onclick = () => {
+                    if (isLast) {
+                        if (modalState.quiz.length > 0) {
+                            modalState.phase = 'quiz';
+                            modalState.quizAnswers = new Array(modalState.quiz.length).fill(-1);
+                            renderModalView();
+                        } else {
+                            submitQuizAnswers();
+                        }
+                    } else {
+                        modalState.currentStep++;
+                        renderModalView();
+                    }
+                };
+                prevBtn.onclick = () => { if (modalState.currentStep > 0) { modalState.currentStep--; renderModalView(); } };
+            } else if (modalState.phase === 'quiz') {
+                renderQuiz();
+                quizSection.classList.remove('hidden');
+                prevBtn.classList.remove('hidden');
+                prevBtn.onclick = () => {
+                    if (modalState.steps.length > 0) {
+                        modalState.phase = 'lesson';
+                        modalState.currentStep = modalState.steps.length - 1;
+                        renderModalView();
+                    }
+                };
+                nextBtn.textContent = 'Проверить ✓';
+                nextBtn.classList.remove('hidden');
+                nextBtn.disabled = modalState.quizAnswers.some(a => a === -1);
+                nextBtn.onclick = submitQuizAnswers;
+            } else if (modalState.phase === 'results') {
+                resultsSection.classList.remove('hidden');
+                prevBtn.classList.add('hidden');
+                nextBtn.classList.remove('hidden');
+            }
+
+            renderStepIndicators();
+        }
+
+        function renderStepIndicators() {
+            const container = document.getElementById('step-indicators');
+            const counter = document.getElementById('step-counter');
+            const totalSteps = modalState.steps.length;
+            const hasQuiz = modalState.quiz.length > 0;
+
+            let dots = '';
+            for (let i = 0; i < totalSteps; i++) {
+                const cls = modalState.phase === 'lesson' && i === modalState.currentStep ? 'active' : (modalState.phase === 'lesson' && i < modalState.currentStep) || modalState.phase !== 'lesson' ? 'done' : '';
+                dots += `<div class="step-dot ${cls}"></div>`;
+            }
+            if (hasQuiz) {
+                const quizCls = modalState.phase === 'quiz' ? 'active' : modalState.phase === 'results' ? 'done' : '';
+                dots += `<div class="step-dot ${quizCls}" style="width:20px;border-radius:5px;"></div>`;
+            }
+            container.innerHTML = dots;
+
+            if (modalState.phase === 'lesson') {
+                counter.textContent = `${modalState.currentStep + 1} / ${totalSteps}${hasQuiz ? ' + тест' : ''}`;
+            } else if (modalState.phase === 'quiz') {
+                counter.textContent = 'Тест';
+            } else {
+                counter.textContent = 'Результат';
+            }
+        }
+
+        function renderLessonStep() {
+            const step = modalState.steps[modalState.currentStep];
+            if (!step) return;
+            document.getElementById('step-title').textContent = step.title || '';
+            document.getElementById('step-content').innerHTML = escapeHtml(step.content || '').replace(/\n/g, '<br>');
+
+            const tipEl = document.getElementById('step-tip');
+            const tipText = document.getElementById('step-tip-text');
+            if (step.tip) {
+                tipEl.classList.remove('hidden');
+                tipText.textContent = step.tip;
+            } else {
+                tipEl.classList.add('hidden');
+            }
+        }
+
+        function renderQuiz() {
+            const container = document.getElementById('quiz-questions-container');
+            container.innerHTML = modalState.quiz.map((q, qi) => {
+                return `
+                    <div class="mb-6">
+                        <div class="font-black text-slate-800 mb-3">${qi + 1}. ${escapeHtml(q.question)}</div>
+                        <div class="space-y-2">
+                            ${q.options.map((opt, oi) => `
+                                <div class="quiz-option ${modalState.quizAnswers[qi] === oi ? 'selected' : ''}"
+                                     onclick="selectQuizAnswer(${qi}, ${oi})">
+                                    <span class="text-sm font-bold text-slate-400 mr-2">${String.fromCharCode(65 + oi)}.</span>
+                                    ${escapeHtml(opt)}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        function selectQuizAnswer(questionIdx, optionIdx) {
+            modalState.quizAnswers[questionIdx] = optionIdx;
+            renderQuiz();
+            document.getElementById('modal-next-btn').disabled = modalState.quizAnswers.some(a => a === -1);
+        }
+
+        async function submitQuizAnswers() {
+            const nextBtn = document.getElementById('modal-next-btn');
+            nextBtn.disabled = true;
+            nextBtn.textContent = 'Проверяем...';
+
+            try {
+                const result = await window.roChessApi.submitTaskQuiz(modalState.taskId, modalState.quizAnswers);
+
+                modalState.phase = 'results';
+                renderQuizResults(result);
+                renderModalView();
+            } catch (err) {
+                showToast(err.message || 'Ошибка проверки', 'error');
+                nextBtn.disabled = false;
+                nextBtn.textContent = 'Проверить ✓';
+            }
+        }
+
+        function renderQuizResults(result) {
+            const passed = result.passed;
+            const score = result.score;
+
+            document.getElementById('results-icon').textContent = passed ? '🏆' : '😔';
+            document.getElementById('results-title').textContent = passed ? 'Отлично! Урок пройден!' : 'Попробуй ещё раз!';
+            document.getElementById('results-title').className = `text-2xl font-black mb-2 ${passed ? 'text-emerald-600' : 'text-red-500'}`;
+            document.getElementById('results-subtitle').textContent = passed
+                ? `Правильных ответов: ${result.correct} из ${result.total}`
+                : `Нужно минимум 60% для прохождения. Твой результат: ${score}%`;
+
+            document.getElementById('results-score').innerHTML = `
+                <span class="${passed ? 'text-emerald-500' : 'text-red-400'}">${score}%</span>`;
+
+            const details = document.getElementById('results-details');
+            details.innerHTML = (result.results || []).map((r, i) => `
+                <div class="p-4 rounded-2xl border-2 ${r.is_correct ? 'border-emerald-200 bg-emerald-50' : 'border-red-200 bg-red-50'}">
+                    <div class="font-black text-sm ${r.is_correct ? 'text-emerald-700' : 'text-red-700'}">${r.is_correct ? '✅' : '❌'} ${escapeHtml(r.question)}</div>
+                    ${r.explanation ? `<div class="text-xs font-bold mt-1 ${r.is_correct ? 'text-emerald-600' : 'text-red-600'}">${escapeHtml(r.explanation)}</div>` : ''}
+                </div>`).join('');
+
+            const nextBtn = document.getElementById('modal-next-btn');
+            if (passed) {
+                nextBtn.textContent = 'Закрыть и продолжить 🎉';
+                nextBtn.className = 'bg-emerald-500 text-white font-black uppercase tracking-widest rounded-2xl px-8 py-3 text-sm shadow-[0_6px_0_#059669] active:translate-y-[3px] active:shadow-none transition-all';
+                nextBtn.onclick = async () => {
+                    closeLessonModal();
+                    await loadRoadmap();
+                    await initDashboard();
+                };
+            } else {
+                nextBtn.textContent = 'Попробовать снова 🔄';
+                nextBtn.className = 'bg-indigo-500 text-white font-black uppercase tracking-widest rounded-2xl px-8 py-3 text-sm shadow-[0_6px_0_#4338ca] active:translate-y-[3px] active:shadow-none transition-all';
+                nextBtn.onclick = () => {
+                    modalState.phase = 'lesson';
+                    modalState.currentStep = 0;
+                    modalState.quizAnswers = new Array(modalState.quiz.length).fill(-1);
+                    renderModalView();
+                };
+            }
+            nextBtn.disabled = false;
+        }
+
+        /* ====================== MOBILE MENU ====================== */
 
         function setupMobileMenu() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('mobile-overlay');
             const menuBtn = document.getElementById('mobile-menu-btn');
-
             if (!sidebar || !overlay || !menuBtn) return;
 
-            function openMenu() {
-                sidebar.classList.remove('-translate-x-full');
-                overlay.classList.remove('hidden');
-                document.body.classList.add('overflow-hidden');
-            }
-
-            function closeMenu() {
-                sidebar.classList.add('-translate-x-full');
-                overlay.classList.add('hidden');
-                document.body.classList.remove('overflow-hidden');
-            }
-
-            menuBtn.addEventListener('click', openMenu);
-            overlay.addEventListener('click', closeMenu);
+            menuBtn.addEventListener('click', () => { sidebar.classList.remove('-translate-x-full'); overlay.classList.remove('hidden'); document.body.classList.add('overflow-hidden'); });
+            overlay.addEventListener('click', () => { sidebar.classList.add('-translate-x-full'); overlay.classList.add('hidden'); document.body.classList.remove('overflow-hidden'); });
 
             window.addEventListener('resize', () => {
-                if (window.innerWidth >= 1280) {
-                    overlay.classList.add('hidden');
-                    document.body.classList.remove('overflow-hidden');
-                    sidebar.classList.remove('-translate-x-full');
-                } else {
-                    sidebar.classList.add('-translate-x-full');
-                }
+                if (window.innerWidth >= 1280) { overlay.classList.add('hidden'); document.body.classList.remove('overflow-hidden'); sidebar.classList.remove('-translate-x-full'); }
+                else { sidebar.classList.add('-translate-x-full'); }
             });
         }
+
+        /* ====================== MODAL CLOSE HANDLERS ====================== */
+
+        document.getElementById('modal-close-btn')?.addEventListener('click', closeLessonModal);
+        document.getElementById('modal-bg-close')?.addEventListener('click', closeLessonModal);
+
+        /* ====================== INIT ====================== */
 
         document.addEventListener('DOMContentLoaded', async () => {
             setupMobileMenu();

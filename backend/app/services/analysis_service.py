@@ -1,6 +1,10 @@
+import base64
+import os
+import random
+import re
 import chess
 import chess.engine
-import random
+from openai import OpenAI
 from app import db
 from app.models.game import Game
 from app.models.move import Move
@@ -9,6 +13,7 @@ from app.models.exercise import Exercise
 from app.models.topic import Topic
 from app.services.chess_service import ChessService
 from app.models.analysis_cache import AnalysisCache
+from app.chess.pgn_utils import parse_pgn
 
 MAX_KEY_MISTAKES = 3
 
@@ -84,57 +89,225 @@ def _classify_move_phase(move_number):
 
 
 class AnalysisService:
+    @staticmethod
+    def _move_color_by_index(move_number):
+        return 'white' if move_number % 2 == 1 else 'black'
+
+    @staticmethod
+    def _analyze_parsed_moves(parsed_moves):
+        from app.chess.stockfish_engine import StockfishEngine
+        pool = StockfishEngine()
+        engine = pool._acquire()
+
+        analysis_list = []
+        blunders = []
+        prev_eval_white = 0.0
+
+        try:
+            for idx, move in enumerate(parsed_moves, start=1):
+                fen_after = move.get('fen_after')
+                if not fen_after:
+                    continue
+
+                cached = AnalysisCache.query.filter_by(fen=fen_after).first()
+                if cached:
+                    eval_score = cached.evaluation
+                    best = cached.best_move
+                else:
+                    board = chess.Board(fen_after)
+                    info = engine.analyse(board, chess.engine.Limit(depth=14))
+                    score_obj = info['score'].white()
+                    if score_obj.is_mate():
+                        eval_score = 100.0 if score_obj.mate() > 0 else -100.0
+                    else:
+                        eval_score = score_obj.score() / 100.0
+                    best = info['pv'][0].uci() if info.get('pv') else None
+                    db.session.add(AnalysisCache(fen=fen_after, evaluation=eval_score, best_move=best))
+
+                move_color = AnalysisService._move_color_by_index(idx)
+                if move_color == 'white':
+                    loss = prev_eval_white - eval_score
+                else:
+                    loss = eval_score - prev_eval_white
+                loss = max(0, loss)
+
+                is_blunder = loss > 1.5
+                is_mistake = loss > 0.8 and not is_blunder
+
+                if is_blunder or is_mistake:
+                    blunders.append({
+                        'move_number': idx,
+                        'move_played': move.get('notation'),
+                        'fen': fen_after,
+                        'loss': loss,
+                        'best_move': best,
+                        'category': _classify_move_phase(idx)
+                    })
+
+                prev_eval_white = eval_score
+
+                is_white_move = (idx % 2 == 1)
+                analysis_list.append({
+                    'move_number': idx,
+                    'move_played': move.get('notation'),
+                    'evaluation': eval_score,
+                    'best_move': best,
+                    'fen_after': fen_after,
+                    'uci': move.get('uci', ''),
+                    'is_blunder': is_blunder,
+                    'is_mistake': is_mistake,
+                })
+        finally:
+            pool.engines.put(engine)
+
+        blunders.sort(key=lambda x: x['loss'], reverse=True)
+        key_mistakes = blunders[:MAX_KEY_MISTAKES]
+
+        formatted_mistakes = []
+        train_focus = []
+        for km in key_mistakes:
+            templates = CATEGORY_EXPLANATIONS.get(km['category'], ["Хорошая попытка!"])
+            advice = random.choice(templates)
+            formatted_mistakes.append({
+                'move_number': km['move_number'],
+                'move_played': km['move_played'],
+                'best_move': km['best_move'],
+                'fen': km['fen'],
+                'category': km['category'],
+                'evaluation_loss': km['loss'],
+                'explanation': f"{advice} (Лучше было: {km['best_move']})"
+            })
+            train_focus.append(km['category'])
+
+        total_moves = len(analysis_list)
+        blunders_count = sum(1 for a in analysis_list if a.get('is_blunder'))
+        mistakes_count = sum(1 for a in analysis_list if a.get('is_mistake'))
+
+        db.session.commit()
+        return {
+            'analysis': analysis_list,
+            'key_mistakes': formatted_mistakes,
+            'train_focus': sorted(list(set(train_focus))) or ['tactic'],
+            'total_moves': total_moves,
+            'blunders_count': blunders_count,
+            'mistakes_count': mistakes_count,
+        }
+
+    @staticmethod
+    def analyze_pgn_text(pgn_text):
+        if not pgn_text or not isinstance(pgn_text, str):
+            return {'error': 'PGN не передан'}, 400
+
+        parsed = parse_pgn(pgn_text)
+        if not parsed or not parsed.get('moves'):
+            return {'error': 'Не удалось распарсить PGN'}, 400
+
+        result = AnalysisService._analyze_parsed_moves(parsed['moves'])
+        return {
+            'parsed_headers': parsed.get('headers', {}),
+            'result': parsed.get('result'),
+            'moves_count': len(parsed.get('moves', [])),
+            **result
+        }, 200
+
+    @staticmethod
+    def extract_pgn_from_handwritten_image(image_file):
+        api_key = os.environ.get("OPENAI_API_KEY")
+        if not api_key:
+            return {'error': 'OPENAI_API_KEY не настроен'}, 503
+
+        image_bytes = image_file.read()
+        if not image_bytes:
+            return {'error': 'Пустой файл изображения'}, 400
+
+        b64 = base64.b64encode(image_bytes).decode("utf-8")
+        client = OpenAI(api_key=api_key)
+
+        prompt = (
+            "Это фото шахматной записи партии, возможно рукописной. "
+            "Извлеки чистый PGN. Исправь очевидные OCR-ошибки (например 0-0/O-O, 1/l, лишние пробелы), "
+            "но не выдумывай ходы. Верни ТОЛЬКО PGN текст."
+        )
+
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "Ты помощник по распознаванию шахматной нотации."},
+                {"role": "user", "content": [
+                    {"type": "text", "text": prompt},
+                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}}
+                ]}
+            ],
+            temperature=0.0,
+            max_tokens=1200
+        )
+        text = (response.choices[0].message.content or "").strip()
+        text = re.sub(r'^```(?:pgn)?\s*', '', text)
+        text = re.sub(r'\s*```$', '', text)
+        return {'pgn': text}, 200
 
     @staticmethod
     def analyze_game(user_id, game_id):
         game = Game.query.get(game_id)
         if not game:
             return {'error': 'Игра не найдена'}, 404
+        if int(user_id) not in (int(game.white_id), int(game.black_id)):
+            return {'error': 'Доступ запрещён'}, 403
 
         if game.status != 'finished':
             return {'error': 'Анализ доступен только после завершения партии'}, 400
 
+        Mistake.query.filter_by(user_id=user_id, game_id=game_id).delete()
+
         moves = game.moves.order_by(Move.move_number).all()
-        
+
         from app.chess.stockfish_engine import StockfishEngine
         pool = StockfishEngine()
-        engine = pool.engines.get()
+        engine = pool._acquire()
 
         analysis_list = []
         blunders = []
-        prev_eval = 0.0
+        prev_eval_white = 0.0
 
         try:
             for move in moves:
                 cached = AnalysisCache.query.filter_by(fen=move.fen_after).first()
-                
+
                 if cached:
                     eval_score = cached.evaluation
                     best = cached.best_move
                 else:
                     board = chess.Board(move.fen_after)
                     info = engine.analyse(board, chess.engine.Limit(depth=14))
-                    
-                    score_obj = info['score'].relative
+
+                    score_obj = info['score'].white()
                     if score_obj.is_mate():
                         eval_score = 100.0 if score_obj.mate() > 0 else -100.0
                     else:
                         eval_score = score_obj.score() / 100.0
-                        
+
                     best = info['pv'][0].uci() if info.get('pv') else None
 
                     new_cache = AnalysisCache(
-                        fen=move.fen_after, 
-                        evaluation=eval_score, 
+                        fen=move.fen_after,
+                        evaluation=eval_score,
                         best_move=best
                     )
                     db.session.add(new_cache)
 
                 move.evaluation = eval_score
-                loss = abs(eval_score - prev_eval)
+
+                is_white_move = (move.color == 'white')
+                if is_white_move:
+                    loss = prev_eval_white - eval_score
+                else:
+                    loss = eval_score - prev_eval_white
+
+                loss = max(0, loss)
+
                 is_blunder = loss > 1.5
                 is_mistake = loss > 0.8 and not is_blunder
-                
+
                 move.is_blunder = is_blunder
                 move.is_mistake = is_mistake
 
@@ -146,7 +319,7 @@ class AnalysisService:
                         'eval': eval_score,
                     })
 
-                prev_eval = eval_score
+                prev_eval_white = eval_score
                 analysis_list.append({
                     'move': move.to_dict(),
                     'evaluation': eval_score,
@@ -162,10 +335,10 @@ class AnalysisService:
         for km in key_mistakes:
             m = km['move']
             category = _classify_move_phase(m.move_number)
-            
+
             templates = CATEGORY_EXPLANATIONS.get(category, ["Хорошая попытка! В следующий раз получится лучше."])
             random_advice = random.choice(templates)
-            
+
             friendly_explanation = f"{random_advice} (Лучше было пойти: {km['best_move']})"
 
             topic = Topic.query.filter(Topic.name.ilike(f'%{category}%')).first()
@@ -176,14 +349,14 @@ class AnalysisService:
                 fen=m.fen_after,
                 move_played=m.notation,
                 best_move=km['best_move'],
-                explanation=friendly_explanation, 
+                explanation=friendly_explanation,
                 category=category,
                 topic_id=topic.id if topic else None,
                 evaluation_loss=km['loss'],
             )
             db.session.add(mistake)
             db.session.flush()
-            
+
             saved_mistakes.append({
                 'id': mistake.id,
                 'fen': m.fen_after,
@@ -249,10 +422,12 @@ class AnalysisService:
         }, 200
 
     @staticmethod
-    def get_exercises_for_mistake(mistake_id):
+    def get_exercises_for_mistake(user_id, mistake_id):
         mistake = Mistake.query.get(mistake_id)
         if not mistake:
             return {'error': 'Ошибка не найдена'}, 404
+        if int(mistake.user_id) != int(user_id):
+            return {'error': 'Доступ запрещён'}, 403
 
         exercises = []
         if mistake.topic_id:
@@ -265,9 +440,7 @@ class AnalysisService:
                 ).limit(5).all()
 
         if not exercises:
-            exercises = Exercise.query.filter_by(
-                difficulty=mistake.category or 'beginner'
-            ).limit(5).all()
+            exercises = Exercise.query.limit(5).all()
 
         return {
             'mistake': mistake.to_dict(),

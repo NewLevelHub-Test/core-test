@@ -22,8 +22,8 @@ def check_admin():
         if not user or user.role != 'admin':
             return jsonify({"message": "Доступ разрешен только администраторам"}), 403
             
-    except Exception as e:
-        return jsonify({"message": "Ошибка авторизации", "error": str(e)}), 401
+    except Exception:
+        return jsonify({"message": "Ошибка авторизации"}), 401
 
 # --- Users ---
 

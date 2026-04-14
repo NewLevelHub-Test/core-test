@@ -38,5 +38,35 @@ def get_mistakes():
 @analysis_bp.route('/mistakes/<int:mistake_id>/exercises', methods=['GET'])
 @jwt_required()
 def get_mistake_exercises(mistake_id):
-    result, status = AnalysisService.get_exercises_for_mistake(mistake_id)
+    user_id = get_jwt_identity()
+    result, status = AnalysisService.get_exercises_for_mistake(user_id, mistake_id)
     return jsonify(result), status
+
+@analysis_bp.route('/pgn', methods=['POST'])
+@jwt_required()
+@limiter.limit("10 per minute")
+def analyze_pgn():
+    data = request.get_json() or {}
+    pgn_text = data.get('pgn')
+    result, status = AnalysisService.analyze_pgn_text(pgn_text)
+    return jsonify(result), status
+
+@analysis_bp.route('/pgn-photo', methods=['POST'])
+@jwt_required()
+@limiter.limit("5 per minute")
+def analyze_pgn_photo():
+    if 'image' not in request.files:
+        return jsonify({'error': 'Ключ "image" не найден в FormData'}), 400
+    image = request.files['image']
+    if image.filename == '':
+        return jsonify({'error': 'Файл не выбран'}), 400
+
+    extracted, status = AnalysisService.extract_pgn_from_handwritten_image(image)
+    if status != 200:
+        return jsonify(extracted), status
+
+    analyzed, a_status = AnalysisService.analyze_pgn_text(extracted.get('pgn'))
+    return jsonify({
+        'extracted_pgn': extracted.get('pgn'),
+        **analyzed
+    }), a_status

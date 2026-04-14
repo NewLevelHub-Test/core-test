@@ -49,7 +49,8 @@ class PhotoService:
             }, 200
 
         except Exception as e:
-            return {'error': f'Ошибка обработки: {str(e)}'}, 500
+            current_app.logger.exception("Photo recognition error")
+            return {'error': 'Ошибка обработки изображения'}, 500
 
     @staticmethod
     def correct_position(data):
@@ -82,7 +83,8 @@ class PhotoService:
                 'valid': FenGenerator.validate(new_fen),
             }, 200
         except Exception as e:
-            return {'error': f'Ошибка коррекции: {str(e)}'}, 500
+            current_app.logger.exception("Position correction error")
+            return {'error': 'Ошибка коррекции позиции'}, 500
 
     @staticmethod
     def analyze_confirmed_position(data):
@@ -93,18 +95,47 @@ class PhotoService:
         try:
             evaluation = ChessService.evaluate_position(fen)
             best_move = ChessService.get_best_move(fen)
-            
+
             explanation = 'Позиция равна.'
             if evaluation:
-                if evaluation > 1.0: explanation = 'Преимущество белых.'
-                elif evaluation < -1.0: explanation = 'Преимущество черных.'
+                if evaluation > 1.0:
+                    explanation = 'Преимущество белых.'
+                elif evaluation < -1.0:
+                    explanation = 'Преимущество черных.'
+
+            from app.models.topic import Topic
+            from app.chess.board_utils import get_piece_count
+            piece_count = get_piece_count(fen)
+            total_pieces = sum(piece_count.values())
+
+            recommended_topics = []
+            if total_pieces <= 10:
+                topic = Topic.query.filter(Topic.name.ilike('%эндшпиль%')).first()
+                if topic:
+                    recommended_topics.append(topic.to_dict())
+            elif total_pieces >= 28:
+                topic = Topic.query.filter(Topic.name.ilike('%дебют%')).first() or \
+                        Topic.query.filter(Topic.name.ilike('%opening%')).first()
+                if topic:
+                    recommended_topics.append(topic.to_dict())
+            else:
+                topic = Topic.query.filter(Topic.name.ilike('%тактик%')).first() or \
+                        Topic.query.filter(Topic.name.ilike('%tactic%')).first()
+                if topic:
+                    recommended_topics.append(topic.to_dict())
+
+            if not recommended_topics:
+                topics = Topic.query.limit(3).all()
+                recommended_topics = [t.to_dict() for t in topics]
 
             return {
                 'fen': fen,
                 'evaluation': evaluation,
                 'best_move': best_move,
                 'explanation': explanation,
-                'legal_moves': ChessService.get_legal_moves(fen)
+                'legal_moves': ChessService.get_legal_moves(fen),
+                'recommended_topics': recommended_topics,
             }, 200
-        except Exception as e:
-            return {'error': f'Ошибка анализа: {str(e)}'}, 500
+        except Exception:
+            current_app.logger.exception("Position analysis error")
+            return {'error': 'Ошибка анализа позиции'}, 500

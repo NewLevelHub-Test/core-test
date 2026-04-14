@@ -1,4 +1,5 @@
 from datetime import datetime
+import secrets
 import chess
 
 from app import db
@@ -14,7 +15,15 @@ class GameService:
     def create_game(user_id, data):
         mode = data.get('mode', 'ai')
         player_color = data.get('color', 'white')
-        bot_level = data.get('bot_level', 5)
+
+        difficulty = data.get('difficulty')
+        DIFFICULTY_MAP = {1: 1, 2: 10, 3: 20}
+        if difficulty and int(difficulty) in DIFFICULTY_MAP:
+            bot_level = DIFFICULTY_MAP[int(difficulty)]
+        else:
+            bot_level = data.get('bot_level', 5)
+
+        time_control = data.get('time_control') or data.get('time_limit')
 
         bot_user = User.query.filter_by(username="ChessBot").first()
         
@@ -22,11 +31,11 @@ class GameService:
             bot_user = User(
                 username="ChessBot", 
                 email="bot@system.chess",
-                role="admin", 
+                role="bot",
                 elo_rating=1500
             )
 
-            bot_user.set_password("system_bot_secret_999") 
+            bot_user.set_password(secrets.token_hex(24))
             
             db.session.add(bot_user)
             db.session.commit()
@@ -46,6 +55,7 @@ class GameService:
             mode=mode,
             player_color=player_color,
             bot_level=bot_level,
+            time_control=int(time_control) if time_control else None,
             status='in_progress',
             fen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
         )
@@ -64,10 +74,12 @@ class GameService:
         return result, 201
 
     @staticmethod
-    def get_game(game_id):
+    def get_game(user_id, game_id):
         game = Game.query.get(game_id)
         if not game:
             return {'error': 'Игра не найдена'}, 404
+        if int(user_id) not in (int(game.white_id), int(game.black_id)):
+            return {'error': 'Доступ запрещён'}, 403
 
         moves = [m.to_dict() for m in game.moves.order_by(Move.move_number).all()]
         return {'game': game.to_dict(), 'moves': moves}, 200
@@ -80,6 +92,8 @@ class GameService:
 
         if game.status != 'in_progress':
             return {'error': 'Игра уже завершена'}, 400
+        if int(user_id) not in (int(game.white_id), int(game.black_id)):
+            return {'error': 'Вы не участник этой партии'}, 403
 
         move_uci = data.get('move')
         if not ChessService.validate_move(game.fen, move_uci):
@@ -155,15 +169,16 @@ class GameService:
         game.finished_at = datetime.utcnow()
 
         
-        if game_over.get('is_resign'):
+        if game_over.get('is_resign') or game_over.get('is_timeout'):
             winner_id = game_over['winner_id']
             game.result = '1-0' if winner_id == game.white_id else '0-1'
         elif game_over.get('is_checkmate'):
-            game.result = '1-0' if last_move_number % 2 == 1 else '0-1'
-        elif game_over.get('is_draw'):
+            board = chess.Board(game.fen)
+            game.result = '0-1' if board.turn == chess.WHITE else '1-0'
+        elif game_over.get('is_draw') or game_over.get('is_stalemate'):
             game.result = '1/2-1/2'
         else:
-            game.result = '1-0' if last_move_number % 2 == 1 else '0-1'
+            game.result = '1/2-1/2'
 
        
         moves = game.moves.order_by(Move.move_number).all()
@@ -196,7 +211,7 @@ class GameService:
                 else:
                     player_score = 0.0
 
-                ai_rating = 1000 + (game.bot_level * 50)
+                ai_rating = 600 + (game.bot_level * 100)
                 new_player_elo, _ = elo_update(player_user.elo_rating, ai_rating, player_score)
                 player_user.elo_rating = new_player_elo
 
@@ -211,6 +226,8 @@ class GameService:
         game = Game.query.get(game_id)
         if not game or game.status != 'in_progress':
             return {'error': 'Игра не найдена или уже завершена'}, 400
+        if int(user_id) not in (int(game.white_id), int(game.black_id)):
+            return {'error': 'Вы не участник этой партии'}, 403
 
  
         loser_id = user_id
@@ -223,9 +240,23 @@ class GameService:
         return {'game': game.to_dict()}, 200
 
     @staticmethod
+    def timeout_loss(user_id, game_id):
+        game = Game.query.get(game_id)
+        if not game or game.status != 'in_progress':
+            return {'error': 'Игра не найдена или уже завершена'}, 400
+        if int(user_id) not in (int(game.white_id), int(game.black_id)):
+            return {'error': 'Вы не участник этой партии'}, 403
+
+        winner_id = game.white_id if int(user_id) == int(game.black_id) else game.black_id
+        GameService._finish_game(game, {'is_timeout': True, 'winner_id': winner_id})
+        db.session.commit()
+        return {'game': game.to_dict()}, 200
+
+    @staticmethod
     def get_user_games(user_id, page=1):
         pagination = Game.query.filter(
-            (Game.white_id == user_id) | (Game.black_id == user_id)
+            ((Game.white_id == user_id) | (Game.black_id == user_id)) &
+            (Game.status == 'finished')
         ).order_by(Game.created_at.desc()).paginate(page=page, per_page=20, error_out=False)
 
         return {
@@ -236,19 +267,23 @@ class GameService:
         }, 200
 
     @staticmethod
-    def get_game_moves(game_id):
+    def get_game_moves(user_id, game_id):
         game = Game.query.get(game_id)
         if not game:
             return {'error': 'Игра не найдена'}, 404
+        if int(user_id) not in (int(game.white_id), int(game.black_id)):
+            return {'error': 'Доступ запрещён'}, 403
 
         moves = game.moves.order_by(Move.move_number).all()
         return {'moves': [m.to_dict() for m in moves]}, 200
 
     @staticmethod
-    def export_pgn(game_id):
+    def export_pgn(user_id, game_id):
         game = Game.query.get(game_id)
         if not game:
             return {'error': 'Игра не найдена'}, 404
+        if int(user_id) not in (int(game.white_id), int(game.black_id)):
+            return {'error': 'Доступ запрещён'}, 403
 
         moves = game.moves.order_by(Move.move_number).all()
 

@@ -212,6 +212,10 @@
     <script src="state.js"></script>
     <script src="api.js"></script>
     <script>
+        if (!window.roChessApi || !window.roChessApi.isAuthenticated || !window.roChessApi.isAuthenticated()) {
+            window.location.href = 'h1.html';
+        }
+
         const container = document.getElementById('tests-grid');
         const pageMessage = document.getElementById('page-message');
         const liveRegion = document.getElementById('live-region');
@@ -308,9 +312,7 @@
             announce('Загружается список тестов');
 
             try {
-                console.log("Запрашиваю список тестов...");
                 const data = await window.roChessApi.getTestsList();
-                console.log("Данные от сервера:", data);
 
                 const tests = Array.isArray(data.tests) ? data.tests : [];
 
@@ -348,7 +350,7 @@
 
                 announce('Список тестов загружен');
             } catch (err) {
-                console.error("Критическая ошибка:", err);
+                console.error("Ошибка загрузки тестов:", err);
                 renderErrorState(err.message || 'Ошибка соединения с сервером.');
                 showPageMessage('Ой, что-то пошло не так! Не удалось загрузить тесты.', 'error');
                 showToast('Ошибка загрузки тестов', 'error');

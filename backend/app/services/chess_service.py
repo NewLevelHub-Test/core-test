@@ -32,11 +32,17 @@ class ChessService:
     @staticmethod
     def is_game_over(fen):
         board = chess.Board(fen)
+        is_draw = (
+            board.is_stalemate()
+            or board.is_insufficient_material()
+            or board.is_fifty_moves()
+            or board.can_claim_threefold_repetition()
+        )
         return {
             'is_over': board.is_game_over(),
             'is_checkmate': board.is_checkmate(),
             'is_stalemate': board.is_stalemate(),
-            'is_draw': board.is_insufficient_material() or board.is_fifty_moves(),
+            'is_draw': is_draw,
         }
 
     @staticmethod

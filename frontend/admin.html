@@ -345,9 +345,7 @@
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <header class="xl:hidden sticky top-0 z-[90] bg-white/90 backdrop-blur-xl border-b border-slate-100 px-4 py-3 flex items-center justify-between">
-        <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-lg px-3 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block">
-            RO-CHESS
-        </div>
+        <img src="gml.png" alt="RO-CHESS" class="h-10 rounded-xl">
 
         <button
             id="mobile-menu-btn"
@@ -363,9 +361,7 @@
 
     <aside id="sidebar" class="w-72 desktop-sidebar h-screen fixed xl:sticky top-0 left-0 flex flex-col p-8 z-[85] -translate-x-full xl:translate-x-0 transition-transform duration-300">
         <div class="mb-12 text-center">
-            <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-2xl px-4 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block transform -rotate-2">
-                RO-CHESS
-            </div>
+            <img src="gml.png" alt="RO-CHESS" class="h-14 rounded-xl inline-block">
         </div>
 
         <nav class="space-y-4 flex-1" aria-label="Основная навигация">
@@ -421,6 +417,9 @@
             </button>
             <button class="tab-btn font-black text-sm uppercase tracking-widest whitespace-nowrap" data-tab="exercises" aria-label="Показать задачи" type="button">
                 Задачи
+            </button>
+            <button class="tab-btn font-black text-sm uppercase tracking-widest whitespace-nowrap" data-tab="tests" aria-label="Показать тесты" type="button">
+                Тесты
             </button>
         </nav>
 
@@ -785,6 +784,51 @@
                 floatingAddBtn.textContent = '+';
                 floatingAddBtn.setAttribute('aria-label', 'Добавить задачу');
                 loadExercisesTab();
+            } else if (tabName === 'tests') {
+                floatingAddBtn.classList.remove('hidden');
+                floatingAddBtn.textContent = '+';
+                floatingAddBtn.setAttribute('aria-label', 'Добавить тест');
+                loadTestsTab();
+            }
+        }
+
+        async function loadTestsTab() {
+            adminContent.innerHTML = '<div class="admin-card-lux p-6 text-center"><div class="spinner-center"></div></div>';
+            try {
+                const data = await window.roChessApi.getTestsList();
+                const tests = data.tests || data.items || data || [];
+
+                if (!tests.length) {
+                    adminContent.innerHTML = '<div class="admin-card-lux p-8 text-center text-slate-400 font-black">Тесты ещё не созданы</div>';
+                    return;
+                }
+
+                adminContent.innerHTML = tests.map(test => `
+                    <div class="admin-card-lux p-5 flex items-center justify-between gap-4">
+                        <div>
+                            <div class="font-black text-slate-800">${escapeHtml(test.title || 'Тест')}</div>
+                            <div class="text-xs text-slate-400 font-bold">${escapeHtml(test.description || '')} &bull; ${test.question_count || 0} вопросов</div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="action-btn bg-blue-50 text-blue-500" onclick="editTest(${test.id})" aria-label="Редактировать">✏️</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error(e);
+                adminContent.innerHTML = '<div class="admin-card-lux p-8 text-center text-rose-500 font-black">Ошибка загрузки тестов</div>';
+            }
+        }
+
+        async function editTest(testId) {
+            const title = prompt('Новое название теста:');
+            if (!title) return;
+            try {
+                await window.roChessApi.updateAdminTest(testId, { title });
+                showToast('Тест обновлён', 'success');
+                loadTestsTab();
+            } catch (e) {
+                showToast('Ошибка обновления', 'error');
             }
         }
 
@@ -975,13 +1019,15 @@
         async function loadUserDetail(userId) {
             try {
                 const data = await window.roChessApi.getAdminUserDetail(userId);
-                const username = data.username || data.name || `User #${userId}`;
-                const levelLabel = normalizeLevel(data.level);
+                const user = data.user || data;
+                const stats = data.stats || {};
+                const username = user.username || user.name || `User #${userId}`;
+                const levelLabel = normalizeLevel(user.level);
                 const progressPercent = getProgressValue(data);
-                const completedLessons = data.lessons_completed ?? data.completed_lessons ?? 0;
-                const completedTests = data.tests_completed ?? data.completed_tests ?? data.tests_taken ?? 0;
-                const mistakes = data.mistakes ?? data.mistakes_count ?? data.total_errors ?? 0;
-                const elo = data.elo_rating ?? data.rating ?? '—';
+                const completedLessons = stats.completed_lessons ?? 0;
+                const completedTests = stats.test_attempts ?? 0;
+                const totalGames = stats.total_games ?? 0;
+                const elo = user.elo_rating ?? '—';
 
                 showSideInfo(`
                     <div class="section-title">Профиль игрока</div>
@@ -1002,7 +1048,7 @@
                         <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">ELO</span><span class="font-black text-slate-700">${elo}</span></div>
                         <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">Уроков завершено</span><span class="font-black text-slate-700">${completedLessons}</span></div>
                         <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">Тестов пройдено</span><span class="font-black text-slate-700">${completedTests}</span></div>
-                        <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">Ошибок</span><span class="font-black text-amber-500">${mistakes}</span></div>
+                        <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">Всего партий</span><span class="font-black text-slate-700">${totalGames}</span></div>
                     </div>
                 `);
             } catch (e) {
@@ -1418,6 +1464,16 @@
             } else if (activeTab === 'exercises') {
                 await preloadLessonsAndTopics();
                 openExerciseModal('create');
+            } else if (activeTab === 'tests') {
+                const title = prompt('Название нового теста:');
+                if (!title) return;
+                try {
+                    await window.roChessApi.createAdminTest({ title });
+                    showToast('Тест создан', 'success');
+                    loadTestsTab();
+                } catch (e) {
+                    showToast('Ошибка создания теста', 'error');
+                }
             }
         });
 

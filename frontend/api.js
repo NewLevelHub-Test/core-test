@@ -1,10 +1,40 @@
+const DEV_BACKEND_URL = 'http://127.0.0.1:5001';
+const DEV_PORTS = ['3000', '5500', '8080'];
+
+function resolveBaseUrl() {
+    if (DEV_PORTS.includes(window.location.port)) {
+        return `${DEV_BACKEND_URL}/api`;
+    }
+    return `${window.location.origin}/api`;
+}
+
 const API_CONFIG = {
-    BASE_URL: 'http://10.120.104.178:5000/api', 
+    BASE_URL: resolveBaseUrl(),
     AUTH_PAGE: 'h1.html'
 };
 
 const api = {
-    async fetchWithAuth(endpoint, options = {}) {
+    async refreshAccessToken() {
+        const refreshToken = localStorage.getItem('refresh_token');
+        if (!refreshToken) return null;
+
+        const response = await fetch(`${API_CONFIG.BASE_URL}/auth/refresh`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${refreshToken}`
+            }
+        });
+
+        if (!response.ok) return null;
+        const data = await response.json().catch(() => ({}));
+        if (data.access_token) {
+            window.roChessState.setTokens(data.access_token, refreshToken);
+            return data.access_token;
+        }
+        return null;
+    },
+
+    async fetchWithAuth(endpoint, options = {}, retryOn401 = true) {
         const token = localStorage.getItem('access_token');
         const defaultHeaders = {
             'Content-Type': 'application/json',
@@ -22,7 +52,14 @@ const api = {
     
         try {
             const response = await fetch(url, config);
-            if (response.status === 401) { this.logout(); return; }
+            if (response.status === 401 && retryOn401) {
+                const newAccessToken = await this.refreshAccessToken();
+                if (newAccessToken) {
+                    return this.fetchWithAuth(endpoint, options, false);
+                }
+                this.logout();
+                return;
+            }
             const responseData = await response.json().catch(() => ({}));
             if (!response.ok) throw new Error(responseData.error || `Ошибка: ${response.status}`);
             return responseData;
@@ -30,20 +67,15 @@ const api = {
     },
 
     async login(credentials) {
-        console.log("Отправка данных на вход:", credentials);
-        
         const data = await this.fetchWithAuth('/auth/login', {
             method: 'POST',
             body: JSON.stringify(credentials)
         });
-        
-        console.log("Полный ответ сервера при логине:", data);
 
         const finalToken = data.access_token || (data.data && data.data.access_token) || data.token;
         const finalUser = data.user || (data.data && data.data.user);
 
         if (finalToken) {
-            console.log("Токен получен! Сохраняю и перехожу на Dashboard...");
             window.roChessState.setTokens(finalToken, data.refresh_token || (data.data && data.data.refresh_token));
             window.roChessState.setUser(finalUser || { name: "Player" });
             
@@ -51,21 +83,16 @@ const api = {
                 window.location.href = 'Dashboard.html';
             }, 100);
         } else {
-            console.error("Сервер ответил успешно, но токена в объекте нет. Проверь консоль выше.");
             throw new Error("Ошибка авторизации: сервер не прислал ключ доступа.");
         }
         return data;
     },
 
     async register(userData) {
-        console.log("Отправка данных на регистрацию:", userData);
-
         const data = await this.fetchWithAuth('/auth/register', {
             method: 'POST',
             body: JSON.stringify(userData)
         });
-
-        console.log("Ответ сервера при регистрации:", data);
 
         const finalToken = data.access_token || (data.data && data.data.access_token) || data.token;
         const finalUser = data.user || (data.data && data.data.user);
@@ -90,17 +117,25 @@ const api = {
     async uploadAvatar(file) {
         const formData = new FormData();
         formData.append('avatar', file);
-        const token = localStorage.getItem('access_token');
-        const response = await fetch(`${API_CONFIG.BASE_URL}/users/avatar`, {
+        const send = async (token) => fetch(`${API_CONFIG.BASE_URL}/users/avatar`, {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            },
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {},
             body: formData
         });
 
-        if (!response.ok) throw new Error("Ошибка загрузки аватара");
-        return await response.json();
+        let token = localStorage.getItem('access_token');
+        let response = await send(token);
+
+        if (response.status === 401) {
+            const newAccessToken = await this.refreshAccessToken();
+            if (newAccessToken) {
+                response = await send(newAccessToken);
+            }
+        }
+
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload.error || `Ошибка: ${response.status}`);
+        return payload;
     },
 
     async getDashboardData() {
@@ -124,6 +159,19 @@ const api = {
     async completeRoadmapTask(taskId) {
         return await this.fetchWithAuth(`/roadmap/tasks/${taskId}/complete`, {
             method: 'POST'
+        });
+    },
+
+    async getTaskContent(taskId) {
+        return await this.fetchWithAuth(`/roadmap/tasks/${taskId}/content`, {
+            method: 'GET'
+        });
+    },
+
+    async submitTaskQuiz(taskId, answers) {
+        return await this.fetchWithAuth(`/roadmap/tasks/${taskId}/quiz`, {
+            method: 'POST',
+            body: JSON.stringify({ answers })
         });
     },
 
@@ -176,16 +224,23 @@ const api = {
     async recognizePhoto(file) {
         const formData = new FormData();
         formData.append('image', file);
-    
-        const token = localStorage.getItem('access_token');
-        const response = await fetch(`${API_CONFIG.BASE_URL}/photo/recognize`, {
+
+        const send = async (token) => fetch(`${API_CONFIG.BASE_URL}/photo/recognize`, {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            },
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {},
             body: formData
         });
-    
+
+        let token = localStorage.getItem('access_token');
+        let response = await send(token);
+
+        if (response.status === 401) {
+            const newAccessToken = await this.refreshAccessToken();
+            if (newAccessToken) {
+                response = await send(newAccessToken);
+            }
+        }
+
         const data = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(data.error || `Ошибка: ${response.status}`);
         return data;
@@ -203,6 +258,36 @@ const api = {
             method: 'POST',
             body: JSON.stringify(payload)
         });
+    },
+
+    async analyzePgnText(pgn) {
+        return await this.fetchWithAuth('/analysis/pgn', {
+            method: 'POST',
+            body: JSON.stringify({ pgn })
+        });
+    },
+
+    async analyzePgnPhoto(file) {
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const send = async (token) => fetch(`${API_CONFIG.BASE_URL}/analysis/pgn-photo`, {
+            method: 'POST',
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+            body: formData
+        });
+
+        let token = localStorage.getItem('access_token');
+        let response = await send(token);
+
+        if (response.status === 401) {
+            const newAccessToken = await this.refreshAccessToken();
+            if (newAccessToken) response = await send(newAccessToken);
+        }
+
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || `Ошибка: ${response.status}`);
+        return data;
     },
 
     async getAdminUsers() {
@@ -360,14 +445,161 @@ const api = {
         };
     },
 
-    logout() {
+    async sendSmsCode(phone) {
+        return await this.fetchWithAuth('/auth/send-code', {
+            method: 'POST',
+            body: JSON.stringify({ phone })
+        });
+    },
+
+    async loginByPhone(phone, code) {
+        const data = await this.fetchWithAuth('/auth/login-phone', {
+            method: 'POST',
+            body: JSON.stringify({ phone, code })
+        });
+
+        const finalToken = data.access_token || (data.data && data.data.access_token);
+        const finalUser = data.user || (data.data && data.data.user);
+
+        if (finalToken) {
+            window.roChessState.setTokens(finalToken, data.refresh_token || (data.data && data.data.refresh_token));
+            window.roChessState.setUser(finalUser || { name: "Player" });
+            setTimeout(() => { window.location.href = 'Dashboard.html'; }, 100);
+        }
+        return data;
+    },
+
+    async sendRecoveryCode(identifier) {
+        const payload = identifier.includes('@') ? { email: identifier } : { phone: identifier };
+        return await this.fetchWithAuth('/auth/recover', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+    },
+
+    async confirmRecovery(identifier, code, newPassword) {
+        const payload = identifier.includes('@')
+            ? { email: identifier, code, new_password: newPassword }
+            : { phone: identifier, code, new_password: newPassword };
+        return await this.fetchWithAuth('/auth/recover/confirm', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+    },
+
+    async getUserStats() {
+        return await this.fetchWithAuth('/users/stats', { method: 'GET' });
+    },
+
+    async getAdminTopics(page = 1) {
+        return await this.fetchWithAuth(`/admin/topics?page=${page}`, { method: 'GET' });
+    },
+
+    async createAdminTopic(payload) {
+        return await this.fetchWithAuth('/admin/topics', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+    },
+
+    async updateAdminTopic(topicId, payload) {
+        return await this.fetchWithAuth(`/admin/topics/${topicId}`, {
+            method: 'PUT',
+            body: JSON.stringify(payload)
+        });
+    },
+
+    async deleteAdminTopic(topicId) {
+        return await this.fetchWithAuth(`/admin/topics/${topicId}`, {
+            method: 'DELETE'
+        });
+    },
+
+    async createAdminTest(payload) {
+        return await this.fetchWithAuth('/admin/tests', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+    },
+
+    async updateAdminTest(testId, payload) {
+        return await this.fetchWithAuth(`/admin/tests/${testId}`, {
+            method: 'PUT',
+            body: JSON.stringify(payload)
+        });
+    },
+
+    async addAdminQuestion(testId, payload) {
+        return await this.fetchWithAuth(`/admin/tests/${testId}/questions`, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+    },
+
+    async updateAdminQuestion(questionId, payload) {
+        return await this.fetchWithAuth(`/admin/questions/${questionId}`, {
+            method: 'PUT',
+            body: JSON.stringify(payload)
+        });
+    },
+
+    async deleteAdminQuestion(questionId) {
+        return await this.fetchWithAuth(`/admin/questions/${questionId}`, {
+            method: 'DELETE'
+        });
+    },
+
+    async logoutServer() {
+        try {
+            await this.fetchWithAuth('/auth/logout', { method: 'POST' });
+        } catch (e) {}
         window.roChessState.logout();
         window.location.href = 'h1.html';
+    },
+
+    logout() {
+        this.logoutServer();
     },
 
     isAuthenticated() {
         return window.roChessState.isLoggedIn();
     }
 };
+
+function initUnifiedSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+
+    const nav = sidebar.querySelector('nav');
+    if (!nav) return;
+
+    const currentPage = (window.location.pathname.split('/').pop() || '').toLowerCase();
+    const navItems = [
+        { href: 'Dashboard.html', icon: '🏠', label: 'Главная' },
+        { href: 'profile.html', icon: '👤', label: 'Профиль' },
+        { href: 'study.html', icon: '📚', label: 'Уроки' },
+        { href: 'wbots.html', icon: '🤖', label: 'Игра с ботом' },
+        { href: 'hist.html', icon: '📜', label: 'История партий' },
+        { href: 'analysis.html', icon: '📈', label: 'Анализ' },
+        { href: 'position.html', icon: '📸', label: 'Сканер позиции' },
+        { href: 'chat.html', icon: '💬', label: 'ИИ-помощник' },
+        { href: 'admin.html', icon: '🛠️', label: 'Админ-панель' }
+    ];
+
+    nav.innerHTML = navItems.map(item => {
+        const isActive = currentPage === item.href.toLowerCase();
+        const baseClass = 'flex items-center gap-4 p-4 min-h-[52px] rounded-2xl font-black uppercase text-xs tracking-widest transition-all';
+        const activeClass = 'bg-indigo-50 text-indigo-600 border-b-4 border-indigo-100';
+        const idleClass = 'hover:bg-slate-50 text-slate-400';
+        return `
+            <a href="${item.href}" class="${baseClass} ${isActive ? activeClass : idleClass}">
+                <span class="text-xl">${item.icon}</span>
+                <span>${item.label}</span>
+            </a>
+        `;
+    }).join('');
+}
+
+document.addEventListener('DOMContentLoaded', initUnifiedSidebar);
 
 window.roChessApi = api;

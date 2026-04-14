@@ -4,7 +4,7 @@ import bleach
 
 def clean_html(text):
     if not text or not isinstance(text, str):
-        return textppp
+        return text
     return bleach.clean(text, tags=[], attributes={}, strip=True)
 
 

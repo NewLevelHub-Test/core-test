@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ro-Chess — Сканер позиций</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
     <style>
         body {
@@ -488,6 +489,76 @@
             }
         }
 
+        .pgn-board-wrap {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            width: min(80vw, 380px);
+            height: min(80vw, 380px);
+            min-width: 220px;
+            min-height: 220px;
+            border: 8px solid #393b3d;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+            background: white;
+        }
+
+        .pgn-sq {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-width: 0;
+            min-height: 0;
+            font-size: clamp(14px, 3.5vw, 28px);
+            line-height: 1;
+            position: relative;
+        }
+
+        .pgn-sq-w { background: #fff; }
+        .pgn-sq-b { background: #3b82f6; }
+        .pgn-sq .piece { filter: drop-shadow(0 3px 6px rgba(0,0,0,0.15)); pointer-events: none; }
+
+        .pgn-sq.from-bad { box-shadow: inset 0 0 0 4px rgba(239,68,68,0.9); background: #f87171 !important; }
+        .pgn-sq.to-bad { box-shadow: inset 0 0 0 4px rgba(185,28,28,0.85); background: #fca5a5 !important; }
+        .pgn-sq.from-best { box-shadow: inset 0 0 0 4px rgba(34,197,94,0.9); background: #4ade80 !important; }
+        .pgn-sq.to-best { box-shadow: inset 0 0 0 4px rgba(21,128,61,0.85); background: #86efac !important; }
+        .pgn-sq.last-move { box-shadow: inset 0 0 0 4px rgba(250,204,21,0.9); }
+
+        .pgn-eval-bar {
+            width: 22px;
+            height: min(80vw, 380px);
+            min-height: 220px;
+            border-radius: 999px;
+            background: #0f172a;
+            position: relative;
+            overflow: hidden;
+            border: 3px solid white;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+        }
+
+        .pgn-eval-fill {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background: white;
+            transition: height 0.3s ease;
+        }
+
+        .pgn-analysis-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .pgn-analysis-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
         @media (max-width: 1279px) {
             .desktop-sidebar {
                 box-shadow: 20px 0 40px rgba(0,0,0,0.12);
@@ -582,9 +653,7 @@
 
     <!-- MOBILE HEADER -->
     <header class="xl:hidden sticky top-0 z-[90] bg-white/90 backdrop-blur-xl border-b border-slate-100 px-4 py-3 flex items-center justify-between">
-        <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-lg px-3 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block">
-            RO-CHESS
-        </div>
+        <img src="gml.png" alt="RO-CHESS" class="h-10 rounded-xl">
 
         <button id="mobile-menu-btn" class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl" aria-label="Открыть меню" type="button">
             ☰
@@ -595,9 +664,7 @@
 
     <aside id="sidebar" class="w-72 desktop-sidebar h-screen fixed xl:sticky top-0 left-0 flex flex-col p-8 z-[85] -translate-x-full xl:translate-x-0 transition-transform duration-300">
         <div class="mb-12 text-center">
-            <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-2xl px-4 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block transform -rotate-2">
-                RO-CHESS
-            </div>
+            <img src="gml.png" alt="RO-CHESS" class="h-14 rounded-xl inline-block">
         </div>
 
         <nav class="space-y-4 flex-1" aria-label="Основная навигация">
@@ -606,6 +673,9 @@
             </a>
             <a href="position.html" class="flex items-center gap-4 p-4 min-h-[52px] bg-blue-50 rounded-2xl text-blue-600 font-black uppercase text-xs tracking-widest border-b-4 border-blue-100" aria-label="Текущая страница: сканер позиций">
                 <span class="text-2xl">📸</span> Сканер
+            </a>
+            <a href="analysis.html" class="flex items-center gap-4 p-4 min-h-[52px] hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all" aria-label="Перейти к анализу">
+                <span class="text-2xl">🔍</span> Анализ
             </a>
             <a href="profile.html" class="flex items-center gap-4 p-4 min-h-[52px] hover:bg-slate-50 rounded-2xl text-slate-400 font-black uppercase text-xs tracking-widest transition-all" aria-label="Перейти в профиль">
                 <span class="text-2xl">👤</span> Профиль
@@ -660,6 +730,45 @@
                 </div>
             </div>
         </div>
+
+        <section class="tool-card mb-6 page-transition">
+            <div class="flex items-center justify-between gap-3 flex-wrap mb-4">
+                <div>
+                    <div class="text-[10px] uppercase font-black tracking-[0.25em] text-indigo-500">Анализ PGN</div>
+                    <div class="text-slate-600 font-bold mt-2">Вставь PGN текстом или загрузи фото бланка — получишь полный разбор с ошибками.</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="text-[10px] uppercase font-black tracking-[0.25em] text-slate-400 mb-2 block">Вставить PGN текстом</label>
+                    <textarea id="pgn-text-input" rows="6" class="w-full border-2 border-slate-200 rounded-2xl p-4 font-mono text-sm text-slate-700 focus:border-indigo-400 focus:outline-none resize-none" placeholder="1. e4 e5 2. Nf3 Nc6 3. Bb5 a6..."></textarea>
+                </div>
+                <div>
+                    <label class="text-[10px] uppercase font-black tracking-[0.25em] text-slate-400 mb-2 block">Или загрузить фото PGN</label>
+                    <label class="flex items-center justify-center border-2 border-dashed border-slate-300 rounded-2xl p-6 cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition-all" style="min-height:144px;">
+                        <div class="text-center">
+                            <div class="text-3xl mb-2">📷</div>
+                            <div class="text-slate-500 font-bold text-sm" id="pgn-photo-label">Выбрать фото бланка</div>
+                        </div>
+                        <input id="pgn-photo-input" type="file" accept="image/*" class="hidden">
+                    </label>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button id="pgn-text-analyze-btn" class="btn-confirm text-white roblox-font italic uppercase py-4 rounded-2xl text-sm tracking-widest min-h-[52px]" type="button">
+                    Анализировать PGN
+                </button>
+                <button id="pgn-photo-analyze-btn" class="btn-secondary text-white roblox-font italic uppercase py-4 rounded-2xl text-sm tracking-widest min-h-[52px]" type="button">
+                    Распознать фото PGN
+                </button>
+                <button id="pgn-clear-btn" class="bg-slate-100 text-slate-600 font-black uppercase tracking-widest rounded-2xl min-h-[52px]" type="button">
+                    Очистить
+                </button>
+            </div>
+            <div id="pgn-analysis-output" class="mt-4 hidden"></div>
+        </section>
 
         <div class="main-scan-grid">
             <aside class="preview-card page-transition">
@@ -821,6 +930,10 @@
         const pageMessage = document.getElementById('page-message');
         const liveRegion = document.getElementById('live-region');
         const toast = document.getElementById('toast');
+        const pgnPhotoInput = document.getElementById('pgn-photo-input');
+        const pgnPhotoAnalyzeBtn = document.getElementById('pgn-photo-analyze-btn');
+        const pgnClearBtn = document.getElementById('pgn-clear-btn');
+        const pgnAnalysisOutput = document.getElementById('pgn-analysis-output');
 
         function announce(message) {
             if (liveRegion) liveRegion.textContent = message;
@@ -869,6 +982,234 @@
         function showAnalysisEmpty() {
             analysisResultCard.classList.add('hidden');
             analysisEmpty.classList.remove('hidden');
+        }
+
+        const ANALYSIS_PIECES = {
+            p: '♟', r: '♜', n: '♞', b: '♝', q: '♛', k: '♚',
+            P: '♙', R: '♖', N: '♘', B: '♗', Q: '♕', K: '♔'
+        };
+
+        let pgnAnalysisData = [];
+        let pgnKeyMistakes = [];
+        let pgnCurrentIdx = 0;
+
+        function escHtml(t) {
+            return t == null ? '' : String(t).replaceAll('<','&lt;').replaceAll('>','&gt;');
+        }
+
+        function clampEval(s) {
+            const v = Math.max(-8, Math.min(8, Number(s || 0)));
+            return ((v + 8) / 16) * 100;
+        }
+
+        function uciToSq(uci) {
+            if (!uci || uci.length < 4) return null;
+            return { from: uci.slice(0, 2), to: uci.slice(2, 4) };
+        }
+
+        function pgnBuildBoard(fen, moveInfo) {
+            const el = document.getElementById('pgn-board');
+            if (!el) return;
+            el.innerHTML = '';
+
+            const chess = new Chess(fen);
+            const rows = chess.board();
+            const played = uciToSq(moveInfo?.uci || '');
+            const best = uciToSq(moveInfo?.best_move || '');
+            const files = 'abcdefgh';
+
+            for (let r = 0; r < 8; r++) {
+                for (let f = 0; f < 8; f++) {
+                    const name = files[f] + (8 - r);
+                    const sq = document.createElement('div');
+                    sq.className = `pgn-sq ${(r + f) % 2 === 0 ? 'pgn-sq-w' : 'pgn-sq-b'}`;
+
+                    if (moveInfo?.is_blunder || moveInfo?.is_mistake) {
+                        if (played?.from === name) sq.classList.add('from-bad');
+                        if (played?.to === name) sq.classList.add('to-bad');
+                    } else if (played) {
+                        if (played.from === name || played.to === name) sq.classList.add('last-move');
+                    }
+                    if (best?.from === name) sq.classList.add('from-best');
+                    if (best?.to === name) sq.classList.add('to-best');
+
+                    const pc = rows[r][f];
+                    if (pc) {
+                        const span = document.createElement('span');
+                        span.className = 'piece';
+                        span.textContent = pc.color === 'w' ? ANALYSIS_PIECES[pc.type.toUpperCase()] : ANALYSIS_PIECES[pc.type];
+                        sq.appendChild(span);
+                    }
+
+                    if (r === 7) {
+                        const fl = document.createElement('span');
+                        fl.className = 'coord coord-file';
+                        fl.textContent = files[f];
+                        sq.appendChild(fl);
+                    }
+                    if (f === 0) {
+                        const rl = document.createElement('span');
+                        rl.className = 'coord coord-rank';
+                        rl.textContent = 8 - r;
+                        sq.appendChild(rl);
+                    }
+
+                    el.appendChild(sq);
+                }
+            }
+        }
+
+        function pgnUpdatePanel() {
+            const m = pgnAnalysisData[pgnCurrentIdx];
+            if (!m) return;
+
+            const moveTitle = document.getElementById('pgn-move-title');
+            const moveEval = document.getElementById('pgn-move-eval');
+            const bestMove = document.getElementById('pgn-best-move');
+            const explanation = document.getElementById('pgn-explanation');
+            const counter = document.getElementById('pgn-move-counter');
+            const range = document.getElementById('pgn-move-range');
+            const evalFill = document.getElementById('pgn-eval-fill');
+            const evalText = document.getElementById('pgn-eval-text');
+            const prevBtn = document.getElementById('pgn-prev');
+            const nextBtn = document.getElementById('pgn-next');
+
+            moveTitle.textContent = `Ход ${m.move_number || pgnCurrentIdx + 1}: ${m.move_played || '—'}`;
+
+            const ev = Number(m.evaluation || 0);
+            const evLabel = ev > 1.5 ? `+${ev.toFixed(1)} • перевес белых` :
+                            ev > 0.3 ? `+${ev.toFixed(1)} • чуть лучше белым` :
+                            ev < -1.5 ? `${ev.toFixed(1)} • перевес чёрных` :
+                            ev < -0.3 ? `${ev.toFixed(1)} • чуть лучше чёрным` :
+                            `${ev.toFixed(1)} • равно`;
+            moveEval.textContent = evLabel;
+            bestMove.textContent = m.best_move || '—';
+
+            let expl = 'Нормальный ход.';
+            if (m.is_blunder) expl = `Серьёзная ошибка! Лучше: ${m.best_move || '?'}`;
+            else if (m.is_mistake) expl = `Неточность. Лучше: ${m.best_move || '?'}`;
+            explanation.textContent = expl;
+
+            counter.textContent = `${pgnCurrentIdx + 1} / ${pgnAnalysisData.length}`;
+            range.value = pgnCurrentIdx;
+            prevBtn.disabled = pgnCurrentIdx === 0;
+            nextBtn.disabled = pgnCurrentIdx === pgnAnalysisData.length - 1;
+
+            evalFill.style.height = `${clampEval(m.evaluation)}%`;
+            evalText.textContent = ev.toFixed(1);
+
+            if (m.fen_after) pgnBuildBoard(m.fen_after, m);
+        }
+
+        function pgnGoToMove(idx) {
+            if (idx < 0 || idx >= pgnAnalysisData.length) return;
+            pgnCurrentIdx = idx;
+            pgnUpdatePanel();
+        }
+
+        function renderFullPgnAnalysis(data, sourcePgn) {
+            pgnAnalysisData = Array.isArray(data.analysis) ? data.analysis : [];
+            pgnKeyMistakes = Array.isArray(data.key_mistakes) ? data.key_mistakes : [];
+            const train = Array.isArray(data.train_focus) ? data.train_focus : [];
+            const totalMoves = data.total_moves || data.moves_count || pgnAnalysisData.length;
+            const mistakesCount = data.mistakes_count || 0;
+            const blundersCount = data.blunders_count || 0;
+
+            pgnAnalysisOutput.classList.remove('hidden');
+            pgnAnalysisOutput.innerHTML = `
+                <div class="tool-card mt-2 mb-2">
+                    <div class="text-[10px] uppercase font-black tracking-[0.25em] text-indigo-500 mb-2">Полный анализ PGN</div>
+                    ${sourcePgn ? `<details class="mb-4"><summary class="text-slate-500 font-bold text-xs cursor-pointer">Показать PGN</summary><pre class="whitespace-pre-wrap text-xs font-mono text-slate-600 bg-slate-50 rounded-xl p-3 border border-slate-200 max-h-40 overflow-auto mt-2">${escHtml(sourcePgn)}</pre></details>` : ''}
+                    <div class="grid grid-cols-3 gap-3 mb-5">
+                        <div class="bg-slate-50 rounded-2xl p-3 text-center border border-slate-100">
+                            <div class="text-[9px] uppercase font-black text-slate-400">Ходов</div>
+                            <div class="text-2xl font-black text-slate-800">${totalMoves}</div>
+                        </div>
+                        <div class="bg-amber-50 rounded-2xl p-3 text-center border border-amber-100">
+                            <div class="text-[9px] uppercase font-black text-amber-500">Ошибки</div>
+                            <div class="text-2xl font-black text-amber-500">${mistakesCount}</div>
+                        </div>
+                        <div class="bg-red-50 rounded-2xl p-3 text-center border border-red-100">
+                            <div class="text-[9px] uppercase font-black text-red-500">Зевки</div>
+                            <div class="text-2xl font-black text-red-500">${blundersCount}</div>
+                        </div>
+                    </div>
+
+                    ${pgnAnalysisData.length ? `
+                    <div class="pgn-analysis-grid">
+                        <div>
+                            <div class="flex items-start gap-3 justify-center">
+                                <div>
+                                    <div class="pgn-eval-bar">
+                                        <div id="pgn-eval-fill" class="pgn-eval-fill" style="height:50%"></div>
+                                    </div>
+                                    <div id="pgn-eval-text" class="text-xs font-black text-slate-500 text-center mt-1">0.0</div>
+                                </div>
+                                <div id="pgn-board" class="pgn-board-wrap"></div>
+                            </div>
+                            <div class="flex gap-3 mt-4">
+                                <button id="pgn-prev" class="flex-1 bg-white py-3 rounded-2xl border-b-4 border-slate-100 font-black text-slate-500 uppercase text-[10px] tracking-widest min-h-[48px]" type="button">⬅ Назад</button>
+                                <button id="pgn-next" class="flex-1 bg-blue-500 py-3 rounded-2xl border-b-4 border-blue-700 font-black text-white uppercase text-[10px] tracking-widest min-h-[48px] shadow-lg" type="button">Вперёд ➡</button>
+                            </div>
+                            <div class="flex items-center gap-3 mt-3">
+                                <span id="pgn-move-counter" class="text-xs font-black text-blue-500">0/0</span>
+                                <input id="pgn-move-range" type="range" min="0" max="${Math.max(0, pgnAnalysisData.length - 1)}" value="0" class="flex-1 min-h-[40px]">
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="bg-white/80 border-2 border-white rounded-2xl p-4 shadow-sm" style="border-left:8px solid #3b82f6;">
+                                <div class="text-[10px] uppercase font-black text-slate-400 mb-1">Ход</div>
+                                <div id="pgn-move-title" class="text-lg font-black text-slate-800">—</div>
+                                <div class="text-[10px] uppercase font-black text-slate-400 mt-3 mb-1">Оценка</div>
+                                <div id="pgn-move-eval" class="font-black text-slate-600">—</div>
+                                <div class="text-[10px] uppercase font-black text-slate-400 mt-3 mb-1">Лучший ход</div>
+                                <div id="pgn-best-move" class="font-black text-emerald-600">—</div>
+                                <div class="text-[10px] uppercase font-black text-slate-400 mt-3 mb-1">Комментарий</div>
+                                <div id="pgn-explanation" class="text-slate-600 font-bold text-sm">—</div>
+                            </div>
+
+                            <div class="bg-white/80 border-2 border-white rounded-2xl p-4 shadow-sm">
+                                <div class="text-[10px] uppercase font-black text-slate-400 mb-3">Ключевые ошибки</div>
+                                <div class="space-y-2" id="pgn-mistakes-list">
+                                    ${pgnKeyMistakes.length ? pgnKeyMistakes.map((km, i) => `
+                                        <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 cursor-pointer hover:bg-amber-100 transition-all pgn-mistake-goto" data-move="${km.move_number}">
+                                            <div class="font-black text-amber-700 text-xs">#${i+1} Ход ${km.move_number}: ${escHtml(km.move_played)}</div>
+                                            <div class="text-emerald-600 font-bold text-xs mt-1">Лучше: ${escHtml(km.best_move)}</div>
+                                            <div class="text-slate-600 text-xs mt-1">${escHtml(km.explanation)}</div>
+                                        </div>
+                                    `).join('') : '<div class="text-slate-400 font-bold text-sm">Ошибок не найдено!</div>'}
+                                </div>
+                            </div>
+
+                            <div class="bg-white/80 border-2 border-white rounded-2xl p-4 shadow-sm">
+                                <div class="text-[10px] uppercase font-black text-slate-400 mb-3">Что тренировать</div>
+                                <div class="flex flex-wrap gap-2">
+                                    ${train.length ? train.map(t => `<span class="topic-pill">${escHtml(t)}</span>`).join('') : '<span class="text-slate-400 font-bold text-sm">Тактика</span>'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    ` : '<div class="text-slate-500 font-bold text-center py-4">Нет данных для анализа.</div>'}
+                </div>
+            `;
+
+            if (pgnAnalysisData.length) {
+                pgnCurrentIdx = 0;
+                pgnUpdatePanel();
+
+                document.getElementById('pgn-prev').addEventListener('click', () => pgnGoToMove(pgnCurrentIdx - 1));
+                document.getElementById('pgn-next').addEventListener('click', () => pgnGoToMove(pgnCurrentIdx + 1));
+                document.getElementById('pgn-move-range').addEventListener('input', (e) => pgnGoToMove(Number(e.target.value)));
+
+                document.querySelectorAll('.pgn-mistake-goto').forEach(el => {
+                    el.addEventListener('click', () => {
+                        const mn = Number(el.dataset.move);
+                        const idx = pgnAnalysisData.findIndex(a => a.move_number === mn);
+                        if (idx >= 0) pgnGoToMove(idx);
+                    });
+                });
+            }
         }
 
         function showAnalysisResult() {
@@ -1294,6 +1635,75 @@
         confirmBtn.addEventListener('click', handleConfirm);
         analyzeBtn.addEventListener('click', handleAnalyze);
 
+        const pgnTextInput = document.getElementById('pgn-text-input');
+        const pgnTextAnalyzeBtn = document.getElementById('pgn-text-analyze-btn');
+        const pgnPhotoLabel = document.getElementById('pgn-photo-label');
+
+        pgnPhotoInput.addEventListener('change', () => {
+            const f = pgnPhotoInput.files[0];
+            if (f) pgnPhotoLabel.textContent = f.name;
+        });
+
+        pgnTextAnalyzeBtn.addEventListener('click', async () => {
+            const pgn = pgnTextInput.value.trim();
+            if (!pgn) {
+                showPageMessage('Вставь PGN текст для анализа.', 'error');
+                showToast('PGN пустой', 'error');
+                return;
+            }
+            setButtonLoading(pgnTextAnalyzeBtn, true, 'Анализируем...', 'Анализировать PGN');
+            hidePageMessage();
+            try {
+                const data = await window.roChessApi.analyzePgnText(pgn);
+                renderFullPgnAnalysis(data, pgn);
+                showPageMessage('PGN проанализирован.', 'success');
+                showToast('Анализ PGN готов', 'success');
+            } catch (error) {
+                console.error('Ошибка анализа PGN:', error);
+                showPageMessage(`Ошибка: ${error.message || 'Не удалось проанализировать PGN.'}`, 'error');
+                showToast('Ошибка анализа PGN', 'error');
+            } finally {
+                setButtonLoading(pgnTextAnalyzeBtn, false, 'Анализируем...', 'Анализировать PGN');
+            }
+        });
+
+        pgnPhotoAnalyzeBtn.addEventListener('click', async () => {
+            const file = pgnPhotoInput.files[0];
+            if (!file) {
+                showPageMessage('Сначала выбери фото с рукописной нотацией.', 'error');
+                showToast('Нужно выбрать фото PGN', 'error');
+                return;
+            }
+            setButtonLoading(pgnPhotoAnalyzeBtn, true, 'Распознаём PGN...', 'Распознать фото PGN');
+            hidePageMessage();
+            try {
+                const data = await window.roChessApi.analyzePgnPhoto(file);
+                const extractedPgn = data.extracted_pgn || '';
+                if (extractedPgn) pgnTextInput.value = extractedPgn;
+                renderFullPgnAnalysis(data, extractedPgn);
+                showPageMessage('PGN распознан и проанализирован.', 'success');
+                showToast('Анализ PGN готов', 'success');
+            } catch (error) {
+                console.error('Ошибка OCR PGN:', error);
+                showPageMessage(`Ошибка: ${error.message || 'Не удалось распознать PGN с фото.'}`, 'error');
+                showToast('Ошибка распознавания PGN', 'error');
+            } finally {
+                setButtonLoading(pgnPhotoAnalyzeBtn, false, 'Распознаём PGN...', 'Распознать фото PGN');
+            }
+        });
+
+        pgnClearBtn.addEventListener('click', () => {
+            pgnPhotoInput.value = '';
+            pgnTextInput.value = '';
+            pgnAnalysisOutput.innerHTML = '';
+            pgnAnalysisOutput.classList.add('hidden');
+            pgnAnalysisData = [];
+            pgnKeyMistakes = [];
+            pgnCurrentIdx = 0;
+            if (pgnPhotoLabel) pgnPhotoLabel.textContent = 'Выбрать фото бланка';
+            showToast('Результат очищен', 'success');
+        });
+
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
         const mobileOverlay = document.getElementById('mobile-overlay');
         const sidebar = document.getElementById('sidebar');
@@ -1329,6 +1739,10 @@
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeMobileMenu();
+            }
+            if (pgnAnalysisData.length && !e.ctrlKey && !e.metaKey) {
+                if (e.key === 'ArrowLeft') { e.preventDefault(); pgnGoToMove(pgnCurrentIdx - 1); }
+                if (e.key === 'ArrowRight') { e.preventDefault(); pgnGoToMove(pgnCurrentIdx + 1); }
             }
         });
 

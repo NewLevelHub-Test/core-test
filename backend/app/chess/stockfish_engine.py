@@ -3,6 +3,32 @@ import chess.engine
 import queue
 import threading
 import os
+import logging
+import shutil
+
+logger = logging.getLogger(__name__)
+
+ENGINE_ACQUIRE_TIMEOUT = 10  # seconds
+
+
+def _resolve_stockfish_path(path=None):
+    if path:
+        return path
+
+    env_path = os.environ.get('STOCKFISH_PATH')
+    if env_path and os.path.isfile(env_path):
+        return env_path
+
+    system_path = shutil.which('stockfish')
+    if system_path:
+        return system_path
+
+    for candidate in ('/usr/games/stockfish', '/usr/bin/stockfish', '/usr/local/bin/stockfish'):
+        if os.path.isfile(candidate):
+            return candidate
+
+    return 'stockfish'
+
 
 class StockfishPool:
     _instance = None
@@ -16,33 +42,58 @@ class StockfishPool:
         return cls._instance
 
     def _init_pool(self, path=None):
-        if not path:
-            current_file_dir = os.path.dirname(os.path.abspath(__file__))
-            backend_root = os.path.abspath(os.path.join(current_file_dir, "..", ".."))
-            self.path = os.path.join(backend_root, 'bin', 'stockfish.exe')
-        else:
-            self.path = path
-        
+        self.path = _resolve_stockfish_path(path)
         self.pool_size = 4
         self.engines = queue.Queue()
+        self._healthy = False
 
+        started = 0
         for _ in range(self.pool_size):
             try:
                 engine = chess.engine.SimpleEngine.popen_uci(self.path)
                 self.engines.put(engine)
+                started += 1
             except Exception as e:
-                print(f"Engine start error: {e}")
+                logger.error("Engine start error (path=%s): %s", self.path, e)
+
+        if started > 0:
+            self._healthy = True
+            logger.info("Stockfish pool ready: %d/%d engines (path=%s)", started, self.pool_size, self.path)
+        else:
+            logger.error("Stockfish pool EMPTY — no engines started (path=%s)", self.path)
+
+    def _acquire(self):
+        if not self._healthy:
+            raise RuntimeError("Stockfish pool is not available")
+        try:
+            return self.engines.get(timeout=ENGINE_ACQUIRE_TIMEOUT)
+        except queue.Empty:
+            raise RuntimeError("Stockfish engine pool exhausted (timeout)")
 
     def _map_level(self, engine, bot_level):
         skill = max(0, min(20, int(bot_level)))
         engine.configure({"Skill Level": skill})
 
+    def _limit_for_level(self, bot_level):
+        lvl = int(bot_level)
+        if lvl <= 3:
+            return chess.engine.Limit(depth=2, time=0.05)
+        elif lvl <= 6:
+            return chess.engine.Limit(depth=4, time=0.1)
+        elif lvl <= 12:
+            return chess.engine.Limit(depth=8, time=0.4)
+        elif lvl <= 17:
+            return chess.engine.Limit(depth=12, time=0.8)
+        else:
+            return chess.engine.Limit(depth=18, time=1.5)
+
     def get_best_move(self, fen, bot_level=5):
-        engine = self.engines.get()
+        engine = self._acquire()
         try:
             board = chess.Board(fen)
             self._map_level(engine, bot_level)
-            result = engine.play(board, chess.engine.Limit(time=0.1))
+            limit = self._limit_for_level(bot_level)
+            result = engine.play(board, limit)
             return result.move.uci() if result.move else None
         except Exception:
             return None
@@ -50,7 +101,7 @@ class StockfishPool:
             self.engines.put(engine)
 
     def evaluate(self, fen, bot_level=20):
-        engine = self.engines.get()
+        engine = self._acquire()
         try:
             board = chess.Board(fen)
             self._map_level(engine, bot_level)
@@ -65,7 +116,7 @@ class StockfishPool:
             self.engines.put(engine)
 
     def get_top_moves(self, fen, count=3, bot_level=20):
-        engine = self.engines.get()
+        engine = self._acquire()
         try:
             board = chess.Board(fen)
             self._map_level(engine, bot_level)
@@ -84,11 +135,12 @@ class StockfishPool:
 
     def shutdown(self):
         with self._lock:
+            self._healthy = False
             while not self.engines.empty():
                 try:
                     engine = self.engines.get_nowait()
                     engine.quit()
-                except:
+                except Exception:
                     pass
 
 StockfishEngine = StockfishPool

@@ -20,11 +20,17 @@ class Config:
     JWT_BLACKLIST_TOKEN_CHECKS = ['access', 'refresh']
 
 
-    STOCKFISH_PATH = os.environ.get('STOCKFISH_PATH', 'bin/stockfish.exe')
+    STOCKFISH_PATH = os.environ.get('STOCKFISH_PATH', '/usr/games/stockfish')
+    CORS_ALLOWED_ORIGINS = os.environ.get(
+        'CORS_ALLOWED_ORIGINS',
+        'http://127.0.0.1:5500,http://localhost:5500,http://127.0.0.1:5000,http://localhost:5000'
+    )
+    RATELIMIT_STORAGE_URI = os.environ.get('RATELIMIT_STORAGE_URI', 'memory://')
 
 
 class DevelopmentConfig(Config):
     DEBUG = True
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///chess_app.db')
 
 
 class ProductionConfig(Config):

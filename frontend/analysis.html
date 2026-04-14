@@ -492,9 +492,7 @@
 
     <!-- MOBILE HEADER -->
     <header class="xl:hidden sticky top-0 z-[90] bg-white/90 backdrop-blur-xl border-b border-slate-100 px-4 py-3 flex items-center justify-between">
-        <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-lg px-3 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block">
-            RO-CHESS
-        </div>
+        <img src="gml.png" alt="RO-CHESS" class="h-10 rounded-xl">
 
         <button
             id="mobile-menu-btn"
@@ -510,9 +508,7 @@
 
     <aside id="sidebar" class="w-72 desktop-sidebar h-screen fixed xl:sticky top-0 left-0 flex flex-col p-8 z-[85] -translate-x-full xl:translate-x-0 transition-transform duration-300">
         <div class="mb-12 text-center">
-            <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-2xl px-4 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block transform -rotate-2">
-                RO-CHESS
-            </div>
+            <img src="gml.png" alt="RO-CHESS" class="h-14 rounded-xl inline-block">
         </div>
 
         <nav class="space-y-4 flex-1" aria-label="Основная навигация">
@@ -543,10 +539,37 @@
                 <p id="analysis-subtitle" class="text-slate-400 font-bold mt-2">Загрузка анализа...</p>
             </div>
 
-            <a href="hist.html" class="bg-white px-6 md:px-8 py-3 rounded-2xl border-b-4 border-slate-200 active:translate-y-2 font-black text-slate-400 uppercase italic roblox-font text-xs md:text-sm tracking-widest transition-all text-center min-h-[52px] flex items-center justify-center" aria-label="Назад к истории" >
-                Назад к истории
-            </a>
+            <div class="flex gap-3 flex-wrap">
+                <button id="show-picker-btn" type="button" class="bg-indigo-500 px-5 py-3 rounded-2xl border-b-4 border-indigo-700 active:translate-y-2 font-black text-white uppercase italic roblox-font text-[10px] md:text-xs tracking-widest transition-all text-center min-h-[48px] flex items-center justify-center shadow-lg" aria-label="Выбрать другую партию">
+                    Выбрать партию 📜
+                </button>
+                <a href="hist.html" class="bg-white px-5 py-3 rounded-2xl border-b-4 border-slate-200 active:translate-y-2 font-black text-slate-400 uppercase italic roblox-font text-[10px] md:text-xs tracking-widest transition-all text-center min-h-[48px] flex items-center justify-center" aria-label="Назад к истории">
+                    История
+                </a>
+            </div>
         </header>
+
+        <section id="game-picker-section" class="hidden mb-8 page-transition">
+            <div class="mini-card p-6 md:p-8">
+                <div class="flex items-center gap-4 mb-5">
+                    <div class="w-12 h-12 bg-indigo-50 rounded-[1.2rem] flex items-center justify-center text-2xl shadow-inner border border-white">📜</div>
+                    <div>
+                        <h3 class="font-black text-slate-800 uppercase text-xs tracking-[0.25em]">Выбери партию для анализа</h3>
+                        <p class="text-slate-400 font-bold text-sm mt-1">Выбери из своей истории сражений</p>
+                    </div>
+                </div>
+                <div id="game-picker-list" class="space-y-3 max-h-[420px] overflow-y-auto">
+                    <div class="h-16 rounded-2xl skeleton"></div>
+                    <div class="h-16 rounded-2xl skeleton"></div>
+                    <div class="h-16 rounded-2xl skeleton"></div>
+                </div>
+                <div class="flex justify-center gap-3 mt-5" id="picker-pagination">
+                    <button id="picker-prev" class="px-4 py-2 bg-slate-100 rounded-xl font-black text-xs uppercase text-slate-500 min-h-[40px] disabled:opacity-30" type="button">Назад</button>
+                    <span id="picker-page-info" class="flex items-center text-xs font-black text-slate-400 px-3">Стр. 1</span>
+                    <button id="picker-next" class="px-4 py-2 bg-slate-100 rounded-xl font-black text-xs uppercase text-slate-500 min-h-[40px] disabled:opacity-30" type="button">Вперёд</button>
+                </div>
+            </div>
+        </section>
 
         <div class="grid grid-cols-12 gap-6 lg:gap-8 xl:gap-10 items-start">
             <section class="col-span-12 xl:col-span-7">
@@ -740,6 +763,96 @@
         function getGameIdFromUrl() {
             const params = new URLSearchParams(window.location.search);
             return params.get('id');
+        }
+
+        let pickerPage = 1;
+        const PICKER_LIMIT = 10;
+
+        async function loadGamePicker(page = 1) {
+            const section = document.getElementById('game-picker-section');
+            const list = document.getElementById('game-picker-list');
+            const prevBtn = document.getElementById('picker-prev');
+            const nextBtn = document.getElementById('picker-next');
+            const pageInfo = document.getElementById('picker-page-info');
+
+            section.classList.remove('hidden');
+
+            list.innerHTML = `
+                <div class="h-14 rounded-2xl skeleton"></div>
+                <div class="h-14 rounded-2xl skeleton"></div>
+                <div class="h-14 rounded-2xl skeleton"></div>
+            `;
+
+            try {
+                const data = await window.roChessApi.fetchWithAuth(`games/history?page=${page}&limit=${PICKER_LIMIT}`);
+                const games = data.games || data || [];
+
+                if (prevBtn) prevBtn.disabled = page <= 1;
+                if (nextBtn) nextBtn.disabled = games.length < PICKER_LIMIT;
+                if (pageInfo) pageInfo.textContent = `Стр. ${page}`;
+
+                if (!games.length) {
+                    list.innerHTML = `
+                        <div class="empty-state">
+                            <div class="text-3xl mb-2">♟️</div>
+                            <div class="font-black text-slate-700">Нет партий</div>
+                            <div class="text-slate-500 font-bold mt-1">Сначала сыграй партию с ботом.</div>
+                            <a href="wbots.html" class="mt-3 inline-block bg-blue-500 text-white px-5 py-2 rounded-xl font-black text-xs uppercase">Играть</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                list.innerHTML = games.map(g => {
+                    let resClass = 'bg-slate-100 text-slate-500';
+                    let resText = 'Ничья';
+                    const rt = g.result_text || g.result;
+                    if (rt === 'win' || (rt === '1-0' && g.player_color === 'white') || (rt === '0-1' && g.player_color === 'black')) {
+                        resClass = 'bg-emerald-100 text-emerald-600'; resText = 'Победа';
+                    } else if (rt === 'loss' || (rt === '0-1' && g.player_color === 'white') || (rt === '1-0' && g.player_color === 'black')) {
+                        resClass = 'bg-red-100 text-red-600'; resText = 'Поражение';
+                    }
+                    const dateText = g.created_at ? new Date(g.created_at).toLocaleDateString() : '—';
+                    return `
+                        <button type="button" class="w-full flex items-center gap-4 p-4 bg-slate-50 hover:bg-blue-50 rounded-2xl border border-slate-100 hover:border-blue-200 transition-all text-left game-pick-btn" data-game-id="${g.id}">
+                            <span class="px-3 py-1 rounded-xl font-black text-[10px] uppercase ${resClass}">${escapeHtml(resText)}</span>
+                            <span class="font-bold text-slate-700 text-sm">Партия #${escapeHtml(String(g.id))}</span>
+                            <span class="text-slate-400 text-xs font-bold">${dateText}</span>
+                            <span class="text-slate-400 text-xs font-bold">Lvl: ${escapeHtml(String(g.difficulty ?? '—'))}</span>
+                            <span class="ml-auto text-blue-500 font-black text-xs uppercase">Анализ →</span>
+                        </button>
+                    `;
+                }).join('');
+
+                list.querySelectorAll('.game-pick-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = btn.dataset.gameId;
+                        window.history.replaceState(null, '', `analysis.html?id=${id}`);
+                        section.classList.add('hidden');
+                        gameId = id;
+                        loadAnalysis();
+                    });
+                });
+            } catch (err) {
+                console.error('Ошибка загрузки истории:', err);
+                list.innerHTML = `
+                    <div class="error-state">
+                        <div class="text-3xl mb-2">😵</div>
+                        <div class="font-black text-red-700">Не удалось загрузить историю</div>
+                        <div class="text-red-600 font-bold mt-1">${escapeHtml(err.message || '')}</div>
+                    </div>
+                `;
+            }
+        }
+
+        let pickerInited = false;
+        function initPickerPagination() {
+            if (pickerInited) return;
+            pickerInited = true;
+            const prevBtn = document.getElementById('picker-prev');
+            const nextBtn = document.getElementById('picker-next');
+            if (prevBtn) prevBtn.addEventListener('click', () => { pickerPage = Math.max(1, pickerPage - 1); loadGamePicker(pickerPage); });
+            if (nextBtn) nextBtn.addEventListener('click', () => { pickerPage++; loadGamePicker(pickerPage); });
         }
 
         function uciToSquares(uci) {
@@ -1131,8 +1244,7 @@
                 showToast('Ошибка: нет ID задачи', 'error');
                 return;
             }
-
-            window.location.href = `/exercises.html?mistake_id=${id}`;
+            window.location.href = `study.html?mistake_id=${id}`;
         }
 
         function updateInfoPanel() {
@@ -1192,18 +1304,27 @@
             gameId = getGameIdFromUrl();
 
             if (!gameId) {
-                document.getElementById('analysis-subtitle').textContent = 'Не указан id партии';
-                showError('В адресе страницы нет id партии. Открой страницу из истории игр.', false);
+                document.getElementById('analysis-subtitle').textContent = 'Выбери партию из истории';
                 document.getElementById('key-mistakes-list').innerHTML = renderEmptyState(
-                    'Нет данных для анализа',
-                    'Открой партию из истории, и здесь появится разбор.',
-                    '🧭'
+                    'Выбери партию',
+                    'Нажми на партию выше, чтобы начать анализ.',
+                    '📜'
                 );
                 document.getElementById('mistake-cards').innerHTML = renderEmptyState(
-                    'Карточки недоступны',
-                    'Сначала нужно открыть конкретную партию.',
+                    'Карточки появятся после выбора партии',
+                    'Выбери партию из истории выше.',
                     '📄'
                 );
+                document.getElementById('move-title').textContent = '—';
+                document.getElementById('move-eval').textContent = '—';
+                document.getElementById('best-move-text').textContent = '—';
+                document.getElementById('explanation-text').textContent = 'Выбери партию для разбора.';
+                document.getElementById('total-moves-stat').textContent = '—';
+                document.getElementById('mistakes-stat').textContent = '—';
+                document.getElementById('blunders-stat').textContent = '—';
+                buildBoard('8/8/8/8/8/8/8/8 w - - 0 1', null);
+                initPickerPagination();
+                loadGamePicker();
                 return;
             }
 
@@ -1393,6 +1514,16 @@
             const bestMove = btn.dataset.bestMove || '';
 
             askAIMistake(fen, move, bestMove);
+        });
+
+        document.getElementById('show-picker-btn').addEventListener('click', () => {
+            const section = document.getElementById('game-picker-section');
+            if (section.classList.contains('hidden')) {
+                initPickerPagination();
+                loadGamePicker(pickerPage);
+            } else {
+                section.classList.add('hidden');
+            }
         });
 
         buildBoard('8/8/8/8/8/8/8/8 w - - 0 1', null);

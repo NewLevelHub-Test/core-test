@@ -268,9 +268,7 @@
 
     <div class="w-full max-w-[500px] desktop-card-lux px-5 py-6 sm:px-8 sm:py-10 md:p-12 relative">
         <div class="text-center mb-8 sm:mb-10 md:mb-14">
-            <div class="inline-block bg-[#00b06f] text-white roblox-font italic uppercase text-3xl sm:text-4xl md:text-5xl px-5 sm:px-6 md:px-8 py-3 rounded-[1.4rem] sm:rounded-[1.7rem] md:rounded-[2rem] transform -rotate-2 shadow-2xl mb-5 md:mb-6 border-t-2 border-white/40">
-                RO-CHESS
-            </div>
+            <img src="gml.png" alt="RO-CHESS" class="h-20 md:h-24 rounded-2xl inline-block transform -rotate-2 shadow-2xl">
             <p class="text-slate-400 font-black uppercase text-[10px] sm:text-xs tracking-[0.25em] sm:tracking-[0.35em] md:tracking-[0.4em]">
                 Premium Portal
             </p>
@@ -342,6 +340,15 @@
                     Создать новый профиль
                 </button>
 
+                <div class="flex gap-3 sm:gap-4">
+                    <button type="button" id="to-sms-login" class="flex-1 text-blue-500 hover:text-blue-700 font-black text-[9px] sm:text-[10px] uppercase tracking-wide cursor-pointer transition-colors text-center min-h-[40px]">
+                        Войти по SMS
+                    </button>
+                    <button type="button" id="to-recovery" class="flex-1 text-slate-400 hover:text-rose-500 font-black text-[9px] sm:text-[10px] uppercase tracking-wide cursor-pointer transition-colors text-center min-h-[40px]">
+                        Забыл пароль
+                    </button>
+                </div>
+
                 <div class="hint-box">
                     Войти можно по email или по телефону.
                 </div>
@@ -400,6 +407,59 @@
                 <div class="hint-box">
                     Обязательные поля: никнейм, телефон и пароль.
                 </div>
+            </form>
+        </div>
+
+        <!-- SMS Login Section -->
+        <div id="sms-login-section" class="hidden fade-swap">
+            <h2 class="roblox-font italic uppercase text-slate-700 text-lg sm:text-xl mb-5 sm:mb-6 text-center">
+                Вход по SMS-коду
+            </h2>
+            <form class="space-y-3 sm:space-y-4" novalidate>
+                <div>
+                    <input type="tel" id="sms-phone" placeholder="Телефон (например, +77001234567)" class="w-full p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white border-2 border-slate-100 outline-none focus:border-emerald-400 transition-all font-bold min-h-[50px]" aria-label="Телефон">
+                    <p id="sms-phone-error" class="hidden text-rose-500 font-bold text-xs mt-2 ml-1"></p>
+                </div>
+                <button type="button" id="sms-send-code-btn" class="w-full bg-blue-500 text-white font-black py-3.5 rounded-xl sm:rounded-2xl uppercase italic roblox-font tracking-wide shadow-[0_6px_0_#2563eb] active:translate-y-1 active:shadow-none transition-all text-sm min-h-[50px]">
+                    Отправить код
+                </button>
+                <div id="sms-code-block" class="hidden space-y-3">
+                    <input type="text" id="sms-code" placeholder="Введите код из SMS" maxlength="6" class="w-full p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white border-2 border-slate-100 outline-none focus:border-emerald-400 transition-all font-bold min-h-[50px] text-center text-2xl tracking-[0.5em]" aria-label="SMS код">
+                    <p id="sms-code-error" class="hidden text-rose-500 font-bold text-xs mt-2 ml-1"></p>
+                    <button type="button" id="sms-login-btn" class="w-full bg-emerald-500 text-white font-black py-4 sm:py-5 rounded-[1.3rem] sm:rounded-[2rem] uppercase italic roblox-font tracking-widest shadow-[0_8px_0_#059669] active:translate-y-2 active:shadow-none transition-all text-sm sm:text-base min-h-[54px]">
+                        Войти
+                    </button>
+                </div>
+                <button type="button" id="sms-to-login" class="w-full text-center text-slate-400 font-black text-[10px] sm:text-xs uppercase tracking-widest mt-4 cursor-pointer hover:text-blue-500 min-h-[48px]">
+                    Назад ко входу
+                </button>
+            </form>
+        </div>
+
+        <!-- Recovery Section -->
+        <div id="recovery-section" class="hidden fade-swap">
+            <h2 class="roblox-font italic uppercase text-slate-700 text-lg sm:text-xl mb-5 sm:mb-6 text-center">
+                Восстановление пароля
+            </h2>
+            <form class="space-y-3 sm:space-y-4" novalidate>
+                <div>
+                    <input type="text" id="recovery-identifier" placeholder="Email или телефон" class="w-full p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white border-2 border-slate-100 outline-none focus:border-emerald-400 transition-all font-bold min-h-[50px]" aria-label="Email или телефон">
+                    <p id="recovery-identifier-error" class="hidden text-rose-500 font-bold text-xs mt-2 ml-1"></p>
+                </div>
+                <button type="button" id="recovery-send-btn" class="w-full bg-blue-500 text-white font-black py-3.5 rounded-xl sm:rounded-2xl uppercase italic roblox-font tracking-wide shadow-[0_6px_0_#2563eb] active:translate-y-1 active:shadow-none transition-all text-sm min-h-[50px]">
+                    Отправить код восстановления
+                </button>
+                <div id="recovery-code-block" class="hidden space-y-3">
+                    <input type="text" id="recovery-code" placeholder="Код из SMS/Email" maxlength="6" class="w-full p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white border-2 border-slate-100 outline-none focus:border-emerald-400 transition-all font-bold min-h-[50px] text-center text-2xl tracking-[0.5em]" aria-label="Код восстановления">
+                    <input type="password" id="recovery-new-password" placeholder="Новый пароль" class="w-full p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white border-2 border-slate-100 outline-none focus:border-emerald-400 transition-all font-bold min-h-[50px]" aria-label="Новый пароль" autocomplete="new-password">
+                    <p id="recovery-form-error" class="hidden text-rose-500 font-bold text-xs mt-2 ml-1"></p>
+                    <button type="button" id="recovery-confirm-btn" class="w-full bg-emerald-500 text-white font-black py-4 sm:py-5 rounded-[1.3rem] sm:rounded-[2rem] uppercase italic roblox-font tracking-widest shadow-[0_8px_0_#059669] active:translate-y-2 active:shadow-none transition-all text-sm sm:text-base min-h-[54px]">
+                        Сменить пароль
+                    </button>
+                </div>
+                <button type="button" id="recovery-to-login" class="w-full text-center text-slate-400 font-black text-[10px] sm:text-xs uppercase tracking-widest mt-4 cursor-pointer hover:text-blue-500 min-h-[48px]">
+                    Назад ко входу
+                </button>
             </form>
         </div>
 
@@ -581,7 +641,7 @@
                 email: document.getElementById('reg-email').value.trim(),
                 phone: document.getElementById('reg-phone').value.trim(),
                 password: document.getElementById('reg-password').value,
-                age: Number(document.getElementById('reg-age').value) || 0,
+                age: document.getElementById('reg-age').value ? Number(document.getElementById('reg-age').value) : null,
                 role: 'student'
             };
 
@@ -603,6 +663,12 @@
             } else if (userData.password.length < 6) {
                 setFieldError('reg-password', 'reg-password-error', 'Пароль должен быть не короче 6 символов');
                 valid = false;
+            } else if (!/[A-Z]/.test(userData.password)) {
+                setFieldError('reg-password', 'reg-password-error', 'Добавь хотя бы 1 заглавную букву');
+                valid = false;
+            } else if (!/\d/.test(userData.password)) {
+                setFieldError('reg-password', 'reg-password-error', 'Добавь хотя бы 1 цифру');
+                valid = false;
             }
 
             if (userData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.email)) {
@@ -610,8 +676,8 @@
                 valid = false;
             }
 
-            if (userData.age && userData.age < 1) {
-                setFieldError('reg-age', 'reg-age-error', 'Возраст должен быть больше 0');
+            if (userData.age !== null && (userData.age < 5 || userData.age > 12)) {
+                setFieldError('reg-age', 'reg-age-error', 'Возраст должен быть от 5 до 12');
                 valid = false;
             }
 
@@ -695,6 +761,151 @@
 
         document.getElementById('reg-age').addEventListener('keydown', (e) => {
             if (e.key === 'Enter') regBtn.click();
+        });
+
+        // --- SMS Login ---
+        const smsSection = document.getElementById('sms-login-section');
+        const toSmsLoginBtn = document.getElementById('to-sms-login');
+        const smsToLoginBtn = document.getElementById('sms-to-login');
+        const smsSendCodeBtn = document.getElementById('sms-send-code-btn');
+        const smsLoginBtn = document.getElementById('sms-login-btn');
+        const smsCodeBlock = document.getElementById('sms-code-block');
+
+        function showSmsLogin() {
+            hideFormMessage();
+            loginSection.classList.add('hidden');
+            registerSection.classList.add('hidden');
+            document.getElementById('recovery-section').classList.add('hidden');
+            smsSection.classList.remove('hidden');
+            smsSection.classList.remove('fade-swap');
+            void smsSection.offsetWidth;
+            smsSection.classList.add('fade-swap');
+            announce('Открыта форма входа по SMS');
+        }
+
+        toSmsLoginBtn.addEventListener('click', showSmsLogin);
+        smsToLoginBtn.addEventListener('click', showLogin);
+
+        function showLoginFromAnywhere() {
+            hideFormMessage();
+            smsSection.classList.add('hidden');
+            document.getElementById('recovery-section').classList.add('hidden');
+            showLogin();
+        }
+        smsToLoginBtn.addEventListener('click', showLoginFromAnywhere);
+
+        smsSendCodeBtn.addEventListener('click', async () => {
+            const phone = document.getElementById('sms-phone').value.trim();
+            if (!phone) {
+                setFieldError('sms-phone', 'sms-phone-error', 'Введите номер телефона');
+                return;
+            }
+            setButtonLoading(smsSendCodeBtn, true, 'Отправка...', 'Отправить код');
+            try {
+                await window.roChessApi.sendSmsCode(phone);
+                smsCodeBlock.classList.remove('hidden');
+                showFormMessage('Код отправлен на ваш телефон', 'success');
+                showToast('Код отправлен', 'success');
+            } catch (e) {
+                showFormMessage(e.message || 'Ошибка отправки кода');
+                showToast('Ошибка', 'error');
+            } finally {
+                setButtonLoading(smsSendCodeBtn, false, 'Отправка...', 'Отправить код');
+            }
+        });
+
+        smsLoginBtn.addEventListener('click', async () => {
+            const phone = document.getElementById('sms-phone').value.trim();
+            const code = document.getElementById('sms-code').value.trim();
+            if (!code) {
+                setFieldError('sms-code', 'sms-code-error', 'Введите код');
+                return;
+            }
+            setButtonLoading(smsLoginBtn, true, 'Вход...', 'Войти');
+            try {
+                await window.roChessApi.loginByPhone(phone, code);
+                showFormMessage('Вход выполнен!', 'success');
+                showToast('Добро пожаловать!', 'success');
+            } catch (e) {
+                showFormMessage(e.message || 'Ошибка входа');
+                showToast('Ошибка', 'error');
+            } finally {
+                setButtonLoading(smsLoginBtn, false, 'Вход...', 'Войти');
+            }
+        });
+
+        // --- Recovery ---
+        const recoverySection = document.getElementById('recovery-section');
+        const toRecoveryBtn = document.getElementById('to-recovery');
+        const recoveryToLoginBtn = document.getElementById('recovery-to-login');
+        const recoverySendBtn = document.getElementById('recovery-send-btn');
+        const recoveryConfirmBtn = document.getElementById('recovery-confirm-btn');
+        const recoveryCodeBlock = document.getElementById('recovery-code-block');
+
+        function showRecovery() {
+            hideFormMessage();
+            loginSection.classList.add('hidden');
+            registerSection.classList.add('hidden');
+            smsSection.classList.add('hidden');
+            recoverySection.classList.remove('hidden');
+            recoverySection.classList.remove('fade-swap');
+            void recoverySection.offsetWidth;
+            recoverySection.classList.add('fade-swap');
+            announce('Открыта форма восстановления пароля');
+        }
+
+        toRecoveryBtn.addEventListener('click', showRecovery);
+        recoveryToLoginBtn.addEventListener('click', showLoginFromAnywhere);
+
+        recoverySendBtn.addEventListener('click', async () => {
+            const id = document.getElementById('recovery-identifier').value.trim();
+            if (!id) {
+                setFieldError('recovery-identifier', 'recovery-identifier-error', 'Введите email или телефон');
+                return;
+            }
+            setButtonLoading(recoverySendBtn, true, 'Отправка...', 'Отправить код восстановления');
+            try {
+                await window.roChessApi.sendRecoveryCode(id);
+                recoveryCodeBlock.classList.remove('hidden');
+                showFormMessage('Код восстановления отправлен', 'success');
+                showToast('Код отправлен', 'success');
+            } catch (e) {
+                showFormMessage(e.message || 'Ошибка отправки');
+                showToast('Ошибка', 'error');
+            } finally {
+                setButtonLoading(recoverySendBtn, false, 'Отправка...', 'Отправить код восстановления');
+            }
+        });
+
+        recoveryConfirmBtn.addEventListener('click', async () => {
+            const id = document.getElementById('recovery-identifier').value.trim();
+            const code = document.getElementById('recovery-code').value.trim();
+            const newPass = document.getElementById('recovery-new-password').value;
+            const errEl = document.getElementById('recovery-form-error');
+
+            if (!code || !newPass) {
+                errEl.textContent = 'Заполните код и новый пароль';
+                errEl.classList.remove('hidden');
+                return;
+            }
+            if (newPass.length < 6) {
+                errEl.textContent = 'Пароль должен быть не менее 6 символов';
+                errEl.classList.remove('hidden');
+                return;
+            }
+            errEl.classList.add('hidden');
+            setButtonLoading(recoveryConfirmBtn, true, 'Смена...', 'Сменить пароль');
+            try {
+                await window.roChessApi.confirmRecovery(id, code, newPass);
+                showFormMessage('Пароль успешно изменён! Теперь войдите.', 'success');
+                showToast('Пароль изменён', 'success');
+                setTimeout(showLoginFromAnywhere, 1500);
+            } catch (e) {
+                showFormMessage(e.message || 'Ошибка смены пароля');
+                showToast('Ошибка', 'error');
+            } finally {
+                setButtonLoading(recoveryConfirmBtn, false, 'Смена...', 'Сменить пароль');
+            }
         });
     </script>
 </body>

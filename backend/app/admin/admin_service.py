@@ -65,18 +65,47 @@ class AdminService:
     def delete_user(user_id):
         user = User.query.get(user_id)
         if not user:
-            return {"error": "User not found"}, 404
+            return {"error": "Пользователь не найден"}, 404
 
         try:
-            Game.query.filter((Game.white_id == user_id) | (Game.black_id == user_id)).delete(synchronize_session=False)
+            from app.models.mistake import Mistake
+            from app.models.move import Move
+            from app.models.chat import ChatSession
+
+            Mistake.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+            Progress.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+            TestAttempt.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+            ChatSession.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+
+            games = Game.query.filter(
+                (Game.white_id == user_id) | (Game.black_id == user_id)
+            ).all()
+            for game in games:
+                Move.query.filter_by(game_id=game.id).delete(synchronize_session=False)
+            Game.query.filter(
+                (Game.white_id == user_id) | (Game.black_id == user_id)
+            ).delete(synchronize_session=False)
+
+            from app.models.roadmap import Roadmap
+            from app.models.roadmap_week import RoadmapWeek
+            from app.models.daily_task import DailyTask
+            roadmaps = Roadmap.query.filter_by(user_id=user_id).all()
+            for rm in roadmaps:
+                weeks = RoadmapWeek.query.filter_by(roadmap_id=rm.id).all()
+                for w in weeks:
+                    DailyTask.query.filter_by(week_id=w.id).delete(synchronize_session=False)
+                RoadmapWeek.query.filter_by(roadmap_id=rm.id).delete(synchronize_session=False)
+            Roadmap.query.filter_by(user_id=user_id).delete(synchronize_session=False)
 
             db.session.delete(user)
             db.session.commit()
-            return {"message": "User and their games deleted successfully"}, 200
-            
-        except Exception as e:
-            db.session.rollback() 
-            return {"error": str(e)}, 500
+            return {"message": "Пользователь и все связанные данные удалены"}, 200
+
+        except Exception:
+            db.session.rollback()
+            import logging
+            logging.getLogger(__name__).exception("Error deleting user %s", user_id)
+            return {"error": "Ошибка удаления пользователя"}, 500
         
 
     # --- Topics ---

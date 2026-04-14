@@ -1,13 +1,16 @@
 import numpy as np
+import os
 from roboflow import Roboflow
 
 class PieceDetector:
-    API_KEY = "WcAZeJc1UxlwVpJKm4B2"
-    PROJECT_NAME = "ctv"
-    VERSION = 1
+    API_KEY = os.environ.get("ROBOFLOW_API_KEY", "")
+    PROJECT_NAME = os.environ.get("ROBOFLOW_PROJECT", "ctv")
+    VERSION = int(os.environ.get("ROBOFLOW_VERSION", "1"))
 
     @staticmethod
     def detect(image_path):
+        if not PieceDetector.API_KEY:
+            raise RuntimeError("ROBOFLOW_API_KEY is not configured")
         rf = Roboflow(api_key=PieceDetector.API_KEY)
         # Указываем воркспейс из твоей ссылки
         project = rf.workspace("chess-nypgo").project(PieceDetector.PROJECT_NAME)

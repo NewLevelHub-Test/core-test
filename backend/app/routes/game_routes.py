@@ -21,7 +21,8 @@ def create_game():
 @game_bp.route('/<int:game_id>', methods=['GET'])
 @jwt_required()
 def get_game(game_id):
-    result, status = GameService.get_game(game_id)
+    user_id = get_jwt_identity()
+    result, status = GameService.get_game(user_id, game_id)
     return jsonify(result), status
 
 @game_bp.route('/<int:game_id>/move', methods=['POST'])
@@ -49,6 +50,14 @@ def resign(game_id):
     result, status = GameService.resign(user_id, game_id)
     return jsonify(result), status
 
+@game_bp.route('/<int:game_id>/timeout', methods=['POST'])
+@jwt_required()
+@limiter.limit("5 per minute")
+def timeout_loss(game_id):
+    user_id = get_jwt_identity()
+    result, status = GameService.timeout_loss(user_id, game_id)
+    return jsonify(result), status
+
 @game_bp.route('/history', methods=['GET'])
 @jwt_required()
 @limiter.limit("20 per minute")
@@ -65,12 +74,14 @@ def get_history():
 @game_bp.route('/<int:game_id>/moves', methods=['GET'])
 @jwt_required()
 def get_moves(game_id):
-    result, status = GameService.get_game_moves(game_id)
+    user_id = get_jwt_identity()
+    result, status = GameService.get_game_moves(user_id, game_id)
     return jsonify(result), status
 
 @game_bp.route('/<int:game_id>/pgn', methods=['GET'])
 @jwt_required()
 @limiter.limit("5 per minute") 
 def export_pgn(game_id):
-    result, status = GameService.export_pgn(game_id)
+    user_id = get_jwt_identity()
+    result, status = GameService.export_pgn(user_id, game_id)
     return jsonify(result), status

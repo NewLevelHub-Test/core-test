@@ -1,62 +1,57 @@
-import random
 from app import db
 from app.models.roadmap import Roadmap
 from app.models.roadmap_week import RoadmapWeek
 from app.models.daily_task import DailyTask
-from app.models.topic import Topic
-from app.models.lesson import Lesson
 from app.models.user import User
+from app.services.roadmap_ai_service import (
+    get_curriculum,
+    WEEK_TASK_TEMPLATE,
+    generate_task_content,
+)
 from datetime import datetime
 
-WEEK_TEMPLATES = [
-    [
-        {'day': 1, 'type': 'lesson', 'title': 'Введение в тему'},
-        {'day': 2, 'type': 'exercise', 'title': 'Закрепление основ'},
-        {'day': 3, 'type': 'lesson', 'title': 'Углубленное изучение'},
-        {'day': 4, 'type': 'exercise', 'title': 'Практика на мат'},
-        {'day': 5, 'type': 'game', 'title': 'Партия с ботом'},
-        {'day': 6, 'type': 'exercise', 'title': 'Поиск ошибок'},
-        {'day': 7, 'type': 'test', 'title': 'Тест недели'},
-    ],
+TOTAL_WEEKS = 12
 
-    [
-        {'day': 1, 'type': 'lesson', 'title': 'Краткий обзор'},
-        {'day': 2, 'type': 'exercise', 'title': 'Тактический тренажер'},
-        {'day': 3, 'type': 'exercise', 'title': 'Решение этюдов'},
-        {'day': 4, 'type': 'game', 'title': 'Тренировочный матч'},
-        {'day': 5, 'type': 'lesson', 'title': 'Разбор стратегий'},
-        {'day': 6, 'type': 'game', 'title': 'Реванш с ботом'},
-        {'day': 7, 'type': 'test', 'title': 'Проверка навыков'},
-    ],
 
-    [
-        {'day': 1, 'type': 'lesson', 'title': 'Теория и примеры'},
-        {'day': 2, 'type': 'game', 'title': 'Легкая разминка'},
-        {'day': 3, 'type': 'exercise', 'title': 'Задачи на время'},
-        {'day': 4, 'type': 'lesson', 'title': 'Мастер-класс'},
-        {'day': 5, 'type': 'game', 'title': 'Серьезная игра'},
-        {'day': 6, 'type': 'exercise', 'title': 'Анализ позиции'},
-        {'day': 7, 'type': 'test', 'title': 'Экзамен'},
-    ]
-]
+def _int_id(user_id):
+    try:
+        return int(user_id)
+    except (TypeError, ValueError):
+        return None
 
 
 class RoadmapService:
 
     @staticmethod
     def get_roadmap(user_id):
+        user_id = _int_id(user_id)
         roadmap = Roadmap.query.filter_by(user_id=user_id).first()
         if not roadmap:
             return {'error': 'План обучения не создан. Пройдите тест для генерации'}, 404
 
         weeks = roadmap.weeks.all()
+
+        weeks_data = []
+        for w in weeks:
+            wd = w.to_dict()
+            prev_done = True
+            if w.week_number > 1:
+                prev = RoadmapWeek.query.filter_by(
+                    roadmap_id=roadmap.id,
+                    week_number=w.week_number - 1,
+                ).first()
+                prev_done = prev.is_completed if prev else True
+            wd['is_locked'] = not prev_done and w.week_number > 1
+            weeks_data.append(wd)
+
         return {
             'roadmap': roadmap.to_dict(),
-            'weeks': [w.to_dict() for w in weeks],
+            'weeks': weeks_data,
         }, 200
 
     @staticmethod
     def generate_roadmap(user_id, level=None):
+        user_id = _int_id(user_id)
         user = db.session.get(User, user_id)
         if not user:
             return {'error': 'Пользователь не найден'}, 404
@@ -68,53 +63,37 @@ class RoadmapService:
             db.session.delete(existing)
             db.session.flush()
 
-        all_topics = Topic.query.order_by(Topic.order).all()
-        user_weak_ids = user.weak_topics if user.weak_topics else []
-        
-        weak_topics = [t for t in all_topics if t.id in user_weak_ids]
-        other_topics = [t for t in all_topics if t.id not in user_weak_ids]
-        sorted_topics = weak_topics + other_topics
+        curriculum = get_curriculum(level)
 
         roadmap = Roadmap(
             user_id=user_id,
             level=level,
-            total_weeks=len(sorted_topics),
+            total_weeks=TOTAL_WEEKS,
             current_week=1,
-            title=f'План обучения: {level.capitalize()}'
+            title=f'План обучения: {level.capitalize()}',
         )
         db.session.add(roadmap)
         db.session.flush()
 
-        for i, topic in enumerate(sorted_topics, start=1):
-            is_weak = topic.id in user_weak_ids
-            
+        for i, topic_info in enumerate(curriculum[:TOTAL_WEEKS], start=1):
             week = RoadmapWeek(
                 roadmap_id=roadmap.id,
                 week_number=i,
-                title=f'Неделя {i}: {topic.name}',
-                description=f'{"[ПРИОРИТЕТ] " if is_weak else ""}Изучаем: {topic.description}',
-                topics=[topic.id],
+                title=f'Неделя {i}: {topic_info["topic"]}',
+                description=topic_info['desc'],
+                topics=[],
             )
             db.session.add(week)
             db.session.flush()
 
-            lessons = Lesson.query.filter_by(topic_id=topic.id).order_by(Lesson.order).all()
-            
-            template = random.choice(WEEK_TEMPLATES)
-
-            for tmpl in template:
-                ref_id = None
-                if tmpl['type'] == 'lesson' and lessons:
-                    lesson_idx = (tmpl['day'] // 2) % len(lessons)
-                    ref_id = lessons[lesson_idx].id
-
+            for tmpl in WEEK_TASK_TEMPLATE:
                 task = DailyTask(
                     week_id=week.id,
                     day_number=tmpl['day'],
                     task_type=tmpl['type'],
-                    title=tmpl['title'],
-                    description=f'{topic.name}: {tmpl["title"]}',
-                    reference_id=ref_id,
+                    title=f'{topic_info["topic"]}: {tmpl["suffix"]}',
+                    description=f'{topic_info["desc"]} — {tmpl["suffix"]}',
+                    content_generated=False,
                 )
                 db.session.add(task)
 
@@ -126,7 +105,156 @@ class RoadmapService:
         }, 201
 
     @staticmethod
+    def get_task_content(user_id, task_id):
+        user_id = _int_id(user_id)
+        task = DailyTask.query.get(task_id)
+        if not task:
+            return {'error': 'Задание не найдено'}, 404
+
+        week = RoadmapWeek.query.get(task.week_id)
+        roadmap = Roadmap.query.get(week.roadmap_id)
+        if int(roadmap.user_id) != int(user_id):
+            return {'error': 'Доступ запрещён'}, 403
+
+        if week.week_number > 1:
+            prev = RoadmapWeek.query.filter_by(
+                roadmap_id=roadmap.id,
+                week_number=week.week_number - 1,
+            ).first()
+            if prev and not prev.is_completed:
+                return {'error': 'Сначала завершите предыдущую неделю'}, 403
+
+        if not task.content_generated:
+            topic_name = week.title.replace(f'Неделя {week.week_number}: ', '')
+            content = generate_task_content(
+                topic_name=topic_name,
+                task_title=task.title,
+                task_type=task.task_type,
+                level=roadmap.level or 'beginner',
+                week_description=week.description or '',
+            )
+            task.lesson_content = content.get('steps', [])
+            task.quiz_questions = content.get('quiz', [])
+            task.content_generated = True
+            db.session.commit()
+
+        return {'task': task.to_dict_full()}, 200
+
+    @staticmethod
+    def submit_task_quiz(user_id, task_id, answers):
+        from app.models.progress import Progress
+        user_id = _int_id(user_id)
+
+        task = DailyTask.query.get(task_id)
+        if not task:
+            return {'error': 'Задание не найдено'}, 404
+
+        week = RoadmapWeek.query.get(task.week_id)
+        roadmap = Roadmap.query.get(week.roadmap_id)
+        if int(roadmap.user_id) != int(user_id):
+            return {'error': 'Доступ запрещён'}, 403
+
+        if task.is_completed:
+            return {'error': 'Задание уже завершено'}, 400
+
+        if not task.quiz_questions:
+            return {'error': 'У задания нет теста'}, 400
+
+        quiz = task.quiz_questions
+        total = len(quiz)
+        correct = 0
+
+        results = []
+        for i, q in enumerate(quiz):
+            user_answer = answers[i] if i < len(answers) else -1
+            is_correct = user_answer == q.get('correct', -1)
+            if is_correct:
+                correct += 1
+            results.append({
+                'question': q.get('question', ''),
+                'user_answer': user_answer,
+                'correct_answer': q.get('correct', 0),
+                'is_correct': is_correct,
+                'explanation': q.get('explanation', ''),
+            })
+
+        score = round(correct / total * 100) if total > 0 else 0
+        passed = score >= 60
+
+        task.quiz_score = score
+        task.quiz_passed = passed
+
+        if passed:
+            task.is_completed = True
+
+            if task.reference_id and task.task_type in ('lesson', 'exercise'):
+                existing = Progress.query.filter_by(
+                    user_id=user_id,
+                    lesson_id=task.reference_id if task.task_type == 'lesson' else None,
+                    exercise_id=task.reference_id if task.task_type == 'exercise' else None,
+                ).first()
+                if not existing:
+                    new_progress = Progress(
+                        user_id=user_id,
+                        lesson_id=task.reference_id if task.task_type == 'lesson' else None,
+                        exercise_id=task.reference_id if task.task_type == 'exercise' else None,
+                        status='completed',
+                        completed_at=datetime.utcnow(),
+                    )
+                    db.session.add(new_progress)
+
+            all_done = not DailyTask.query.filter_by(
+                week_id=week.id, is_completed=False,
+            ).filter(DailyTask.id != task.id).first()
+
+            if all_done:
+                week.is_completed = True
+                if roadmap.current_week == week.week_number:
+                    roadmap.current_week = min(week.week_number + 1, roadmap.total_weeks)
+
+        db.session.commit()
+
+        total_tasks = DailyTask.query.join(RoadmapWeek).filter(
+            RoadmapWeek.roadmap_id == roadmap.id,
+        ).count()
+        completed_tasks = DailyTask.query.join(RoadmapWeek).filter(
+            RoadmapWeek.roadmap_id == roadmap.id,
+            DailyTask.is_completed == True,
+        ).count()
+        new_percent = round(completed_tasks / total_tasks * 100) if total_tasks else 0
+
+        return {
+            'passed': passed,
+            'score': score,
+            'correct': correct,
+            'total': total,
+            'results': results,
+            'task': task.to_dict(),
+            'week_completed': week.is_completed,
+            'roadmap_progress': new_percent,
+        }, 200
+
+    @staticmethod
+    def complete_daily_task(user_id, task_id):
+        """Legacy toggle — kept for backward compat but now requires quiz."""
+        user_id = _int_id(user_id)
+        task = DailyTask.query.get(task_id)
+        if not task:
+            return {'error': 'Задание не найдено'}, 404
+
+        week = RoadmapWeek.query.get(task.week_id)
+        roadmap = Roadmap.query.get(week.roadmap_id)
+        if int(roadmap.user_id) != int(user_id):
+            return {'error': 'Доступ запрещён'}, 403
+
+        if not task.quiz_passed and not task.is_completed:
+            return {'error': 'Сначала пройдите тест по уроку'}, 400
+
+        return {'task': task.to_dict()}, 200
+
+    @staticmethod
     def get_week_detail(user_id, week_id):
+        user_id = _int_id(user_id)
         week = RoadmapWeek.query.get(week_id)
         if not week:
             return {'error': 'Неделя не найдена'}, 404
@@ -139,6 +267,7 @@ class RoadmapService:
 
     @staticmethod
     def complete_week(user_id, week_id):
+        user_id = _int_id(user_id)
         week = RoadmapWeek.query.get(week_id)
         if not week:
             return {'error': 'Неделя не найдена'}, 404
@@ -148,7 +277,6 @@ class RoadmapService:
             return {'error': 'Доступ запрещён'}, 403
 
         week.is_completed = True
-
         if roadmap.current_week == week.week_number:
             roadmap.current_week = min(week.week_number + 1, roadmap.total_weeks)
 
@@ -156,82 +284,8 @@ class RoadmapService:
         return {'week': week.to_dict()}, 200
 
     @staticmethod
-    def complete_daily_task(user_id, task_id):
-        from app.models.progress import Progress
-        
-        task = DailyTask.query.get(task_id)
-        if not task:
-            return {'error': 'Задание не найдено'}, 404
-
-        week = RoadmapWeek.query.get(task.week_id)
-        roadmap = Roadmap.query.get(week.roadmap_id)
-        if int(roadmap.user_id) != int(user_id):
-            return {'error': 'Доступ запрещён'}, 403
-
-        # 1. МЕНЯЕМ СТАТУС (Toggle)
-        task.is_completed = not task.is_completed
-
-        # 2. ОБНОВЛЯЕМ ТАБЛИЦУ PROGRESS
-        if task.reference_id:
-            # Ищем существующую запись
-            existing_progress = Progress.query.filter_by(
-                user_id=user_id,
-                lesson_id=task.reference_id if task.task_type == 'lesson' else None,
-                exercise_id=task.reference_id if task.task_type == 'exercise' else None
-            ).first()
-
-            if task.is_completed:
-                # Если поставили галочку
-                if not existing_progress:
-                    new_progress = Progress(
-                        user_id=user_id,
-                        lesson_id=task.reference_id if task.task_type == 'lesson' else None,
-                        exercise_id=task.reference_id if task.task_type == 'exercise' else None,
-                        status='completed',
-                        completed_at=datetime.utcnow()
-                    )
-                    db.session.add(new_progress)
-                else:
-                    existing_progress.status = 'completed'
-                    existing_progress.completed_at = datetime.utcnow()
-            else:
-                # Если УБРАЛИ галочку
-                if existing_progress:
-                    existing_progress.status = 'in_progress'
-                    existing_progress.completed_at = None
-
-        # 3. ПРОВЕРКА ЗАВЕРШЕННОСТИ НЕДЕЛИ
-        all_done = not DailyTask.query.filter_by(
-            week_id=week.id, is_completed=False
-        ).first()
-        
-        week.is_completed = all_done
-        
-        # Обновляем текущую неделю роадмапа, если нужно
-        if all_done and roadmap.current_week == week.week_number:
-            roadmap.current_week = min(week.week_number + 1, roadmap.total_weeks)
-
-        db.session.commit()
-
-        # 4. СЧИТАЕМ НОВЫЙ ПРОЦЕНТ ДЛЯ ОТВЕТА
-        total_tasks = DailyTask.query.join(RoadmapWeek).filter(RoadmapWeek.roadmap_id == roadmap.id).count()
-        completed_tasks = DailyTask.query.join(RoadmapWeek).filter(
-            RoadmapWeek.roadmap_id == roadmap.id, 
-            DailyTask.is_completed == True
-        ).count()
-        
-        new_percent = round(completed_tasks / total_tasks * 100) if total_tasks else 0
-
-        return {
-            'task': task.to_dict(), 
-            'week_completed': all_done,
-            'roadmap_progress': new_percent # Отправляем новый процент фронтенду
-        }, 200
-
-        
-
-    @staticmethod
     def get_progress(user_id):
+        user_id = _int_id(user_id)
         roadmap = Roadmap.query.filter_by(user_id=user_id).first()
         if not roadmap:
             return {'error': 'План обучения не найден'}, 404
@@ -239,11 +293,11 @@ class RoadmapService:
         weeks = roadmap.weeks.all()
         completed_weeks = sum(1 for w in weeks if w.is_completed)
         total_tasks = DailyTask.query.join(RoadmapWeek).filter(
-            RoadmapWeek.roadmap_id == roadmap.id
+            RoadmapWeek.roadmap_id == roadmap.id,
         ).count()
         completed_tasks = DailyTask.query.join(RoadmapWeek).filter(
             RoadmapWeek.roadmap_id == roadmap.id,
-            DailyTask.is_completed == True
+            DailyTask.is_completed == True,
         ).count()
 
         return {

@@ -423,9 +423,7 @@
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <header class="xl:hidden sticky top-0 z-[90] bg-white/90 backdrop-blur-xl border-b border-slate-100 px-4 py-3 flex items-center justify-between">
-        <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-lg px-3 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block">
-            RO-CHESS
-        </div>
+        <img src="gml.png" alt="RO-CHESS" class="h-10 rounded-xl">
 
         <button id="mobile-menu-btn" class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl btn-min" aria-label="Открыть меню" type="button">
             ☰
@@ -436,9 +434,7 @@
 
     <aside id="sidebar" class="w-72 desktop-sidebar h-screen fixed xl:sticky top-0 left-0 flex flex-col p-8 z-[85] -translate-x-full xl:translate-x-0 transition-transform duration-300">
         <div class="mb-12 text-center">
-            <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-2xl px-4 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block transform -rotate-2">
-                RO-CHESS
-            </div>
+            <img src="gml.png" alt="RO-CHESS" class="h-14 rounded-xl inline-block">
         </div>
 
         <nav class="space-y-4 flex-1" aria-label="Основная навигация">
@@ -540,6 +536,10 @@
                         <option value="5" selected>5 минут</option>
                         <option value="10">10 минут</option>
                     </select>
+
+                    <button id="start-btn" class="action-btn mt-4 w-full bg-emerald-500 text-white roblox-font italic uppercase py-4 rounded-2xl text-sm border-b-4 border-emerald-700 active:translate-y-1 transition-all focus-ring" aria-label="Начать игру" type="button">
+                        Старт ▶
+                    </button>
                 </div>
 
                 <button id="resign-btn" onclick="openResignConfirm()" class="action-btn w-full bg-slate-800 text-white roblox-font italic uppercase py-4 rounded-2xl text-sm border-b-4 border-black active:translate-y-1 transition-all focus-ring" aria-label="Сдаться" type="button">
@@ -716,14 +716,44 @@
             updateTimerDisplay();
 
             timerInterval = setInterval(() => {
+                const orientation = board ? board.orientation() : 'white';
+                const playerTurn =
+                    (orientation === 'white' && game.turn() === 'w') ||
+                    (orientation === 'black' && game.turn() === 'b');
+                const shouldTick = !!gameId && !game.game_over() && !isBotThinking && playerTurn;
+                if (!shouldTick) return;
+
                 timeLeft--;
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
-                    lastFinishedGameId = gameId;
-                    showEndScreen("ВРЕМЯ ВЫШЛО", "Вы проиграли по времени ⌛");
+                    handleTimeoutLoss();
                 }
                 updateTimerDisplay();
             }, 1000);
+        }
+
+        async function handleTimeoutLoss() {
+            if (!gameId) {
+                showEndScreen("ВРЕМЯ ВЫШЛО", "Вы проиграли по времени ⌛");
+                return;
+            }
+
+            try {
+                const data = await window.roChessApi.fetchWithAuth(`games/${gameId}/timeout`, {
+                    method: 'POST'
+                });
+                if (data && data.game && data.game.id) {
+                    lastFinishedGameId = data.game.id;
+                } else {
+                    lastFinishedGameId = gameId;
+                }
+            } catch (err) {
+                console.error('Ошибка фиксации поражения по времени:', err);
+                // Даже при ошибке покажем экран, чтобы UX не ломался.
+                lastFinishedGameId = gameId;
+            }
+
+            showEndScreen("ВРЕМЯ ВЫШЛО", "Вы проиграли по времени ⌛");
         }
 
         function updateTimerDisplay() {
@@ -1143,7 +1173,9 @@
         function updateStatus() {
             let status = '';
 
-            if (isCreatingGame) {
+            if (!gameId) {
+                status = 'Выбери сложность, время и нажми Старт';
+            } else if (isCreatingGame) {
                 status = 'Создание партии...';
             } else if (isBotThinking) {
                 status = 'Бот думает...';
@@ -1182,7 +1214,6 @@
             if (isCreatingGame || isBotThinking) return;
             board.orientation(color);
             updateOrientationButtons(color);
-            startNewGame();
         }
 
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
@@ -1209,9 +1240,14 @@
         });
 
         document.getElementById('time-limit').addEventListener('change', () => {
-            // только меняем значение, новую игру не стартуем автоматически
+            const minutes = parseInt(document.getElementById('time-limit').value, 10) || 5;
+            if (!gameId) {
+                timeLeft = minutes * 60;
+                updateTimerDisplay();
+            }
         });
 
+        document.getElementById('start-btn').addEventListener('click', startNewGame);
         document.getElementById('cancel-resign-btn').addEventListener('click', closeResignConfirm);
         document.getElementById('confirm-resign-btn').addEventListener('click', confirmResign);
 
@@ -1225,8 +1261,11 @@
             updateBotDifficultyLabel();
             board = Chessboard('myBoard', config);
             updateOrientationButtons('white');
+            const minutes = parseInt(document.getElementById('time-limit').value, 10) || 5;
+            timeLeft = minutes * 60;
+            updateTimerDisplay();
+            renderMoveLogEmpty();
             updateStatus();
-            await startNewGame();
         });
     </script>
 </body>

@@ -5,7 +5,7 @@ from flask_jwt_extended import create_access_token, create_refresh_token
 from app import db
 from app.models.user import User
 from app.utils.validators import validate_registration
-from app.utils.sms import generate_sms_code, code_expiry, send_sms
+from app.utils.sms import generate_sms_code, code_expiry, send_sms, send_recovery_email
 from app.utils.helpers import clean_html  
 
 class AuthService:
@@ -30,7 +30,7 @@ class AuthService:
             email=data.get('email'),
             phone=data.get('phone'),
             age=data.get('age'),
-            role=data.get('role', 'student'),
+            role='student',
         )
         user.set_password(data['password'])
 
@@ -76,7 +76,15 @@ class AuthService:
         if not phone:
             return {'error': 'Укажите номер телефона'}, 400
 
+        import re as _re
+        cleaned = _re.sub(r'[\s\-\(\)]', '', phone)
         user = User.query.filter_by(phone=phone).first()
+        if not user:
+            user = User.query.filter_by(phone=cleaned).first()
+        if not user and cleaned.startswith('+'):
+            user = User.query.filter_by(phone=cleaned[1:]).first()
+        if not user and not cleaned.startswith('+'):
+            user = User.query.filter_by(phone='+' + cleaned).first()
         if not user:
             return {'error': 'Пользователь с таким номером не найден'}, 404
 
@@ -155,8 +163,14 @@ class AuthService:
         user.recovery_code_expires = code_expiry(minutes=10)
         db.session.commit()
 
+        sent = False
         if phone:
-            send_sms(phone, code)
+            sent = send_sms(phone, code)
+        elif email:
+            sent = send_recovery_email(email, code)
+
+        if not sent:
+            return {'error': 'Не удалось отправить код восстановления'}, 503
 
         return {'message': 'Код восстановления отправлен'}, 200
 

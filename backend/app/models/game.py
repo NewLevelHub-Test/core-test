@@ -22,6 +22,27 @@ class Game(db.Model):
 
     moves = db.relationship('Move', backref='game', lazy='dynamic', order_by='Move.move_number')
 
+    @property
+    def difficulty(self):
+        if self.bot_level is None:
+            return None
+        if self.bot_level <= 5:
+            return 1
+        elif self.bot_level <= 14:
+            return 2
+        else:
+            return 3
+
+    @property
+    def result_text(self):
+        mapping = {'1-0': 'win', '0-1': 'loss', '1/2-1/2': 'draw'}
+        if self.result in mapping:
+            if self.player_color == 'black':
+                rev = {'win': 'loss', 'loss': 'win', 'draw': 'draw'}
+                return rev[mapping[self.result]]
+            return mapping[self.result]
+        return None
+
     def to_dict(self):
         return {
             'id': self.id,
@@ -31,8 +52,10 @@ class Game(db.Model):
             'fen': self.fen,
             'status': self.status,
             'result': self.result,
+            'result_text': self.result_text,
             'mode': self.mode,
             'bot_level': self.bot_level,
+            'difficulty': self.difficulty,
             'player_color': self.player_color,
             'time_control': self.time_control,
             'created_at': self.created_at.isoformat(),

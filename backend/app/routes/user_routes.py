@@ -75,5 +75,6 @@ def get_activity():
 
 
 @user_bp.route('/avatar/<filename>')
+@jwt_required()
 def get_avatar(filename):
     return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)

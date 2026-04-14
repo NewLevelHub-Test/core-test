@@ -9,7 +9,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
-
+token_blocklist = set()
 
 
 from app.config import config_by_name
@@ -32,14 +32,36 @@ def create_app(config_name=None):
     app = Flask(__name__)
     app.config.from_object(config_by_name[config_name])
 
+    if config_name == 'production':
+        missing = [
+            key for key in ('SECRET_KEY', 'JWT_SECRET_KEY', 'DATABASE_URL')
+            if not os.environ.get(key)
+        ]
+        if missing:
+            raise RuntimeError(f"Missing required environment variables for production: {', '.join(missing)}")
+
     db.init_app(app)
     jwt.init_app(app)
     migrate.init_app(app, db)
+
+    @jwt.token_in_blocklist_loader
+    def check_if_token_revoked(jwt_header, jwt_payload):
+        jti = jwt_payload["jti"]
+        return jti in token_blocklist
+    limiter.storage_uri = app.config.get('RATELIMIT_STORAGE_URI', 'memory://')
     limiter.init_app(app)
+
+    cors_origins = [
+        origin.strip()
+        for origin in app.config.get('CORS_ALLOWED_ORIGINS', '').split(',')
+        if origin.strip()
+    ]
+    if not cors_origins:
+        cors_origins = ["*"]
 
     CORS(app, resources={
         r"/api/*": {
-            "origins": ["http://127.0.0.1:5500", "http://localhost:5500", "http://127.0.0.1:5000", "http://localhost:5000"],
+            "origins": cors_origins,
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"],
             "supports_credentials": True
@@ -93,6 +115,10 @@ def create_app(config_name=None):
     def handle_unexpected_error(error):
         app.logger.exception("Unexpected error occurred")
         return jsonify({"error": "Unexpected Error", "message": "Что-то пошло не так"}), 500
+
+    @app.route('/api/health')
+    def health_check():
+        return jsonify({"status": "ok"}), 200
 
     from app.models.analysis_cache import AnalysisCache
 

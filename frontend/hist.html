@@ -190,9 +190,7 @@
 
     <!-- MOBILE HEADER -->
     <header class="xl:hidden sticky top-0 z-[90] bg-white/90 backdrop-blur-xl border-b border-slate-100 px-4 py-3 flex items-center justify-between">
-        <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-lg px-3 py-2 rounded-xl shadow-lg border-t-2 border-white/30 inline-block">
-            RO-CHESS
-        </div>
+        <img src="gml.png" alt="RO-CHESS" class="h-10 rounded-xl">
 
         <button
             id="mobile-menu-btn"
@@ -209,9 +207,7 @@
     <!-- SIDEBAR -->
     <aside id="sidebar" class="w-72 h-screen fixed xl:sticky top-0 left-0 flex flex-col p-8 border-r-2 border-white desktop-sidebar z-[85] -translate-x-full xl:translate-x-0 transition-transform duration-300">
         <div class="mb-12 text-center">
-            <div class="bg-[#00b06f] text-white roblox-font italic uppercase text-2xl px-4 py-2 rounded-xl shadow-lg transform -rotate-2">
-                RO-CHESS
-            </div>
+            <img src="gml.png" alt="RO-CHESS" class="h-14 rounded-xl inline-block">
         </div>
 
         <nav class="space-y-4 flex-1" aria-label="Основная навигация">
@@ -260,8 +256,13 @@
         </div>
     </main>
 
+    <script src="state.js"></script>
     <script src="api.js"></script>
     <script>
+        if (!window.roChessApi || !window.roChessApi.isAuthenticated || !window.roChessApi.isAuthenticated()) {
+            window.location.href = 'h1.html';
+        }
+
         let currentPage = 1;
         const limit = 10;
         const liveRegion = document.getElementById('live-region');
@@ -406,11 +407,11 @@
                     let resClass = 'status-draw';
                     let resText = 'Ничья';
 
-                    if (game.result === 'win') {
+                    const rt = game.result_text || game.result;
+                    if (rt === 'win' || rt === '1-0' && game.player_color === 'white' || rt === '0-1' && game.player_color === 'black') {
                         resClass = 'status-win';
                         resText = 'Победа 🏆';
-                    }
-                    if (game.result === 'loss') {
+                    } else if (rt === 'loss' || rt === '0-1' && game.player_color === 'white' || rt === '1-0' && game.player_color === 'black') {
                         resClass = 'status-loss';
                         resText = 'Поражение 💀';
                     }
