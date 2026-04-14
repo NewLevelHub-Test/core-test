@@ -6,7 +6,7 @@ export FLASK_ENV="${FLASK_ENV:-production}"
 flask db upgrade
 exec gunicorn \
     --bind 0.0.0.0:5000 \
-    --workers 4 \
+    --workers 2 \
     --timeout 120 \
     --graceful-timeout 30 \
     --max-requests 1000 \

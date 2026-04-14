@@ -43,7 +43,7 @@ class StockfishPool:
 
     def _init_pool(self, path=None):
         self.path = _resolve_stockfish_path(path)
-        self.pool_size = 4
+        self.pool_size = 2
         self.engines = queue.Queue()
         self._healthy = False
 
