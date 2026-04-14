@@ -51,6 +51,7 @@ class StockfishPool:
         for _ in range(self.pool_size):
             try:
                 engine = chess.engine.SimpleEngine.popen_uci(self.path)
+                engine.configure({"Threads": 1, "Hash": 32})
                 self.engines.put(engine)
                 started += 1
             except Exception as e:
