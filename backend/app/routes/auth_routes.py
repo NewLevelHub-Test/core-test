@@ -30,25 +30,25 @@ def register():
     age = data.get('age')
 
     if not email and not phone:
-        return jsonify({"error": "Validation Error", "message": "Укажите email или телефон"}), 400
+        return jsonify({"error": "Укажите email или телефон"}), 400
 
     if email and not is_valid_email(email):
-        return jsonify({"error": "Validation Error", "message": "Некорректный Email"}), 400
+        return jsonify({"error": "Некорректный формат email"}), 400
 
     if phone:
         cleaned_phone = re.sub(r'[\s\-\(\)]', '', phone)
         if not re.match(r'^\+?\d{10,15}$', cleaned_phone):
-            return jsonify({"error": "Validation Error", "message": "Некорректный телефон"}), 400
+            return jsonify({"error": "Некорректный формат телефона"}), 400
         data['phone'] = cleaned_phone
     
     is_strong, error_msg = validate_password_strength(password)
     if not is_strong:
-        return jsonify({"error": "Validation Error", "message": error_msg}), 400
+        return jsonify({"error": error_msg}), 400
     
     if not (3 <= len(username) <= 50):
-        return jsonify({"error": "Validation Error", "message": "Имя от 3 до 50 символов"}), 400
+        return jsonify({"error": "Имя пользователя должно быть от 3 до 50 символов"}), 400
     if age is not None and (not isinstance(age, int) or age < 6 or age > 90):
-        return jsonify({"error": "Validation Error", "message": "Возраст должен быть от 6 до 90"}), 400
+        return jsonify({"error": "Возраст должен быть от 6 до 90 лет"}), 400
 
     result, status = AuthService.register(data)
     return jsonify(result), status
@@ -63,7 +63,7 @@ def login():
     password = str(data.get('password', ''))
 
     if (not email and not phone and not username) or not password:
-        return jsonify({"error": "Validation Error", "message": "Заполните все поля"}), 400
+        return jsonify({"error": "Введите логин и пароль"}), 400
         
     result, status = AuthService.login(data)
     return jsonify(result), status
@@ -76,7 +76,7 @@ def send_code():
     import re as _re
     cleaned_phone = _re.sub(r'[\s\-\(\)]', '', phone)
     if not _re.match(r'^\+?\d{10,15}$', cleaned_phone):
-        return jsonify({"error": "Validation Error", "message": "Неверный формат телефона"}), 400
+        return jsonify({"error": "Неверный формат телефона"}), 400
         
     result, status = AuthService.send_sms_code(phone)
     return jsonify(result), status
@@ -88,7 +88,7 @@ def verify_code():
     phone = data.get('phone')
     code = data.get('code')
     if not phone or not code:
-        return jsonify({"error": "Validation Error", "message": "Телефон и код обязательны"}), 400
+        return jsonify({"error": "Укажите телефон и код"}), 400
     result, status = AuthService.verify_sms_code(phone, code)
     return jsonify(result), status
 
@@ -99,7 +99,7 @@ def login_phone():
     phone = data.get('phone')
     code = data.get('code')
     if not phone or not code:
-        return jsonify({"error": "Validation Error", "message": "Телефон и код обязательны"}), 400
+        return jsonify({"error": "Укажите телефон и код"}), 400
         
     result, status = AuthService.login_by_phone(phone, code)
     return jsonify(result), status
@@ -111,7 +111,7 @@ def recover():
     email = data.get('email')
     phone = data.get('phone')
     if not email and not phone:
-        return jsonify({"error": "Validation Error", "message": "Введите Email или телефон"}), 400
+        return jsonify({"error": "Введите email или телефон для восстановления"}), 400
     result, status = AuthService.send_recovery_code(email, phone)
     return jsonify(result), status
 
@@ -123,7 +123,7 @@ def recover_confirm():
     
     is_strong, error_msg = validate_password_strength(new_password)
     if not is_strong:
-        return jsonify({"error": "Validation Error", "message": error_msg}), 400
+        return jsonify({"error": error_msg}), 400
 
     result, status = AuthService.confirm_recovery(data)
     return jsonify(result), status

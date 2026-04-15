@@ -29,12 +29,12 @@ def send_message(session_id):
     session = ChatSession.query.get_or_404(session_id)
     
     if session.user_id != int(user_id):
-        return jsonify({"error": "Forbidden"}), 403
+        return jsonify({"error": "Доступ запрещён"}), 403
 
     data = request.get_json()
     user_text = data.get('message')
     if not user_text:
-        return jsonify({"error": "Message is required"}), 400
+        return jsonify({"error": "Введите сообщение"}), 400
 
     user_msg = ChatMessage(session_id=session_id, role='user', content=user_text)
     db.session.add(user_msg)
@@ -58,7 +58,7 @@ def get_session_messages(session_id):
     session = ChatSession.query.get_or_404(session_id)
     
     if session.user_id != int(user_id):
-        return jsonify({"error": "Access denied"}), 403
+        return jsonify({"error": "Доступ запрещён"}), 403
 
     messages = ChatMessage.query.filter_by(session_id=session_id).order_by(ChatMessage.created_at.asc()).all()
     
@@ -78,7 +78,7 @@ def handle_messages(session_id):
     session = ChatSession.query.get_or_404(session_id)
     
     if session.user_id != int(user_id):
-        return jsonify({"error": "Forbidden"}), 403
+        return jsonify({"error": "Доступ запрещён"}), 403
 
     if request.method == 'GET':
         messages = ChatMessage.query.filter_by(session_id=session_id).order_by(ChatMessage.created_at.asc()).all()
@@ -97,7 +97,7 @@ def handle_messages(session_id):
         user_text = data.get('message')
         
         if not user_text:
-            return jsonify({"error": "Message is required"}), 400
+            return jsonify({"error": "Введите сообщение"}), 400
 
         user_msg = ChatMessage(session_id=session_id, role='user', content=user_text)
         db.session.add(user_msg)

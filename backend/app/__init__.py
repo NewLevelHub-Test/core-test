@@ -48,6 +48,22 @@ def create_app(config_name=None):
     def check_if_token_revoked(jwt_header, jwt_payload):
         jti = jwt_payload["jti"]
         return jti in token_blocklist
+
+    @jwt.expired_token_loader
+    def expired_token_callback(jwt_header, jwt_payload):
+        return jsonify({"error": "Сессия истекла. Войдите снова"}), 401
+
+    @jwt.invalid_token_loader
+    def invalid_token_callback(error_string):
+        return jsonify({"error": "Недействительный токен авторизации"}), 401
+
+    @jwt.unauthorized_loader
+    def missing_token_callback(error_string):
+        return jsonify({"error": "Необходима авторизация"}), 401
+
+    @jwt.revoked_token_loader
+    def revoked_token_callback(jwt_header, jwt_payload):
+        return jsonify({"error": "Токен отозван. Войдите снова"}), 401
     limiter.storage_uri = app.config.get('RATELIMIT_STORAGE_URI', 'memory://')
     limiter.init_app(app)
 
@@ -100,21 +116,21 @@ def create_app(config_name=None):
 
     @app.errorhandler(400)
     def bad_request(error):
-        return jsonify({"error": "Bad Request", "message": str(error.description)}), 400
+        return jsonify({"error": str(error.description)}), 400
 
     @app.errorhandler(404)
     def not_found(error):
-        return jsonify({"error": "Not Found", "message": "Ресурс не найден"}), 404
+        return jsonify({"error": "Страница не найдена"}), 404
 
     @app.errorhandler(500)
     def internal_error(error):
         app.logger.error(f"Server Error: {error}")
-        return jsonify({"error": "Internal Server Error", "message": "Внутренняя ошибка сервера"}), 500
+        return jsonify({"error": "Произошла ошибка сервера. Попробуйте позже"}), 500
 
     @app.errorhandler(Exception)
     def handle_unexpected_error(error):
         app.logger.exception("Unexpected error occurred")
-        return jsonify({"error": "Unexpected Error", "message": "Что-то пошло не так"}), 500
+        return jsonify({"error": "Произошла ошибка. Попробуйте позже"}), 500
 
     @app.route('/api/health')
     def health_check():
@@ -129,10 +145,30 @@ def create_app(config_name=None):
     @app.errorhandler(RateLimitExceeded)
     def handle_ratelimit_error(e):
         return jsonify({
-            "error": "Too Many Requests",
-            "message": "Вы отправляете запросы слишком часто. Подождите немного.",
-            "limit": str(e.description)
+            "error": "Слишком много запросов. Подождите немного"
         }), 429
 
+    import click
+
+    @app.cli.command('create-admin')
+    @click.argument('username')
+    @click.argument('password')
+    @click.option('--email', default=None)
+    def create_admin(username, password, email):
+        """Create an admin user."""
+        from app.models.user import User
+        existing = User.query.filter_by(username=username).first()
+        if existing:
+            existing.role = 'admin'
+            if email:
+                existing.email = email
+            db.session.commit()
+            click.echo(f'User "{username}" promoted to admin.')
+            return
+        user = User(username=username, email=email, role='admin')
+        user.set_password(password)
+        db.session.add(user)
+        db.session.commit()
+        click.echo(f'Admin user "{username}" created (id={user.id}).')
 
     return app

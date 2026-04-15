@@ -48,8 +48,7 @@ def submit_test(test_id):
     # Проверка: answers не должен быть None и должен быть либо списком [], либо словарем {}
     if answers is None or not isinstance(answers, (list, dict)):
         return jsonify({
-            "error": "Validation Error", 
-            "message": "Invalid answers format. Expected list or dict."
+            "error": "Неверный формат ответов"
         }), 400
 
     # Передаем весь объект data в сервис, так как сервис сам внутри ищет ключ 'answers'

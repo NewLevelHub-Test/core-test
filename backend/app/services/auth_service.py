@@ -60,8 +60,11 @@ class AuthService:
         if not user and username:
             user = User.query.filter_by(username=username).first()
 
-        if not user or not user.check_password(data.get('password', '')):
-            return {'error': 'Неверные учётные данные'}, 401
+        if not user:
+            return {'error': 'Аккаунт не найден. Проверьте логин или зарегистрируйтесь'}, 401
+
+        if not user.check_password(data.get('password', '')):
+            return {'error': 'Неверный пароль'}, 401
 
         access_token = create_access_token(identity=str(user.id))
         refresh_token = create_refresh_token(identity=str(user.id))

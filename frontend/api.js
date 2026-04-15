@@ -61,7 +61,7 @@ const api = {
                 return;
             }
             const responseData = await response.json().catch(() => ({}));
-            if (!response.ok) throw new Error(responseData.error || `Ошибка: ${response.status}`);
+            if (!response.ok) throw new Error(responseData.error || responseData.message || `Ошибка: ${response.status}`);
             return responseData;
         } catch (error) { throw error; }
     },
@@ -456,7 +456,7 @@ const api = {
         const data = await this.fetchWithAuth('/auth/login-phone', {
             method: 'POST',
             body: JSON.stringify({ phone, code })
-        });
+        }, false);
 
         const finalToken = data.access_token || (data.data && data.data.access_token);
         const finalUser = data.user || (data.data && data.data.user);
@@ -574,6 +574,9 @@ function initUnifiedSidebar() {
     if (!nav) return;
 
     const currentPage = (window.location.pathname.split('/').pop() || '').toLowerCase();
+    const user = window.roChessState ? window.roChessState.getUser() : null;
+    const isAdmin = user && user.role === 'admin';
+
     const navItems = [
         { href: 'Dashboard.html', icon: '🏠', label: 'Главная' },
         { href: 'profile.html', icon: '👤', label: 'Профиль' },
@@ -583,8 +586,11 @@ function initUnifiedSidebar() {
         { href: 'analysis.html', icon: '📈', label: 'Анализ' },
         { href: 'position.html', icon: '📸', label: 'Сканер позиции' },
         { href: 'chat.html', icon: '💬', label: 'ИИ-помощник' },
-        { href: 'admin.html', icon: '🛠️', label: 'Админ-панель' }
     ];
+
+    if (isAdmin) {
+        navItems.push({ href: 'admin.html', icon: '🛠️', label: 'Админ-панель' });
+    }
 
     nav.innerHTML = navItems.map(item => {
         const isActive = currentPage === item.href.toLowerCase();

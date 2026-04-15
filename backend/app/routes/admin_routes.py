@@ -20,10 +20,10 @@ def check_admin():
         # МЕНЯЕМ ПРОВЕРКУ ТУТ:
         # Теперь мы проверяем, что роль именно 'admin'
         if not user or user.role != 'admin':
-            return jsonify({"message": "Доступ разрешен только администраторам"}), 403
+            return jsonify({"error": "Доступ запрещён. Только для администраторов"}), 403
             
     except Exception:
-        return jsonify({"message": "Ошибка авторизации"}), 401
+        return jsonify({"error": "Необходима авторизация"}), 401
 
 # --- Users ---
 

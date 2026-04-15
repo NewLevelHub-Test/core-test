@@ -714,7 +714,7 @@
             } catch (error) {
                 console.error(error);
                 const message = error?.message || 'Не удалось войти в аккаунт';
-                showFormMessage(`Ой, что-то пошло не так! ${message}`);
+                showFormMessage(message);
                 showToast('Ошибка входа', 'error');
             } finally {
                 setButtonLoading(loginBtn, false, 'Вход...', 'Играть! ➔', true);
@@ -741,8 +741,8 @@
             } catch (error) {
                 console.error(error);
                 const message = error?.message || 'Ошибка сервера';
-                showFormMessage(`Ой, что-то пошло не так! ${message}`);
-                showToast('Регистрация не удалась', 'error');
+                showFormMessage(message);
+                showToast('Ошибка регистрации', 'error');
             } finally {
                 setButtonLoading(regBtn, false, 'Регистрация...', 'Зарегистрироваться');
             }

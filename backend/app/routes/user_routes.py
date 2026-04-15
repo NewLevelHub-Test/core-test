@@ -27,7 +27,7 @@ def update_profile():
     
     username = str(data.get('username', '')).strip()
     if username and not (2 <= len(username) <= 50):
-        return jsonify({"error": "Validation Error", "message": "Имя должно быть от 2 до 50 символов"}), 400
+        return jsonify({"error": "Имя должно быть от 2 до 50 символов"}), 400
 
     result, status = UserService.update_profile(user_id, data)
     return jsonify(result), status
@@ -38,14 +38,14 @@ def update_profile():
 def upload_avatar():
     user_id = get_jwt_identity()
     if 'avatar' not in request.files:
-        return jsonify({"error": "Validation Error", "message": "Файл не найден"}), 400
+        return jsonify({"error": "Файл не найден"}), 400
     
     file = request.files['avatar']
     if file.filename == '':
-        return jsonify({"error": "Validation Error", "message": "Файл не выбран"}), 400
+        return jsonify({"error": "Выберите файл для загрузки"}), 400
         
     if not allowed_file(file.filename):
-        return jsonify({"error": "Validation Error", "message": "Разрешены только форматы JPG и PNG"}), 400
+        return jsonify({"error": "Разрешены только форматы JPG и PNG"}), 400
 
     result, status = UserService.upload_avatar(user_id, file)
     return jsonify(result), status
