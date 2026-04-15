@@ -40,8 +40,8 @@ class UserService:
 
         if 'age' in data:
             age = data['age']
-            if not isinstance(age, int) or age < 5 or age > 12:
-                return {'error': 'Возраст должен быть от 5 до 12'}, 400
+            if not isinstance(age, int) or age < 6 or age > 90:
+                return {'error': 'Возраст должен быть от 6 до 90'}, 400
             user.age = age
 
         if 'password' in data:

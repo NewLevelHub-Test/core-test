@@ -14,7 +14,7 @@ class User(db.Model):
     phone = db.Column(db.String(20), unique=True, nullable=True)
     password_hash = db.Column(db.String(128), nullable=False)
     role = db.Column(db.String(20), default='student')  # student / admin
-    age = db.Column(db.Integer)  # 5–12
+    age = db.Column(db.Integer)  # 6–90
     level = db.Column(db.String(30), default='beginner')  # beginner / intermediate / advanced
     elo_rating = db.Column(db.Integer, default=1200)
     avatar_url = db.Column(db.String(256))

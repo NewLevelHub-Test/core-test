@@ -25,8 +25,8 @@ def validate_registration(data):
 
     age = data.get('age')
     if age is not None:
-        if not isinstance(age, int) or age < 5 or age > 12:
-            errors.append('Возраст должен быть от 5 до 12 лет')
+        if not isinstance(age, int) or age < 6 or age > 90:
+            errors.append('Возраст должен быть от 6 до 90 лет')
 
     return errors if errors else None
 
