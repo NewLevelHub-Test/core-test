@@ -132,10 +132,20 @@ def create_test():
     result, status = AdminService.create_test(data)
     return jsonify(result), status
 
+@admin_bp.route('/tests/<int:test_id>', methods=['GET'])
+def get_test_detail(test_id):
+    result, status = AdminService.get_test_detail(test_id)
+    return jsonify(result), status
+
 @admin_bp.route('/tests/<int:test_id>', methods=['PUT'])
 def update_test(test_id):
     data = request.get_json() or {}
     result, status = AdminService.update_test(test_id, data)
+    return jsonify(result), status
+
+@admin_bp.route('/tests/<int:test_id>', methods=['DELETE'])
+def delete_test(test_id):
+    result, status = AdminService.delete_test(test_id)
     return jsonify(result), status
 
 @admin_bp.route('/tests/<int:test_id>/questions', methods=['POST'])

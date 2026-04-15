@@ -549,6 +549,18 @@ const api = {
         });
     },
 
+    async getAdminTestDetail(testId) {
+        return await this.fetchWithAuth(`/admin/tests/${testId}`, {
+            method: 'GET'
+        });
+    },
+
+    async deleteAdminTest(testId) {
+        return await this.fetchWithAuth(`/admin/tests/${testId}`, {
+            method: 'DELETE'
+        });
+    },
+
     async logoutServer() {
         try {
             await this.fetchWithAuth('/auth/logout', { method: 'POST' });

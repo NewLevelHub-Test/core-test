@@ -326,6 +326,28 @@ class AdminService:
         db.session.commit()
         return {'message': 'Вопрос удалён'}, 200
 
+    @staticmethod
+    def get_test_detail(test_id):
+        test = Test.query.get(test_id)
+        if not test:
+            return {'error': 'Тест не найден'}, 404
+        questions = TestQuestion.query.filter_by(test_id=test_id).order_by(TestQuestion.order).all()
+        return {
+            'test': test.to_dict(),
+            'questions': [q.to_dict() for q in questions],
+        }, 200
+
+    @staticmethod
+    def delete_test(test_id):
+        test = Test.query.get(test_id)
+        if not test:
+            return {'error': 'Тест не найден'}, 404
+        TestQuestion.query.filter_by(test_id=test_id).delete()
+        TestAttempt.query.filter_by(test_id=test_id).delete()
+        db.session.delete(test)
+        db.session.commit()
+        return {'message': 'Тест удалён'}, 200
+
     # --- Platform Stats ---
 
     @staticmethod

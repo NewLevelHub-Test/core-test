@@ -26,5 +26,6 @@ class Test(db.Model):
             'topic_id': self.topic_id,
             'difficulty': self.difficulty,
             'time_limit': self.time_limit,
+            'question_count': self.questions.count(),
             'created_at': self.created_at.isoformat(),
         }

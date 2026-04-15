@@ -563,6 +563,104 @@
         </div>
     </div>
 
+    <div id="test-modal" class="modal-backdrop" aria-hidden="true">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="test-modal-title">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <div class="section-title">Тест</div>
+                    <h3 id="test-modal-title" class="text-2xl md:text-3xl font-black text-slate-800">Создать тест</h3>
+                </div>
+                <button id="close-test-modal" class="action-btn bg-slate-100 text-slate-500" aria-label="Закрыть" type="button">✕</button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <div class="section-title">Название</div>
+                    <input id="test-title-input" class="ghost-input" type="text" placeholder="Например: Тест по эндшпилю" aria-label="Название теста">
+                </div>
+                <div>
+                    <div class="section-title">Описание</div>
+                    <textarea id="test-description-input" class="ghost-textarea" placeholder="Краткое описание теста" aria-label="Описание теста"></textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <div class="section-title">Тема</div>
+                        <select id="test-topic-input" class="ghost-select" aria-label="Тема теста"></select>
+                    </div>
+                    <div>
+                        <div class="section-title">Сложность</div>
+                        <select id="test-difficulty-input" class="ghost-select" aria-label="Сложность теста">
+                            <option value="beginner">Начальный</option>
+                            <option value="intermediate">Средний</option>
+                            <option value="advanced">Продвинутый</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <div class="section-title">Лимит времени (минуты, 0 = без лимита)</div>
+                    <input id="test-timelimit-input" class="ghost-input" type="number" min="0" value="0" aria-label="Лимит времени">
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+                <button id="save-test-btn" class="bg-emerald-600 text-white font-black uppercase tracking-widest rounded-[1.5rem] py-4 min-h-[52px] shadow-[0_8px_0_#047857] active:translate-y-[4px]" type="button">
+                    Сохранить
+                </button>
+                <button id="cancel-test-btn" class="bg-slate-100 text-slate-500 font-black uppercase tracking-widest rounded-[1.5rem] py-4 min-h-[52px]" type="button">
+                    Отмена
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="question-modal" class="modal-backdrop" aria-hidden="true">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="question-modal-title">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <div class="section-title">Вопрос</div>
+                    <h3 id="question-modal-title" class="text-2xl md:text-3xl font-black text-slate-800">Добавить вопрос</h3>
+                </div>
+                <button id="close-question-modal" class="action-btn bg-slate-100 text-slate-500" aria-label="Закрыть" type="button">✕</button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <div class="section-title">Текст вопроса</div>
+                    <textarea id="q-text-input" class="ghost-textarea" placeholder="Какой лучший ход за белых?" aria-label="Текст вопроса"></textarea>
+                </div>
+                <div>
+                    <div class="section-title">FEN позиции (необязательно)</div>
+                    <input id="q-fen-input" class="ghost-input" type="text" placeholder="rnbqkbnr/pppppppp/..." aria-label="FEN">
+                </div>
+                <div class="section-title">Варианты ответа</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <input id="q-opt-a" class="ghost-input" type="text" placeholder="Вариант A" aria-label="Вариант A">
+                    <input id="q-opt-b" class="ghost-input" type="text" placeholder="Вариант B" aria-label="Вариант B">
+                    <input id="q-opt-c" class="ghost-input" type="text" placeholder="Вариант C" aria-label="Вариант C">
+                    <input id="q-opt-d" class="ghost-input" type="text" placeholder="Вариант D" aria-label="Вариант D">
+                </div>
+                <div>
+                    <div class="section-title">Правильный ответ</div>
+                    <select id="q-correct-input" class="ghost-select" aria-label="Правильный ответ">
+                        <option value="0">Вариант A</option>
+                        <option value="1">Вариант B</option>
+                        <option value="2">Вариант C</option>
+                        <option value="3">Вариант D</option>
+                    </select>
+                </div>
+                <div>
+                    <div class="section-title">Объяснение (необязательно)</div>
+                    <textarea id="q-explanation-input" class="ghost-textarea" placeholder="Почему этот ответ правильный..." aria-label="Объяснение"></textarea>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+                <button id="save-question-btn" class="bg-violet-600 text-white font-black uppercase tracking-widest rounded-[1.5rem] py-4 min-h-[52px] shadow-[0_8px_0_#6d28d9] active:translate-y-[4px]" type="button">
+                    Сохранить
+                </button>
+                <button id="cancel-question-btn" class="bg-slate-100 text-slate-500 font-black uppercase tracking-widest rounded-[1.5rem] py-4 min-h-[52px]" type="button">
+                    Отмена
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="state.js"></script>
     <script src="api.js"></script>
     <script>
@@ -734,7 +832,7 @@
         }
 
         function formatDifficulty(value) {
-            const map = { easy: 'Лёгкая', medium: 'Средняя', hard: 'Сложная' };
+            const map = { easy: 'Лёгкая', medium: 'Средняя', hard: 'Сложная', beginner: 'Начальный', intermediate: 'Средний', advanced: 'Продвинутый' };
             return map[value] || value || '—';
         }
 
@@ -795,47 +893,341 @@
                 floatingAddBtn.classList.remove('hidden');
                 floatingAddBtn.textContent = '+';
                 floatingAddBtn.setAttribute('aria-label', 'Добавить тест');
+                activeTestId = null;
                 loadTestsTab();
+            }
+        }
+
+        let cachedTests = [];
+        let currentTestEditingId = null;
+        let currentQuestionEditingId = null;
+        let activeTestId = null;
+
+        const testModal = document.getElementById('test-modal');
+        const testModalTitle = document.getElementById('test-modal-title');
+        const testTitleInput = document.getElementById('test-title-input');
+        const testDescriptionInput = document.getElementById('test-description-input');
+        const testTopicInput = document.getElementById('test-topic-input');
+        const testDifficultyInput = document.getElementById('test-difficulty-input');
+        const testTimelimitInput = document.getElementById('test-timelimit-input');
+        const saveTestBtn = document.getElementById('save-test-btn');
+
+        const questionModal = document.getElementById('question-modal');
+        const questionModalTitle = document.getElementById('question-modal-title');
+        const qTextInput = document.getElementById('q-text-input');
+        const qFenInput = document.getElementById('q-fen-input');
+        const qOptA = document.getElementById('q-opt-a');
+        const qOptB = document.getElementById('q-opt-b');
+        const qOptC = document.getElementById('q-opt-c');
+        const qOptD = document.getElementById('q-opt-d');
+        const qCorrectInput = document.getElementById('q-correct-input');
+        const qExplanationInput = document.getElementById('q-explanation-input');
+        const saveQuestionBtn = document.getElementById('save-question-btn');
+
+        function fillTestTopicsSelect(selectedId = null) {
+            testTopicInput.innerHTML = `
+                <option value="">Без темы</option>
+                ${cachedTopics.map(t => `
+                    <option value="${t.id}" ${String(t.id) === String(selectedId) ? 'selected' : ''}>
+                        ${escapeHtml(t.title || t.name || 'Тема #' + t.id)}
+                    </option>
+                `).join('')}
+            `;
+        }
+
+        function openTestModal(mode = 'create', test = null) {
+            currentTestEditingId = test?.id || null;
+            testModalTitle.textContent = mode === 'edit' ? 'Редактировать тест' : 'Создать тест';
+            testTitleInput.value = test?.title || '';
+            testDescriptionInput.value = test?.description || '';
+            testDifficultyInput.value = test?.difficulty || 'beginner';
+            testTimelimitInput.value = test?.time_limit ? Math.round(test.time_limit / 60) : 0;
+            fillTestTopicsSelect(test?.topic_id || null);
+            testModal.classList.add('show');
+            testModal.setAttribute('aria-hidden', 'false');
+            setTimeout(() => testTitleInput.focus(), 50);
+        }
+
+        function closeTestModal() {
+            testModal.classList.remove('show');
+            testModal.setAttribute('aria-hidden', 'true');
+            currentTestEditingId = null;
+        }
+
+        async function saveTest() {
+            const payload = {
+                title: testTitleInput.value.trim(),
+                description: testDescriptionInput.value.trim(),
+                topic_id: testTopicInput.value ? Number(testTopicInput.value) : null,
+                difficulty: testDifficultyInput.value,
+                time_limit: Number(testTimelimitInput.value || 0) * 60 || null,
+            };
+            if (!payload.title) {
+                showToast('Введите название теста', 'error');
+                testTitleInput.focus();
+                return;
+            }
+            saveTestBtn.disabled = true;
+            saveTestBtn.textContent = 'Сохранение...';
+            try {
+                if (currentTestEditingId) {
+                    await window.roChessApi.updateAdminTest(currentTestEditingId, payload);
+                    showToast('Тест обновлён', 'success');
+                } else {
+                    await window.roChessApi.createAdminTest(payload);
+                    showToast('Тест создан', 'success');
+                }
+                closeTestModal();
+                await loadTestsTab();
+                await loadStats();
+            } catch (e) {
+                console.error(e);
+                showToast('Не удалось сохранить тест', 'error');
+            } finally {
+                saveTestBtn.disabled = false;
+                saveTestBtn.textContent = 'Сохранить';
+            }
+        }
+
+        async function deleteTest(testId) {
+            if (!confirm('Удалить тест и все его вопросы?')) return;
+            try {
+                await window.roChessApi.deleteAdminTest(testId);
+                showToast('Тест удалён', 'success');
+                activeTestId = null;
+                await loadTestsTab();
+                await loadStats();
+            } catch (e) {
+                console.error(e);
+                showToast('Не удалось удалить тест', 'error');
             }
         }
 
         async function loadTestsTab() {
-            adminContent.innerHTML = '<div class="admin-card-lux p-6 text-center"><div class="spinner-center"></div></div>';
+            adminContent.innerHTML = renderListSkeleton('tests', 4);
+            announce('Загружаются тесты');
             try {
                 const data = await window.roChessApi.getTestsList();
                 const tests = data.tests || data.items || data || [];
+                cachedTests = tests;
 
                 if (!tests.length) {
-                    adminContent.innerHTML = '<div class="admin-card-lux p-8 text-center text-slate-400 font-black">Тесты ещё не созданы</div>';
+                    adminContent.innerHTML = renderEmptyState('Тесты ещё не созданы', 'Нажми +, чтобы создать первый тест.', '📝');
+                    showSideInfo('<div class="section-title">Тесты</div><div class="text-slate-500 font-bold">Список тестов пока пуст.</div>');
                     return;
                 }
 
                 adminContent.innerHTML = tests.map(test => `
-                    <div class="admin-card-lux p-5 flex items-center justify-between gap-4">
-                        <div>
-                            <div class="font-black text-slate-800">${escapeHtml(test.title || 'Тест')}</div>
-                            <div class="text-xs text-slate-400 font-bold">${escapeHtml(test.description || '')} &bull; ${test.question_count || 0} вопросов</div>
-                        </div>
-                        <div class="flex gap-2">
-                            <button class="action-btn bg-blue-50 text-blue-500" onclick="editTest(${test.id})" aria-label="Редактировать">✏️</button>
+                    <div class="admin-card-lux p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-l-[14px] border-emerald-400 page-transition">
+                        <button type="button"
+                            class="flex items-center gap-4 md:gap-5 min-w-0 flex-1 test-open-btn text-left"
+                            data-test-id="${test.id}"
+                            aria-label="Открыть тест ${escapeHtml(test.title || test.id)}">
+                            <div class="w-14 h-14 md:w-16 md:h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-3xl md:text-4xl shadow-inner border border-white">📝</div>
+                            <div class="min-w-0">
+                                <p class="font-black text-slate-700 text-base md:text-lg leading-tight truncate">${escapeHtml(test.title || 'Тест #' + test.id)}</p>
+                                <p class="text-[10px] md:text-[11px] text-slate-400 font-black uppercase tracking-widest mt-1">
+                                    ID: ${test.id} &bull; ${formatDifficulty(test.difficulty)} &bull; ${test.question_count || 0} вопросов
+                                    ${test.time_limit ? ' &bull; ' + Math.round(test.time_limit / 60) + ' мин' : ''}
+                                </p>
+                                <p class="text-slate-500 font-bold mt-2 line-clamp-2">${escapeHtml(test.description || 'Описание отсутствует')}</p>
+                            </div>
+                        </button>
+                        <div class="flex gap-3 shrink-0">
+                            <button class="action-btn bg-slate-50 border-b-4 border-slate-100 hover:bg-white test-edit-btn" data-test-id="${test.id}" aria-label="Редактировать тест" type="button">✏️</button>
+                            <button class="action-btn bg-rose-50 border-b-4 border-rose-100 text-rose-500 hover:bg-rose-100 test-delete-btn" data-test-id="${test.id}" aria-label="Удалить тест" type="button">🗑️</button>
                         </div>
                     </div>
                 `).join('');
+
+                document.querySelectorAll('.test-open-btn').forEach(btn => {
+                    btn.addEventListener('click', () => loadTestDetail(Number(btn.dataset.testId)));
+                });
+                document.querySelectorAll('.test-edit-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const test = cachedTests.find(t => String(t.id) === btn.dataset.testId);
+                        if (test) openTestModal('edit', test);
+                    });
+                });
+                document.querySelectorAll('.test-delete-btn').forEach(btn => {
+                    btn.addEventListener('click', () => deleteTest(Number(btn.dataset.testId)));
+                });
+
+                showSideInfo(`
+                    <div class="section-title">Тесты</div>
+                    <div class="text-3xl font-black text-slate-800 mb-2">${tests.length}</div>
+                    <div class="text-slate-500 font-bold">Нажми на тест, чтобы управлять его вопросами.</div>
+                `);
             } catch (e) {
                 console.error(e);
-                adminContent.innerHTML = '<div class="admin-card-lux p-8 text-center text-rose-500 font-black">Ошибка загрузки тестов</div>';
+                adminContent.innerHTML = renderErrorState('Ошибка загрузки тестов');
             }
         }
 
-        async function editTest(testId) {
-            const title = prompt('Новое название теста:');
-            if (!title) return;
+        async function loadTestDetail(testId) {
+            activeTestId = testId;
+            adminContent.innerHTML = renderListSkeleton('tests', 3);
             try {
-                await window.roChessApi.updateAdminTest(testId, { title });
-                showToast('Тест обновлён', 'success');
-                loadTestsTab();
+                const data = await window.roChessApi.getAdminTestDetail(testId);
+                const test = data.test;
+                const questions = data.questions || [];
+
+                showSideInfo(`
+                    <div class="section-title">Тест</div>
+                    <div class="text-2xl font-black text-slate-800 mb-3">${escapeHtml(test.title)}</div>
+                    <div class="space-y-3">
+                        <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">ID</span><span class="font-black text-slate-700">${test.id}</span></div>
+                        <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">Сложность</span><span class="font-black text-slate-700">${formatDifficulty(test.difficulty)}</span></div>
+                        <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">Вопросов</span><span class="font-black text-slate-700">${test.question_count || 0}</span></div>
+                        <div class="flex justify-between gap-4"><span class="text-slate-400 font-black">Лимит</span><span class="font-black text-slate-700">${test.time_limit ? Math.round(test.time_limit / 60) + ' мин' : 'Нет'}</span></div>
+                        <div class="pt-2 text-slate-500 font-bold">${escapeHtml(test.description || 'Нет описания')}</div>
+                    </div>
+                    <button type="button" onclick="loadTestsTab()" class="mt-6 w-full bg-slate-100 text-slate-600 font-black uppercase tracking-widest rounded-[1.2rem] py-3 min-h-[48px] text-xs">
+                        ← Назад к списку тестов
+                    </button>
+                `);
+
+                const optionLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+                let html = `
+                    <div class="admin-card-lux p-5 md:p-6 flex items-center justify-between gap-4 mb-2">
+                        <div>
+                            <div class="font-black text-slate-800 text-lg">${escapeHtml(test.title)} — Вопросы</div>
+                            <div class="text-xs text-slate-400 font-bold">${questions.length} вопросов</div>
+                        </div>
+                        <button type="button" class="action-btn bg-emerald-50 border-b-4 border-emerald-100 text-emerald-600 hover:bg-emerald-100" id="add-question-btn" aria-label="Добавить вопрос">＋</button>
+                    </div>
+                `;
+
+                if (!questions.length) {
+                    html += renderEmptyState('Вопросов пока нет', 'Нажми ＋, чтобы добавить первый вопрос.', '❓');
+                } else {
+                    html += questions.map((q, idx) => {
+                        const opts = q.options || [];
+                        const correctIdx = opts.indexOf(q.correct_answer);
+                        return `
+                        <div class="admin-card-lux p-5 md:p-6 page-transition">
+                            <div class="flex items-start justify-between gap-3 mb-3">
+                                <div class="flex-1 min-w-0">
+                                    <span class="inline-block bg-violet-100 text-violet-700 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mr-2">#${idx + 1}</span>
+                                    <span class="font-black text-slate-800">${escapeHtml(q.question_text)}</span>
+                                </div>
+                                <div class="flex gap-2 shrink-0">
+                                    <button class="action-btn bg-slate-50 border-b-4 border-slate-100 hover:bg-white q-edit-btn" data-q-id="${q.id}" aria-label="Редактировать вопрос" type="button">✏️</button>
+                                    <button class="action-btn bg-rose-50 border-b-4 border-rose-100 text-rose-500 hover:bg-rose-100 q-delete-btn" data-q-id="${q.id}" aria-label="Удалить вопрос" type="button">🗑️</button>
+                                </div>
+                            </div>
+                            ${q.fen ? `<div class="text-xs text-slate-400 font-bold mb-2 break-all">FEN: ${escapeHtml(q.fen)}</div>` : ''}
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+                                ${opts.map((opt, oi) => `
+                                    <div class="px-4 py-2 rounded-xl text-sm font-bold ${oi === correctIdx ? 'bg-emerald-50 text-emerald-700 border-2 border-emerald-200' : 'bg-slate-50 text-slate-600 border-2 border-transparent'}">
+                                        <span class="font-black mr-1">${optionLetters[oi] || oi}.</span> ${escapeHtml(opt)}
+                                    </div>
+                                `).join('')}
+                            </div>
+                            ${q.explanation ? `<div class="text-xs text-slate-500 mt-2"><span class="font-black text-slate-400">Объяснение:</span> ${escapeHtml(q.explanation)}</div>` : ''}
+                        </div>`;
+                    }).join('');
+                }
+
+                adminContent.innerHTML = html;
+
+                document.getElementById('add-question-btn').addEventListener('click', () => openQuestionModal('create', testId));
+                document.querySelectorAll('.q-edit-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const q = questions.find(q => String(q.id) === btn.dataset.qId);
+                        if (q) openQuestionModal('edit', testId, q);
+                    });
+                });
+                document.querySelectorAll('.q-delete-btn').forEach(btn => {
+                    btn.addEventListener('click', () => deleteQuestion(Number(btn.dataset.qId), testId));
+                });
+
             } catch (e) {
-                showToast('Ошибка обновления', 'error');
+                console.error(e);
+                adminContent.innerHTML = renderErrorState('Не удалось загрузить вопросы теста');
+            }
+        }
+
+        function openQuestionModal(mode = 'create', testId, question = null) {
+            activeTestId = testId;
+            currentQuestionEditingId = question?.id || null;
+            questionModalTitle.textContent = mode === 'edit' ? 'Редактировать вопрос' : 'Добавить вопрос';
+            qTextInput.value = question?.question_text || '';
+            qFenInput.value = question?.fen || '';
+            const opts = question?.options || [];
+            qOptA.value = opts[0] || '';
+            qOptB.value = opts[1] || '';
+            qOptC.value = opts[2] || '';
+            qOptD.value = opts[3] || '';
+            if (question) {
+                const correctIdx = opts.indexOf(question.correct_answer);
+                qCorrectInput.value = correctIdx >= 0 ? String(correctIdx) : '0';
+            } else {
+                qCorrectInput.value = '0';
+            }
+            qExplanationInput.value = question?.explanation || '';
+            questionModal.classList.add('show');
+            questionModal.setAttribute('aria-hidden', 'false');
+            setTimeout(() => qTextInput.focus(), 50);
+        }
+
+        function closeQuestionModal() {
+            questionModal.classList.remove('show');
+            questionModal.setAttribute('aria-hidden', 'true');
+            currentQuestionEditingId = null;
+        }
+
+        async function saveQuestion() {
+            const options = [qOptA.value.trim(), qOptB.value.trim(), qOptC.value.trim(), qOptD.value.trim()].filter(Boolean);
+            const correctIdx = Number(qCorrectInput.value);
+            const correct_answer = options[correctIdx] || options[0] || '';
+            const payload = {
+                question_text: qTextInput.value.trim(),
+                fen: qFenInput.value.trim() || null,
+                options,
+                correct_answer,
+                explanation: qExplanationInput.value.trim() || null,
+            };
+            if (!payload.question_text) {
+                showToast('Введите текст вопроса', 'error');
+                qTextInput.focus();
+                return;
+            }
+            if (options.length < 2) {
+                showToast('Нужно минимум 2 варианта ответа', 'error');
+                qOptA.focus();
+                return;
+            }
+            saveQuestionBtn.disabled = true;
+            saveQuestionBtn.textContent = 'Сохранение...';
+            try {
+                if (currentQuestionEditingId) {
+                    await window.roChessApi.updateAdminQuestion(currentQuestionEditingId, payload);
+                    showToast('Вопрос обновлён', 'success');
+                } else {
+                    await window.roChessApi.addAdminQuestion(activeTestId, payload);
+                    showToast('Вопрос добавлен', 'success');
+                }
+                closeQuestionModal();
+                await loadTestDetail(activeTestId);
+            } catch (e) {
+                console.error(e);
+                showToast('Не удалось сохранить вопрос', 'error');
+            } finally {
+                saveQuestionBtn.disabled = false;
+                saveQuestionBtn.textContent = 'Сохранить';
+            }
+        }
+
+        async function deleteQuestion(questionId, testId) {
+            if (!confirm('Удалить вопрос?')) return;
+            try {
+                await window.roChessApi.deleteAdminQuestion(questionId);
+                showToast('Вопрос удалён', 'success');
+                await loadTestDetail(testId);
+            } catch (e) {
+                console.error(e);
+                showToast('Не удалось удалить вопрос', 'error');
             }
         }
 
@@ -1472,14 +1864,11 @@
                 await preloadLessonsAndTopics();
                 openExerciseModal('create');
             } else if (activeTab === 'tests') {
-                const title = prompt('Название нового теста:');
-                if (!title) return;
-                try {
-                    await window.roChessApi.createAdminTest({ title });
-                    showToast('Тест создан', 'success');
-                    loadTestsTab();
-                } catch (e) {
-                    showToast('Ошибка создания теста', 'error');
+                if (activeTestId) {
+                    openQuestionModal('create', activeTestId);
+                } else {
+                    await preloadLessonsAndTopics();
+                    openTestModal('create');
                 }
             }
         });
@@ -1499,6 +1888,16 @@
         exerciseModal.addEventListener('click', (e) => {
             if (e.target === exerciseModal) closeExerciseModal();
         });
+
+        document.getElementById('close-test-modal').addEventListener('click', closeTestModal);
+        document.getElementById('cancel-test-btn').addEventListener('click', closeTestModal);
+        saveTestBtn.addEventListener('click', saveTest);
+        testModal.addEventListener('click', (e) => { if (e.target === testModal) closeTestModal(); });
+
+        document.getElementById('close-question-modal').addEventListener('click', closeQuestionModal);
+        document.getElementById('cancel-question-btn').addEventListener('click', closeQuestionModal);
+        saveQuestionBtn.addEventListener('click', saveQuestion);
+        questionModal.addEventListener('click', (e) => { if (e.target === questionModal) closeQuestionModal(); });
 
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
         const mobileOverlay = document.getElementById('mobile-overlay');
