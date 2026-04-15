@@ -59,9 +59,10 @@ def login():
     data = request.get_json() or {}
     email = str(data.get('email', '')).strip()
     phone = str(data.get('phone', '')).strip()
+    username = str(data.get('username', '')).strip()
     password = str(data.get('password', ''))
 
-    if (not email and not phone) or not password:
+    if (not email and not phone and not username) or not password:
         return jsonify({"error": "Validation Error", "message": "Заполните все поля"}), 400
         
     result, status = AuthService.login(data)

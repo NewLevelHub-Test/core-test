@@ -698,8 +698,10 @@
 
             if (loginValue.includes('@')) {
                 credentials.email = loginValue;
-            } else {
+            } else if (/^\+?\d[\d\s\-()]{6,}$/.test(loginValue)) {
                 credentials.phone = loginValue;
+            } else {
+                credentials.username = loginValue;
             }
 
             setButtonLoading(loginBtn, true, 'Вход...', 'Играть! ➔', true);

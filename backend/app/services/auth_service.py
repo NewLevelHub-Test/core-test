@@ -50,12 +50,15 @@ class AuthService:
     def login(data):
         email = data.get('email')
         phone = data.get('phone')
+        username = data.get('username')
 
         user = None
         if email:
             user = User.query.filter_by(email=email).first()
-        elif phone:
+        if not user and phone:
             user = User.query.filter_by(phone=phone).first()
+        if not user and username:
+            user = User.query.filter_by(username=username).first()
 
         if not user or not user.check_password(data.get('password', '')):
             return {'error': 'Неверные учётные данные'}, 401

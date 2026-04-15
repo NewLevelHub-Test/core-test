@@ -70,7 +70,7 @@ const api = {
         const data = await this.fetchWithAuth('/auth/login', {
             method: 'POST',
             body: JSON.stringify(credentials)
-        });
+        }, false);
 
         const finalToken = data.access_token || (data.data && data.data.access_token) || data.token;
         const finalUser = data.user || (data.data && data.data.user);
@@ -92,7 +92,7 @@ const api = {
         const data = await this.fetchWithAuth('/auth/register', {
             method: 'POST',
             body: JSON.stringify(userData)
-        });
+        }, false);
 
         const finalToken = data.access_token || (data.data && data.data.access_token) || data.token;
         const finalUser = data.user || (data.data && data.data.user);
