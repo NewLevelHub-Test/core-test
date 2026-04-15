@@ -47,8 +47,8 @@ def register():
     
     if not (3 <= len(username) <= 50):
         return jsonify({"error": "Validation Error", "message": "Имя от 3 до 50 символов"}), 400
-    if age is not None and (not isinstance(age, int) or age < 5 or age > 12):
-        return jsonify({"error": "Validation Error", "message": "Возраст должен быть от 5 до 12"}), 400
+    if age is not None and (not isinstance(age, int) or age < 6 or age > 90):
+        return jsonify({"error": "Validation Error", "message": "Возраст должен быть от 6 до 90"}), 400
 
     result, status = AuthService.register(data)
     return jsonify(result), status
