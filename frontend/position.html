@@ -1188,6 +1188,23 @@
                                     ${train.length ? train.map(t => `<span class="topic-pill">${escHtml(t)}</span>`).join('') : '<span class="text-slate-400 font-bold text-sm">Тактика</span>'}
                                 </div>
                             </div>
+
+                            ${data.ai_commentary ? `
+                            <div class="bg-white/80 border-2 border-indigo-200 rounded-2xl p-4 shadow-sm" style="border-left:8px solid #818cf8;">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <span class="text-lg">🤖</span>
+                                    <div class="text-[10px] uppercase font-black text-indigo-600 tracking-wider">Разбор от ИИ-тренера</div>
+                                </div>
+                                ${data.ai_commentary.summary ? `<p class="text-slate-700 font-bold text-sm mb-3">${escHtml(data.ai_commentary.summary)}</p>` : ''}
+                                ${data.ai_commentary.opening_assessment ? `<div class="bg-emerald-50 rounded-xl p-2 mb-2 border border-emerald-100"><span class="text-[9px] font-black text-emerald-600 uppercase">Дебют:</span> <span class="text-xs font-bold text-slate-600">${escHtml(data.ai_commentary.opening_assessment)}</span></div>` : ''}
+                                ${data.ai_commentary.middlegame_assessment ? `<div class="bg-blue-50 rounded-xl p-2 mb-2 border border-blue-100"><span class="text-[9px] font-black text-blue-600 uppercase">Миттельшпиль:</span> <span class="text-xs font-bold text-slate-600">${escHtml(data.ai_commentary.middlegame_assessment)}</span></div>` : ''}
+                                ${data.ai_commentary.endgame_assessment ? `<div class="bg-purple-50 rounded-xl p-2 mb-2 border border-purple-100"><span class="text-[9px] font-black text-purple-600 uppercase">Эндшпиль:</span> <span class="text-xs font-bold text-slate-600">${escHtml(data.ai_commentary.endgame_assessment)}</span></div>` : ''}
+                                ${data.ai_commentary.strengths && data.ai_commentary.strengths.length ? `<div class="bg-emerald-50/60 rounded-xl p-2 mb-2 border border-emerald-100"><span class="text-[9px] font-black text-emerald-600 uppercase block mb-1">Сильные стороны</span>${data.ai_commentary.strengths.map(s => `<div class="text-xs font-bold text-slate-600">• ${escHtml(s)}</div>`).join('')}</div>` : ''}
+                                ${data.ai_commentary.weaknesses && data.ai_commentary.weaknesses.length ? `<div class="bg-amber-50/60 rounded-xl p-2 mb-2 border border-amber-100"><span class="text-[9px] font-black text-amber-600 uppercase block mb-1">Над чем работать</span>${data.ai_commentary.weaknesses.map(s => `<div class="text-xs font-bold text-slate-600">• ${escHtml(s)}</div>`).join('')}</div>` : ''}
+                                ${data.ai_commentary.recommendations && data.ai_commentary.recommendations.length ? `<div class="bg-indigo-50/60 rounded-xl p-2 mb-2 border border-indigo-100"><span class="text-[9px] font-black text-indigo-600 uppercase block mb-1">Рекомендации</span>${data.ai_commentary.recommendations.map(r => `<div class="text-xs font-bold text-slate-600">→ ${escHtml(r)}</div>`).join('')}</div>` : ''}
+                                ${data.ai_commentary.rating_estimate ? `<div class="bg-slate-50 rounded-xl p-2 text-center border border-slate-200"><span class="text-[9px] font-black text-slate-500 uppercase">Оценка уровня:</span> <span class="text-xs font-black text-slate-700">${escHtml(data.ai_commentary.rating_estimate)}</span></div>` : ''}
+                            </div>
+                            ` : ''}
                         </div>
                     </div>
                     ` : '<div class="text-slate-500 font-bold text-center py-4">Нет данных для анализа.</div>'}

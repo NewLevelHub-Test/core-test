@@ -692,6 +692,53 @@
                     <input id="moveRange" type="range" min="0" max="0" value="0" class="w-full min-h-[48px]" aria-label="Перемотка по ходам">
                 </section>
 
+                <section id="ai-commentary-section" class="hidden mini-card p-5 md:p-6 border-l-4 border-indigo-400">
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-xl shadow-inner border border-white">🤖</div>
+                        <div>
+                            <h3 class="font-black text-indigo-600 uppercase text-[10px] md:text-xs tracking-[0.25em]">Разбор от ИИ-тренера</h3>
+                            <p class="text-[9px] text-slate-400 font-bold">Stockfish + GPT анализ</p>
+                        </div>
+                    </div>
+                    <div id="ai-summary" class="text-slate-700 font-bold text-sm leading-relaxed mb-4"></div>
+
+                    <div id="ai-phases" class="space-y-3 mb-4">
+                        <div id="ai-opening" class="hidden bg-emerald-50 rounded-xl p-3 border border-emerald-100">
+                            <span class="text-[9px] font-black text-emerald-600 uppercase tracking-wider">Дебют</span>
+                            <p class="text-slate-700 font-bold text-xs mt-1"></p>
+                        </div>
+                        <div id="ai-middlegame" class="hidden bg-blue-50 rounded-xl p-3 border border-blue-100">
+                            <span class="text-[9px] font-black text-blue-600 uppercase tracking-wider">Миттельшпиль</span>
+                            <p class="text-slate-700 font-bold text-xs mt-1"></p>
+                        </div>
+                        <div id="ai-endgame" class="hidden bg-purple-50 rounded-xl p-3 border border-purple-100">
+                            <span class="text-[9px] font-black text-purple-600 uppercase tracking-wider">Эндшпиль</span>
+                            <p class="text-slate-700 font-bold text-xs mt-1"></p>
+                        </div>
+                    </div>
+
+                    <div id="ai-strengths-weaknesses" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                        <div id="ai-strengths" class="hidden bg-emerald-50/60 rounded-xl p-3 border border-emerald-100">
+                            <span class="text-[9px] font-black text-emerald-600 uppercase tracking-wider block mb-2">Сильные стороны</span>
+                            <ul class="space-y-1 text-xs font-bold text-slate-600"></ul>
+                        </div>
+                        <div id="ai-weaknesses" class="hidden bg-amber-50/60 rounded-xl p-3 border border-amber-100">
+                            <span class="text-[9px] font-black text-amber-600 uppercase tracking-wider block mb-2">Над чем работать</span>
+                            <ul class="space-y-1 text-xs font-bold text-slate-600"></ul>
+                        </div>
+                    </div>
+
+                    <div id="ai-recommendations" class="hidden bg-indigo-50/60 rounded-xl p-3 border border-indigo-100">
+                        <span class="text-[9px] font-black text-indigo-600 uppercase tracking-wider block mb-2">Рекомендации</span>
+                        <ul class="space-y-1 text-xs font-bold text-slate-600"></ul>
+                    </div>
+
+                    <div id="ai-rating-estimate" class="hidden mt-3 text-center bg-slate-50 rounded-xl p-3 border border-slate-200">
+                        <span class="text-[9px] font-black text-slate-500 uppercase tracking-wider">Оценка уровня</span>
+                        <p class="text-sm font-black text-slate-700 mt-1"></p>
+                    </div>
+                </section>
+
                 <section class="mini-card p-5 md:p-6">
                     <h3 class="font-black text-slate-800 uppercase text-[10px] md:text-xs tracking-[0.25em] mb-4">Краткий список ошибок</h3>
                     <div id="key-mistakes-list" class="space-y-3 text-sm text-slate-600 font-bold" aria-live="polite">
@@ -1119,6 +1166,48 @@
             });
         }
 
+        function renderAiCommentary(ai) {
+            const section = document.getElementById('ai-commentary-section');
+            if (!ai || !section) { if (section) section.classList.add('hidden'); return; }
+            section.classList.remove('hidden');
+
+            const summaryEl = document.getElementById('ai-summary');
+            if (summaryEl && ai.summary) summaryEl.textContent = ai.summary;
+
+            function setPhase(id, text) {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (text) { el.classList.remove('hidden'); el.querySelector('p').textContent = text; }
+                else el.classList.add('hidden');
+            }
+            setPhase('ai-opening', ai.opening_assessment);
+            setPhase('ai-middlegame', ai.middlegame_assessment);
+            setPhase('ai-endgame', ai.endgame_assessment);
+
+            function setList(id, items) {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (items && items.length) {
+                    el.classList.remove('hidden');
+                    el.querySelector('ul').innerHTML = items.map(s => `<li>• ${s}</li>`).join('');
+                } else el.classList.add('hidden');
+            }
+            setList('ai-strengths', ai.strengths);
+            setList('ai-weaknesses', ai.weaknesses);
+
+            const recsEl = document.getElementById('ai-recommendations');
+            if (recsEl && ai.recommendations && ai.recommendations.length) {
+                recsEl.classList.remove('hidden');
+                recsEl.querySelector('ul').innerHTML = ai.recommendations.map(r => `<li>→ ${r}</li>`).join('');
+            } else if (recsEl) recsEl.classList.add('hidden');
+
+            const rateEl = document.getElementById('ai-rating-estimate');
+            if (rateEl && ai.rating_estimate) {
+                rateEl.classList.remove('hidden');
+                rateEl.querySelector('p').textContent = ai.rating_estimate;
+            } else if (rateEl) rateEl.classList.add('hidden');
+        }
+
         function renderMistakeCards() {
             const container = document.getElementById('mistake-cards');
             if (!container) return;
@@ -1304,6 +1393,7 @@
             gameId = getGameIdFromUrl();
 
             if (!gameId) {
+                renderAiCommentary(null);
                 document.getElementById('analysis-subtitle').textContent = 'Выбери партию из истории';
                 document.getElementById('key-mistakes-list').innerHTML = renderEmptyState(
                     'Выбери партию',
@@ -1351,6 +1441,7 @@
 
                 renderKeyMistakes();
                 renderMistakeCards();
+                renderAiCommentary(data.ai_commentary || null);
 
                 if (!analysisData.length) {
                     document.getElementById('analysis-subtitle').textContent = 'Анализ пустой';

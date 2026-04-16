@@ -1,4 +1,6 @@
 import base64
+import json
+import logging
 import os
 import random
 import re
@@ -14,6 +16,8 @@ from app.models.topic import Topic
 from app.services.chess_service import ChessService
 from app.models.analysis_cache import AnalysisCache
 from app.chess.pgn_utils import parse_pgn
+
+logger = logging.getLogger(__name__)
 
 MAX_KEY_MISTAKES = 3
 
@@ -92,6 +96,111 @@ class AnalysisService:
     @staticmethod
     def _move_color_by_index(move_number):
         return 'white' if move_number % 2 == 1 else 'black'
+
+    @staticmethod
+    def _get_ai_interpretation(stockfish_result, pgn_text=None, user_level=None):
+        """Send Stockfish analysis data to OpenAI for human-readable interpretation."""
+        api_key = os.environ.get("OPENAI_API_KEY")
+        if not api_key:
+            return None
+
+        total_moves = stockfish_result.get('total_moves', 0)
+        blunders_count = stockfish_result.get('blunders_count', 0)
+        mistakes_count = stockfish_result.get('mistakes_count', 0)
+        key_mistakes = stockfish_result.get('key_mistakes', [])
+
+        analysis_list = stockfish_result.get('analysis', [])
+        evals = []
+        for item in analysis_list:
+            ev = item.get('evaluation')
+            if ev is not None:
+                mp = item.get('move_played') or item.get('move', {}).get('notation', '?')
+                mn = item.get('move_number') or item.get('move', {}).get('move_number', '?')
+                evals.append(f"{mn}. {mp} (eval: {ev:+.2f})")
+
+        eval_summary = '; '.join(evals[-30:]) if len(evals) > 30 else '; '.join(evals)
+
+        mistakes_desc = ""
+        for i, km in enumerate(key_mistakes, 1):
+            move_played = km.get('move_played', '?')
+            best_move = km.get('best_move', '?')
+            loss = km.get('evaluation_loss', km.get('loss', 0))
+            mn = km.get('move_number', '?')
+            fen = km.get('fen', '')
+            mistakes_desc += (
+                f"\nОшибка {i}: Ход {mn}. {move_played} "
+                f"(потеря: {loss:.1f} пешки, лучше было: {best_move})"
+            )
+            if fen:
+                mistakes_desc += f" [FEN: {fen}]"
+
+        level_hint = ""
+        if user_level:
+            level_map = {
+                'pawn': 'начинающий',
+                'knight': 'начинающий-средний',
+                'bishop': 'средний',
+                'rook': 'продвинутый',
+                'queen': 'эксперт',
+            }
+            level_hint = f"\nУровень ученика: {level_map.get(user_level, user_level)}."
+
+        pgn_block = ""
+        if pgn_text:
+            pgn_block = f"\n\nPGN партии:\n{pgn_text[:2000]}"
+
+        prompt = f"""Ты — профессиональный шахматный тренер. Проанализируй результаты движка Stockfish и дай понятный разбор партии.
+
+Статистика:
+- Всего ходов: {total_moves}
+- Ошибок (loss > 0.8): {mistakes_count}
+- Зевков (loss > 1.5): {blunders_count}{level_hint}
+
+Ключевые ошибки:{mistakes_desc or ' нет серьёзных ошибок'}
+
+Оценки по ходам (последние): {eval_summary[:1500]}{pgn_block}
+
+Верни JSON (и ТОЛЬКО JSON, без markdown):
+{{
+  "summary": "Общая оценка партии в 2-3 предложениях",
+  "opening_assessment": "Оценка дебюта в 1-2 предложениях",
+  "middlegame_assessment": "Оценка миттельшпиля в 1-2 предложениях",
+  "endgame_assessment": "Оценка эндшпиля в 1-2 предложениях (или 'Партия не дошла до эндшпиля')",
+  "key_moments": [
+    {{
+      "move_number": 12,
+      "description": "Описание критического момента"
+    }}
+  ],
+  "strengths": ["Сильная сторона 1", "Сильная сторона 2"],
+  "weaknesses": ["Слабая сторона 1", "Слабая сторона 2"],
+  "recommendations": ["Рекомендация 1", "Рекомендация 2", "Рекомендация 3"],
+  "rating_estimate": "Примерная оценка уровня игры на основе этой партии"
+}}
+
+Требования:
+- Всё на русском
+- Дружелюбный, поддерживающий тон
+- Конкретные советы, привязанные к ошибкам в этой партии
+- Если ошибок мало — похвали, отметь сильные стороны"""
+
+        try:
+            client = OpenAI(api_key=api_key)
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": "Ты шахматный тренер-аналитик. Отвечай ТОЛЬКО валидным JSON."},
+                    {"role": "user", "content": prompt},
+                ],
+                temperature=0.7,
+                max_tokens=1500,
+                response_format={"type": "json_object"},
+            )
+            raw = response.choices[0].message.content or "{}"
+            return json.loads(raw)
+        except Exception as e:
+            logger.error("AI interpretation failed: %s", e)
+            return None
 
     @staticmethod
     def _analyze_parsed_moves(parsed_moves):
@@ -203,6 +312,14 @@ class AnalysisService:
             return {'error': 'Не удалось распарсить PGN'}, 400
 
         result = AnalysisService._analyze_parsed_moves(parsed['moves'])
+
+        ai_commentary = AnalysisService._get_ai_interpretation(
+            result,
+            pgn_text=pgn_text,
+        )
+        if ai_commentary:
+            result['ai_commentary'] = ai_commentary
+
         return {
             'parsed_headers': parsed.get('headers', {}),
             'result': parsed.get('result'),
@@ -369,14 +486,30 @@ class AnalysisService:
 
         db.session.commit()
 
-        return {
+        stockfish_result = {
             'analysis': analysis_list,
             'key_mistakes': saved_mistakes,
             'total_moves': len(moves),
             'blunders_count': sum(1 for m in moves if m.is_blunder),
             'mistakes_count': sum(1 for m in moves if m.is_mistake),
-        }, 200
+        }
 
+        user = None
+        try:
+            from app.models.user import User
+            user = User.query.get(int(user_id))
+        except Exception:
+            pass
+
+        ai_commentary = AnalysisService._get_ai_interpretation(
+            stockfish_result,
+            pgn_text=game.pgn,
+            user_level=user.level if user else None,
+        )
+        if ai_commentary:
+            stockfish_result['ai_commentary'] = ai_commentary
+
+        return stockfish_result, 200
 
     @staticmethod
     def analyze_position(fen):
