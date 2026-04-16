@@ -100,10 +100,6 @@ const api = {
         if (finalToken) {
             window.roChessState.setTokens(finalToken, data.refresh_token || (data.data && data.data.refresh_token));
             window.roChessState.setUser(finalUser);
-            window.location.href = 'Dashboard.html';
-        } else {
-            alert("Регистрация успешна! Теперь войдите в свой аккаунт.");
-            window.location.reload(); 
         }
         return data;
     },
