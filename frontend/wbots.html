@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GM Legends — Битва с ботом</title>
 
     <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
@@ -48,6 +48,26 @@
         #myBoard {
             width: 100%;
             aspect-ratio: 1 / 1;
+            touch-action: none;
+        }
+
+        .board-frame,
+        .board-frame * {
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .chessboard-63f37 {
+            touch-action: none !important;
+        }
+
+        .piece-417db {
+            touch-action: none !important;
+        }
+
+        .square-55d63 {
+            touch-action: none !important;
         }
 
         .glass-panel {
@@ -407,25 +427,40 @@
             }
 
             .board-frame {
-                width: min(94vw, 360px);
-                border-width: 8px;
-                border-radius: 20px;
+                width: calc(100vw - 16px);
+                max-width: none;
+                border-width: 4px;
+                border-radius: 12px;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.12);
             }
 
             .confirm-actions {
                 grid-template-columns: 1fr;
             }
-        }
+
+            body.mobile-game-active {
+                overflow: hidden;
+                position: fixed;
+                width: 100%;
+                height: 100%;
+            }
+
+            body.mobile-game-active main {
+                padding: 4px;
+                overflow-y: auto;
+                height: calc(100vh - 52px);
+                -webkit-overflow-scrolling: touch;
+            }
     </style>
 </head>
 <body class="bg-slate-50 xl:flex">
     <div id="live-region" class="sr-only" aria-live="polite"></div>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-    <header class="xl:hidden sticky top-0 z-[90] bg-white/90 backdrop-blur-xl border-b border-slate-100 px-4 py-3 flex items-center justify-between">
-        <img src="gml.png" alt="GM Legends" class="h-10 rounded-xl">
+    <header class="xl:hidden sticky top-0 z-[90] bg-white/90 backdrop-blur-xl border-b border-slate-100 px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between">
+        <img src="gml.png" alt="GM Legends" class="h-8 sm:h-10 rounded-xl">
 
-        <button id="mobile-menu-btn" class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl btn-min" aria-label="Открыть меню" type="button">
+        <button id="mobile-menu-btn" class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-xl sm:text-2xl btn-min" aria-label="Открыть меню" type="button">
             ☰
         </button>
     </header>
@@ -453,7 +488,8 @@
     <main class="flex-1 p-4 md:p-6 xl:p-12 max-w-[1500px] mx-auto w-full">
         <div id="page-message" class="hidden mb-5" aria-live="polite"></div>
 
-        <div class="w-full max-w-7xl mx-auto flex flex-col md:flex-row md:justify-between md:items-center gap-5 mb-8 md:mb-10 px-1 md:px-2">
+        <!-- Top bar: bot info + timer (desktop) -->
+        <div class="hidden sm:flex w-full max-w-7xl mx-auto flex-col md:flex-row md:justify-between md:items-center gap-5 mb-8 md:mb-10 px-1 md:px-2">
             <div class="flex items-center gap-4 md:gap-6">
                 <div class="bg-[#393b3d] text-white px-5 md:px-8 py-4 rounded-[1.6rem] md:rounded-[2rem] flex items-center gap-4 shadow-2xl border-t-2 border-white/10">
                     <span class="text-3xl md:text-4xl">🤖</span>
@@ -465,14 +501,28 @@
                     </div>
                 </div>
             </div>
-
             <div id="timer" class="timer-neon text-emerald-400 px-7 md:px-10 py-3 md:py-4 rounded-[1.6rem] md:rounded-[2rem] roblox-font italic text-3xl md:text-4xl tracking-tighter border-2 border-white/5 w-fit" aria-live="polite">
                 05:00
             </div>
         </div>
 
-        <div class="w-full max-w-7xl mx-auto grid grid-cols-1 xl:grid-cols-12 gap-6 md:gap-8 xl:gap-10 items-start">
-            <div class="xl:col-span-3 space-y-5 md:space-y-6 order-2 xl:order-1">
+        <!-- MOBILE: compact top bar -->
+        <div class="sm:hidden flex items-center justify-between gap-2 mb-2 px-1">
+            <div class="bg-[#393b3d] text-white px-3 py-2 rounded-xl flex items-center gap-2 shadow-lg text-xs">
+                <span>🤖</span>
+                <span id="m-bot-label" class="font-black roblox-font italic uppercase truncate">Мастер</span>
+            </div>
+            <div id="m-game-status" class="flex-1 mx-2 font-black text-indigo-600 text-[11px] bg-indigo-50 px-2 py-2 rounded-lg border border-white shadow-sm uppercase italic text-center" aria-live="polite">
+                Нажми Старт
+            </div>
+            <div id="m-timer" class="timer-neon text-emerald-400 px-3 py-2 rounded-xl roblox-font italic text-xl tracking-tighter border border-white/5">
+                05:00
+            </div>
+        </div>
+
+        <div class="w-full max-w-7xl mx-auto grid grid-cols-1 xl:grid-cols-12 gap-4 sm:gap-6 md:gap-8 xl:gap-10 items-start">
+            <!-- Left panel (desktop only) -->
+            <div class="xl:col-span-3 space-y-5 md:space-y-6 order-2 xl:order-1 hidden sm:block">
                 <div class="glass-panel p-6 md:p-8 text-center">
                     <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6 italic">Твой цвет</p>
                     <div class="flex justify-center gap-4 md:gap-6">
@@ -508,6 +558,7 @@
                 </div>
             </div>
 
+            <!-- Board (always visible) -->
             <div class="xl:col-span-6 flex justify-center order-1 xl:order-2">
                 <div class="board-frame">
                     <div id="board-overlay" class="board-overlay" aria-live="polite">
@@ -520,7 +571,8 @@
                 </div>
             </div>
 
-            <div class="xl:col-span-3 space-y-5 md:space-y-6 text-center order-3">
+            <!-- Right panel (desktop only) -->
+            <div class="xl:col-span-3 space-y-5 md:space-y-6 text-center order-3 hidden sm:block">
                 <div class="glass-panel p-6 md:p-8">
                     <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Настройки</p>
 
@@ -551,6 +603,39 @@
                 </button>
 
                 <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-4 break-all font-mono" id="fen-display" aria-live="polite"></p>
+            </div>
+        </div>
+
+        <!-- MOBILE: compact controls below board -->
+        <div class="sm:hidden mt-2 px-1 space-y-2">
+            <div class="grid grid-cols-3 gap-2">
+                <select id="m-difficulty" class="bg-slate-100 border-b-2 border-slate-200 font-black text-slate-600 uppercase cursor-pointer text-center rounded-lg text-[11px] py-2" aria-label="Сложность">
+                    <option value="1">🥚 Новичок</option>
+                    <option value="2" selected>🔥 Мастер</option>
+                    <option value="3">🏆 Легенда</option>
+                </select>
+                <select id="m-time-limit" class="bg-slate-100 border-b-2 border-slate-200 font-black text-slate-600 uppercase cursor-pointer text-center rounded-lg text-[11px] py-2" aria-label="Время">
+                    <option value="1">1 мин</option>
+                    <option value="5" selected>5 мин</option>
+                    <option value="10">10 мин</option>
+                </select>
+                <button id="m-start-btn" class="bg-emerald-500 text-white roblox-font italic uppercase border-b-2 border-emerald-700 active:translate-y-[2px] transition-all rounded-lg text-[11px] py-2" aria-label="Старт" type="button">
+                    Старт ▶
+                </button>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="toggleMobileOrientation()" class="bg-slate-100 text-slate-600 font-black rounded-lg px-3 py-2 text-[11px] uppercase border-b-2 border-slate-200 active:translate-y-[1px]" type="button">🔄</button>
+                <button id="m-resign-btn" onclick="openResignConfirm()" class="bg-slate-800 text-white font-black rounded-lg px-3 py-2 text-[11px] uppercase border-b-2 border-black active:translate-y-[1px]" type="button">🏳️ Сдаться</button>
+                <button onclick="resetGame()" class="flex-1 bg-red-500 text-white font-black rounded-lg px-3 py-2 text-[11px] uppercase border-b-2 border-red-700 active:translate-y-[1px]" type="button">🔄 Новая</button>
+            </div>
+            <div id="m-move-log" class="bg-slate-50 rounded-lg px-2 py-1 border border-slate-100 max-h-16 overflow-y-auto">
+                <div class="text-slate-400 font-bold text-center text-[10px]">Ходов нет</div>
+            </div>
+            <div id="m-bot-thinking-box" class="hidden flex justify-center">
+                <div class="inline-flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 rounded-full px-3 py-1 text-[10px] font-black uppercase">
+                    <span class="spinner-dark" style="width:12px;height:12px;border-width:2px;"></span>
+                    Бот думает...
+                </div>
             </div>
         </div>
     </main>
@@ -610,8 +695,10 @@
         const toast = document.getElementById('toast');
         const pageMessage = document.getElementById('page-message');
         const botThinkingBox = document.getElementById('bot-thinking-box');
+        const mBotThinkingBox = document.getElementById('m-bot-thinking-box');
         const boardOverlay = document.getElementById('board-overlay');
         const resignModal = document.getElementById('resignConfirmModal');
+        const isMobile = () => window.innerWidth < 640;
 
         let toastTimer = null;
 
@@ -649,35 +736,83 @@
             pageMessage.textContent = '';
         }
 
+        function getDifficultyValue() {
+            if (isMobile()) {
+                return document.getElementById('m-difficulty')?.value || '2';
+            }
+            return document.getElementById('difficulty')?.value || '2';
+        }
+
+        function getTimeLimitValue() {
+            if (isMobile()) {
+                return document.getElementById('m-time-limit')?.value || '5';
+            }
+            return document.getElementById('time-limit')?.value || '5';
+        }
+
+        function syncMobileDesktop() {
+            const dv = getDifficultyValue();
+            const tv = getTimeLimitValue();
+            ['difficulty', 'm-difficulty'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = dv;
+            });
+            ['time-limit', 'm-time-limit'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = tv;
+            });
+        }
+
         function updateBotDifficultyLabel() {
-            const difficultyEl = document.getElementById('difficulty');
-            const labelEl = document.getElementById('bot-difficulty-label');
-
-            if (!difficultyEl || !labelEl) return;
-
+            const val = getDifficultyValue();
             const difficultyMap = {
                 '1': 'CPU Boss: Новичок 🥚',
                 '2': 'CPU Boss: Мастер 🔥',
                 '3': 'CPU Boss: Легенда 🏆'
             };
+            const mobileMap = { '1': 'Новичок 🥚', '2': 'Мастер 🔥', '3': 'Легенда 🏆' };
 
-            labelEl.textContent = difficultyMap[String(difficultyEl.value)] || 'CPU Boss: Мастер 🔥';
+            const labelEl = document.getElementById('bot-difficulty-label');
+            if (labelEl) labelEl.textContent = difficultyMap[val] || 'CPU Boss: Мастер 🔥';
+
+            const mLabel = document.getElementById('m-bot-label');
+            if (mLabel) mLabel.textContent = mobileMap[val] || 'Мастер 🔥';
+        }
+
+        function toggleMobileOrientation() {
+            if (!board || isCreatingGame || isBotThinking) return;
+            const newColor = board.orientation() === 'white' ? 'black' : 'white';
+            board.orientation(newColor);
+            updateOrientationButtons(newColor);
         }
 
         function setBotThinkingState(active) {
             isBotThinking = active;
-            botThinkingBox.classList.toggle('hidden', !active);
+            if (botThinkingBox) botThinkingBox.classList.toggle('hidden', !active);
+            if (mBotThinkingBox) mBotThinkingBox.classList.toggle('hidden', !active);
             boardOverlay.classList.toggle('show', active);
             updateStatus();
         }
 
         function setControlsDisabled(disabled) {
-            document.getElementById('difficulty').disabled = disabled;
-            document.getElementById('time-limit').disabled = disabled;
-            document.getElementById('orientation-white-btn').disabled = disabled;
-            document.getElementById('orientation-black-btn').disabled = disabled;
-            document.getElementById('resign-btn').disabled = disabled;
-            document.getElementById('restart-btn').disabled = disabled;
+            ['difficulty', 'm-difficulty'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.disabled = disabled;
+            });
+            ['time-limit', 'm-time-limit'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.disabled = disabled;
+            });
+            const owb = document.getElementById('orientation-white-btn');
+            const obb = document.getElementById('orientation-black-btn');
+            if (owb) owb.disabled = disabled;
+            if (obb) obb.disabled = disabled;
+            ['resign-btn', 'm-resign-btn'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.disabled = disabled;
+            });
+            const rb = document.getElementById('restart-btn');
+            if (rb) rb.disabled = disabled;
         }
 
         function setRestartButtonLoading(isLoading) {
@@ -694,11 +829,17 @@
 
         function renderMoveLogEmpty() {
             const logContainer = document.getElementById('move-log');
-            logContainer.innerHTML = `
-                <div class="empty-state !p-4">
-                    <div class="text-slate-500 font-bold">Пока ходов нет</div>
-                </div>
-            `;
+            if (logContainer) {
+                logContainer.innerHTML = `
+                    <div class="empty-state !p-4">
+                        <div class="text-slate-500 font-bold">Пока ходов нет</div>
+                    </div>
+                `;
+            }
+            const mLog = document.getElementById('m-move-log');
+            if (mLog) {
+                mLog.innerHTML = `<div class="text-slate-400 font-bold text-center text-[10px]">Ходов нет</div>`;
+            }
         }
 
         function updateOrientationButtons(color) {
@@ -764,38 +905,48 @@
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
             const display = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-            document.getElementById('timer').textContent = display;
+            const desktopTimer = document.getElementById('timer');
+            const mobileTimer = document.getElementById('m-timer');
+            if (desktopTimer) desktopTimer.textContent = display;
+            if (mobileTimer) mobileTimer.textContent = display;
         }
 
         function updateMoveLog(move) {
-            const logContainer = document.getElementById('move-log');
-            if (!logContainer) return;
-
-            if (logContainer.textContent.includes('Пока ходов нет')) {
-                logContainer.innerHTML = '';
-            }
-
+            const containers = [document.getElementById('move-log'), document.getElementById('m-move-log')];
             const historyLength = game.history().length;
             const moveNumber = Math.ceil(historyLength / 2);
 
-            if (historyLength % 2 === 1) {
-                const moveDiv = document.createElement('div');
-                moveDiv.className = "flex justify-between font-black text-slate-600 text-sm bg-slate-50 p-3 rounded-xl border border-white shadow-sm fade-swap";
-                moveDiv.innerHTML = `<span>${moveNumber}. ${move.san}</span><span class="bot-move-placeholder text-blue-500">...</span>`;
-                logContainer.appendChild(moveDiv);
-            } else {
-                const lastRow = logContainer.lastElementChild;
-                if (lastRow) {
-                    const botSpan = lastRow.querySelector('.bot-move-placeholder');
-                    if (botSpan) {
-                        botSpan.innerText = move.san;
-                        botSpan.classList.remove('bot-move-placeholder');
-                        botSpan.classList.add('text-indigo-600');
+            containers.forEach(logContainer => {
+                if (!logContainer) return;
+                const isMobileLog = logContainer.id === 'm-move-log';
+
+                if (logContainer.textContent.includes('Пока ходов нет') || logContainer.textContent.includes('Ходов нет')) {
+                    logContainer.innerHTML = '';
+                }
+
+                if (historyLength % 2 === 1) {
+                    const moveDiv = document.createElement('div');
+                    if (isMobileLog) {
+                        moveDiv.className = "flex justify-between font-black text-slate-600 text-[10px] bg-white px-2 py-1 rounded";
+                    } else {
+                        moveDiv.className = "flex justify-between font-black text-slate-600 text-sm bg-slate-50 p-3 rounded-xl border border-white shadow-sm fade-swap";
+                    }
+                    moveDiv.innerHTML = `<span>${moveNumber}. ${move.san}</span><span class="bot-move-placeholder text-blue-500">...</span>`;
+                    logContainer.appendChild(moveDiv);
+                } else {
+                    const lastRow = logContainer.lastElementChild;
+                    if (lastRow) {
+                        const botSpan = lastRow.querySelector('.bot-move-placeholder');
+                        if (botSpan) {
+                            botSpan.innerText = move.san;
+                            botSpan.classList.remove('bot-move-placeholder');
+                            botSpan.classList.add('text-indigo-600');
+                        }
                     }
                 }
-            }
 
-            logContainer.scrollTop = logContainer.scrollHeight;
+                logContainer.scrollTop = logContainer.scrollHeight;
+            });
         }
 
         function applyAiMoveToBoard(aiMoveData) {
@@ -925,9 +1076,10 @@
         async function startNewGame() {
             if (isCreatingGame) return;
 
-            const difficulty = document.getElementById('difficulty').value;
+            syncMobileDesktop();
+            const difficulty = getDifficultyValue();
             const color = board.orientation();
-            const timeLimit = parseInt(document.getElementById('time-limit').value, 10) * 60;
+            const timeLimit = parseInt(getTimeLimitValue(), 10) * 60;
 
             isCreatingGame = true;
             setControlsDisabled(true);
@@ -981,6 +1133,7 @@
                 updateStatus();
                 hidePageMessage();
                 showToast('Новая игра готова', 'success');
+                lockMobileScroll();
 
                 setTimeout(() => {
                     if (board) board.resize();
@@ -1090,14 +1243,17 @@
                 game.undo();
                 board.position(game.fen());
 
-                const logContainer = document.getElementById('move-log');
-                const lastRow = logContainer.lastElementChild;
-                if (lastRow && lastRow.textContent.includes(move.san)) {
-                    lastRow.remove();
-                    if (!logContainer.children.length) {
-                        renderMoveLogEmpty();
+                ['move-log', 'm-move-log'].forEach(logId => {
+                    const logContainer = document.getElementById(logId);
+                    if (!logContainer) return;
+                    const lastRow = logContainer.lastElementChild;
+                    if (lastRow && lastRow.textContent.includes(move.san)) {
+                        lastRow.remove();
+                        if (!logContainer.children.length) {
+                            renderMoveLogEmpty();
+                        }
                     }
-                }
+                });
 
                 updateStatus();
                 setBotThinkingState(false);
@@ -1139,6 +1295,7 @@
         function showEndScreen(title, message) {
             clearInterval(timerInterval);
             setBotThinkingState(false);
+            unlockMobileScroll();
 
             if (isPlacementMode) {
                 setTimeout(() => {
@@ -1189,9 +1346,9 @@
             let status = '';
 
             if (!gameId) {
-                status = 'Выбери сложность, время и нажми Старт';
+                status = 'Нажми Старт';
             } else if (isCreatingGame) {
-                status = 'Создание партии...';
+                status = 'Создание...';
             } else if (isBotThinking) {
                 status = 'Бот думает...';
             } else if (game.in_checkmate()) {
@@ -1204,11 +1361,17 @@
                     (orientation === 'white' && game.turn() === 'w') ||
                     (orientation === 'black' && game.turn() === 'b');
 
-                status = playerTurn ? 'Твой ход...' : 'Ожидание хода бота...';
+                status = playerTurn ? 'Твой ход...' : 'Ожидание бота...';
             }
 
-            document.getElementById('game-status').innerText = status;
-            document.getElementById('fen-display').innerText = game.fen();
+            const gsEl = document.getElementById('game-status');
+            if (gsEl) gsEl.innerText = status;
+
+            const mGsEl = document.getElementById('m-game-status');
+            if (mGsEl) mGsEl.innerText = status;
+
+            const fenEl = document.getElementById('fen-display');
+            if (fenEl) fenEl.innerText = game.fen();
         }
 
         const config = {
@@ -1250,19 +1413,27 @@
         mobileMenuBtn?.addEventListener('click', openMobileMenu);
         mobileOverlay?.addEventListener('click', closeMobileMenu);
 
-        document.getElementById('difficulty').addEventListener('change', () => {
+        function onDifficultyChange() {
+            syncMobileDesktop();
             updateBotDifficultyLabel();
-        });
+        }
 
-        document.getElementById('time-limit').addEventListener('change', () => {
-            const minutes = parseInt(document.getElementById('time-limit').value, 10) || 5;
+        function onTimeLimitChange() {
+            syncMobileDesktop();
+            const minutes = parseInt(getTimeLimitValue(), 10) || 5;
             if (!gameId) {
                 timeLeft = minutes * 60;
                 updateTimerDisplay();
             }
-        });
+        }
 
-        document.getElementById('start-btn').addEventListener('click', startNewGame);
+        document.getElementById('difficulty')?.addEventListener('change', onDifficultyChange);
+        document.getElementById('m-difficulty')?.addEventListener('change', onDifficultyChange);
+        document.getElementById('time-limit')?.addEventListener('change', onTimeLimitChange);
+        document.getElementById('m-time-limit')?.addEventListener('change', onTimeLimitChange);
+
+        document.getElementById('start-btn')?.addEventListener('click', startNewGame);
+        document.getElementById('m-start-btn')?.addEventListener('click', startNewGame);
         document.getElementById('cancel-resign-btn').addEventListener('click', closeResignConfirm);
         document.getElementById('confirm-resign-btn').addEventListener('click', confirmResign);
 
@@ -1272,26 +1443,61 @@
             }
         });
 
+        (function preventBoardScroll() {
+            const boardEl = document.getElementById('myBoard');
+            if (!boardEl) return;
+
+            function stopScroll(e) {
+                if (e.target.closest('#myBoard') || e.target.closest('.board-frame')) {
+                    e.preventDefault();
+                }
+            }
+
+            boardEl.addEventListener('touchmove', stopScroll, { passive: false });
+            boardEl.closest('.board-frame')?.addEventListener('touchmove', stopScroll, { passive: false });
+        })();
+
+        function lockMobileScroll() {
+            if (isMobile()) document.body.classList.add('mobile-game-active');
+        }
+
+        function unlockMobileScroll() {
+            document.body.classList.remove('mobile-game-active');
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             updateBotDifficultyLabel();
             board = Chessboard('myBoard', config);
             updateOrientationButtons('white');
-            const minutes = parseInt(document.getElementById('time-limit').value, 10) || 5;
+            const minutes = parseInt(getTimeLimitValue(), 10) || 5;
             timeLeft = minutes * 60;
             updateTimerDisplay();
             renderMoveLogEmpty();
             updateStatus();
 
+            setTimeout(() => { if (board) board.resize(); }, 100);
+
             if (isPlacementMode && placementGameId) {
                 gameId = placementGameId;
-                document.getElementById('difficulty').value = '1';
-                document.getElementById('time-limit').value = '5';
+                ['difficulty', 'm-difficulty'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = '1';
+                });
+                ['time-limit', 'm-time-limit'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = '5';
+                });
                 timeLeft = 300;
                 updateTimerDisplay();
                 updateBotDifficultyLabel();
-                document.getElementById('game-status').textContent = 'Пробная партия — играйте!';
+                updateStatus();
+                const gsEl = document.getElementById('game-status');
+                if (gsEl) gsEl.textContent = 'Пробная партия — играйте!';
+                const mGsEl = document.getElementById('m-game-status');
+                if (mGsEl) mGsEl.textContent = 'Играйте!';
                 showPageMessage('Пробная партия для определения уровня. Играйте как обычно!', 'info');
-                startTimerTick();
+                lockMobileScroll();
+                resetTimer(300);
             }
         });
     </script>
