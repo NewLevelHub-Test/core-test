@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Академия Ro-Chess</title>
+    <title>GM Legends — Академия</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
     <style>
@@ -323,7 +323,7 @@
 
     <!-- MOBILE HEADER -->
     <header class="xl:hidden sticky top-0 z-[90] bg-white/90 backdrop-blur-xl border-b border-slate-100 px-4 py-3 flex items-center justify-between">
-        <img src="gml.png" alt="RO-CHESS" class="h-10 rounded-xl">
+        <img src="gml.png" alt="GM Legends" class="h-10 rounded-xl">
 
         <button id="mobile-menu-btn" class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl btn-min" aria-label="Открыть меню" type="button">
             ☰
@@ -334,7 +334,7 @@
 
     <aside id="sidebar" class="w-72 desktop-sidebar h-screen fixed xl:sticky top-0 left-0 flex flex-col p-8 z-[85] -translate-x-full xl:translate-x-0 transition-transform duration-300">
         <div class="mb-12 text-center">
-            <img src="gml.png" alt="RO-CHESS" class="h-14 rounded-xl inline-block">
+            <img src="gml.png" alt="GM Legends" class="h-14 rounded-xl inline-block">
         </div>
 
         <nav class="space-y-4 flex-1" aria-label="Основная навигация">
@@ -710,11 +710,12 @@
                     card.setAttribute('aria-label', `Открыть тему ${topic.name}`);
                     card.onclick = () => loadLessons(topic.id, topic.name);
 
+                    const lessonCount = topic.lesson_count || 0;
                     card.innerHTML = `
                         <div class="text-5xl md:text-6xl mb-4">🧩</div>
                         <h3 class="roblox-font italic uppercase text-base md:text-lg mb-2 text-slate-800">${topic.name}</h3>
                         <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">
-                            ID темы: ${topic.id}
+                            ${lessonCount} ${lessonCount === 1 ? 'урок' : 'уроков'}
                         </p>
                     `;
 
@@ -764,12 +765,17 @@
                 lessons.forEach((lesson, index) => {
                     const row = document.createElement('button');
                     row.type = 'button';
-                    row.className = 'bg-white p-5 md:p-6 rounded-2xl md:rounded-3xl border-b-4 border-slate-100 flex justify-between items-center hover:bg-slate-50 cursor-pointer transition-all lesson-row w-full text-left focus-ring';
+                    const doneClass = lesson.is_completed ? 'border-emerald-200 bg-emerald-50/50' : 'border-slate-100';
+                    row.className = `bg-white p-5 md:p-6 rounded-2xl md:rounded-3xl border-b-4 ${doneClass} flex justify-between items-center hover:bg-slate-50 cursor-pointer transition-all lesson-row w-full text-left focus-ring`;
                     row.setAttribute('aria-label', `Открыть урок ${lesson.title}`);
                     row.onclick = () => loadLessonContent(lesson.id, index);
 
+                    const checkMark = lesson.is_completed
+                        ? '<span class="text-emerald-500 font-black text-lg mr-2">✓</span>'
+                        : '';
+
                     row.innerHTML = `
-                        <span class="font-black text-slate-700 uppercase text-xs md:text-sm">${lesson.title}</span>
+                        <span class="font-black text-slate-700 uppercase text-xs md:text-sm flex items-center">${checkMark}${lesson.title}</span>
                         <span class="text-indigo-500 font-black">➔</span>
                     `;
 

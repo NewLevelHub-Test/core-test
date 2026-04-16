@@ -4,6 +4,15 @@ import bcrypt
 
 from app import db
 
+LEVELS = ['pawn', 'knight', 'bishop', 'rook', 'queen']
+LEVEL_NAMES_RU = {
+    'pawn': 'Пешка',
+    'knight': 'Конь',
+    'bishop': 'Слон',
+    'rook': 'Ладья',
+    'queen': 'Ферзь',
+}
+
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -13,12 +22,16 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=True)
     phone = db.Column(db.String(20), unique=True, nullable=True)
     password_hash = db.Column(db.String(128), nullable=False)
-    role = db.Column(db.String(20), default='student')  # student / admin
+    role = db.Column(db.String(20), default='student')
     age = db.Column(db.Integer)  # 6–90
-    level = db.Column(db.String(30), default='beginner')  # beginner / intermediate / advanced
-    elo_rating = db.Column(db.Integer, default=1200)
+    level = db.Column(db.String(30), default='pawn')
+    elo_rating = db.Column(db.Integer, default=800)
     avatar_url = db.Column(db.String(256))
-    weak_topics = db.Column(db.JSON)  # [topic_id, ...] determined by test
+    weak_topics = db.Column(db.JSON)
+
+    onboarding_completed = db.Column(db.Boolean, default=False)
+    placement_test_score = db.Column(db.Integer)
+    placement_game_id = db.Column(db.Integer)
 
     sms_code = db.Column(db.String(6))
     sms_code_expires = db.Column(db.DateTime)
@@ -55,8 +68,10 @@ class User(db.Model):
             'role': self.role,
             'age': self.age,
             'level': self.level,
+            'level_name': LEVEL_NAMES_RU.get(self.level, self.level),
             'elo_rating': self.elo_rating,
             'avatar_url': self.avatar_url,
             'weak_topics': self.weak_topics,
+            'onboarding_completed': self.onboarding_completed or False,
             'created_at': self.created_at.isoformat(),
         }

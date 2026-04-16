@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RO-CHESS — Dashboard</title>
+    <title>GM Legends — Главная</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
     <style>
@@ -78,7 +78,7 @@
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <header class="xl:hidden sticky top-0 z-[90] bg-white/90 backdrop-blur-xl border-b border-slate-100 px-4 py-3 flex items-center justify-between">
-        <img src="gml.png" alt="RO-CHESS" class="h-10 rounded-xl">
+        <img src="gml.png" alt="GM Legends" class="h-10 rounded-xl">
         <button id="mobile-menu-btn" class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl btn-min" aria-label="Открыть меню" type="button">☰</button>
     </header>
 
@@ -86,7 +86,7 @@
 
     <aside id="sidebar" class="w-72 desktop-sidebar h-screen fixed xl:sticky top-0 left-0 flex flex-col p-8 z-[85] -translate-x-full xl:translate-x-0 transition-transform duration-300">
         <div class="mb-12 text-center">
-            <img src="gml.png" alt="RO-CHESS" class="h-14 rounded-xl inline-block">
+            <img src="gml.png" alt="GM Legends" class="h-14 rounded-xl inline-block">
         </div>
         <nav class="space-y-4 flex-1" aria-label="Основная навигация"></nav>
         <a href="profile.html" class="mt-auto flex items-center gap-3 p-4 min-h-[56px] bg-white rounded-3xl border-2 border-slate-50 shadow-sm hover:scale-105 transition-transform">
@@ -250,6 +250,11 @@
     <script>
         if (!window.roChessApi.isAuthenticated()) {
             window.location.href = 'h1.html';
+        } else {
+            const _u = window.roChessState.getUser();
+            if (_u && _u.onboarding_completed === false) {
+                window.location.href = 'onboarding.html';
+            }
         }
 
         const toast = document.getElementById('toast');

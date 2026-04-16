@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RO-CHESS — Welcome</title>
+    <title>GM Legends — Добро пожаловать</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
     <style>
@@ -268,7 +268,7 @@
 
     <div class="w-full max-w-[500px] desktop-card-lux px-5 py-6 sm:px-8 sm:py-10 md:p-12 relative">
         <div class="text-center mb-8 sm:mb-10 md:mb-14">
-            <img src="gml.png" alt="RO-CHESS" class="h-20 md:h-24 rounded-2xl inline-block transform -rotate-2 shadow-2xl">
+            <img src="gml.png" alt="GM Legends" class="h-20 md:h-24 rounded-2xl inline-block transform -rotate-2 shadow-2xl">
             <p class="text-slate-400 font-black uppercase text-[10px] sm:text-xs tracking-[0.25em] sm:tracking-[0.35em] md:tracking-[0.4em]">
                 Premium Portal
             </p>
@@ -472,7 +472,7 @@
                     Безопасность
                 </p>
                 <p class="text-slate-400 text-[8px] sm:text-[9px] font-bold mt-1 leading-tight">
-                    Данные защищены по стандартам Roblox Security.
+                    Данные защищены по стандартам GM Legends Security.
                 </p>
             </div>
         </div>
@@ -733,10 +733,10 @@
             try {
                 const response = await window.roChessApi.register(userData);
                 console.log('Успех!', response);
-                showFormMessage('Регистрация прошла успешно! Переходим в Dashboard...', 'success');
+                showFormMessage('Регистрация прошла успешно! Переходим к определению уровня...', 'success');
                 showToast('Аккаунт создан', 'success');
                 setTimeout(() => {
-                    window.location.href = 'Dashboard.html';
+                    window.location.href = 'onboarding.html';
                 }, 700);
             } catch (error) {
                 console.error(error);

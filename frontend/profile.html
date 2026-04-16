@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ro-Chess — Профиль</title>
+    <title>GM Legends — Профиль</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
     <style>
@@ -310,7 +310,7 @@
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <header class="xl:hidden sticky top-0 z-[90] bg-white/90 backdrop-blur-xl border-b border-slate-100 px-4 py-3 flex items-center justify-between">
-        <img src="gml.png" alt="RO-CHESS" class="h-10 rounded-xl">
+        <img src="gml.png" alt="GM Legends" class="h-10 rounded-xl">
 
         <button id="mobile-menu-btn" class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl btn-min" aria-label="Открыть меню" type="button">
             ☰
@@ -321,7 +321,7 @@
 
     <aside id="sidebar" class="w-72 desktop-sidebar h-screen fixed xl:sticky top-0 left-0 flex flex-col p-8 z-[85] -translate-x-full xl:translate-x-0 transition-transform duration-300">
         <div class="mb-12 text-center">
-            <img src="gml.png" alt="RO-CHESS" class="h-14 rounded-xl inline-block">
+            <img src="gml.png" alt="GM Legends" class="h-14 rounded-xl inline-block">
         </div>
 
         <nav class="space-y-4 flex-1" aria-label="Основная навигация">
@@ -548,42 +548,34 @@
             `).join('');
         }
 
+        const LEVEL_ORDER = ['pawn', 'knight', 'bishop', 'rook', 'queen'];
+        const LEVEL_UI = {
+            pawn:   { icon: '♟', title: 'Пешка',  percent: 20, next: 'Конь' },
+            knight: { icon: '♞', title: 'Конь',    percent: 40, next: 'Слон' },
+            bishop: { icon: '♝', title: 'Слон',    percent: 60, next: 'Ладья' },
+            rook:   { icon: '♜', title: 'Ладья',   percent: 80, next: 'Ферзь' },
+            queen:  { icon: '♛', title: 'Ферзь',   percent: 100, next: null },
+        };
+
         function normalizeLevel(level) {
             const value = String(level || '').toLowerCase().trim();
-            if (value === 'advanced') return 'advanced';
-            if (value === 'intermediate') return 'intermediate';
-            return 'beginner';
+            if (LEVEL_ORDER.includes(value)) return value;
+            if (value === 'beginner') return 'pawn';
+            if (value === 'intermediate') return 'bishop';
+            if (value === 'advanced') return 'rook';
+            return 'pawn';
         }
 
         function getLevelUi(level) {
             const normalized = normalizeLevel(level);
-
-            if (normalized === 'advanced') {
-                return {
-                    label: 'ADVANCED',
-                    title: 'Продвинутый',
-                    percent: 100,
-                    nextText: 'Ты уже на продвинутом уровне 👑',
-                    badgeText: 'ADVANCED'
-                };
-            }
-
-            if (normalized === 'intermediate') {
-                return {
-                    label: 'INTERMEDIATE',
-                    title: 'Средний',
-                    percent: 66,
-                    nextText: 'Следующая ступень: Advanced 🚀',
-                    badgeText: 'INTERMEDIATE'
-                };
-            }
-
+            const ui = LEVEL_UI[normalized] || LEVEL_UI.pawn;
+            const idx = LEVEL_ORDER.indexOf(normalized);
             return {
-                label: 'BEGINNER',
-                title: 'Начальный',
-                percent: 33,
-                nextText: 'Следующая ступень: Intermediate 🌟',
-                badgeText: 'BEGINNER'
+                label: ui.title.toUpperCase(),
+                title: `${ui.icon} ${ui.title}`,
+                percent: ui.percent,
+                nextText: ui.next ? `Следующая ступень: ${ui.next}` : 'Максимальный уровень!',
+                badgeText: ui.title.toUpperCase(),
             };
         }
 
@@ -592,6 +584,7 @@
             const level = normalizeLevel(user?.level);
             const eloRating = Number(user?.elo_rating || 0);
             const weakTopicsCount = Array.isArray(user?.weak_topics) ? user.weak_topics.length : 0;
+            const lvlIdx = LEVEL_ORDER.indexOf(level);
 
             const badges = [
                 {
@@ -602,12 +595,12 @@
                 {
                     icon: '🧠',
                     title: 'Тактик',
-                    unlocked: level === 'intermediate' || level === 'advanced'
+                    unlocked: lvlIdx >= 2
                 },
                 {
                     icon: '🏆',
                     title: 'Чемпион',
-                    unlocked: eloRating >= 1400 || level === 'advanced'
+                    unlocked: eloRating >= 1400 || lvlIdx >= 3
                 },
                 {
                     icon: '🔥',
@@ -617,12 +610,12 @@
                 {
                     icon: '📘',
                     title: 'Ученик',
-                    unlocked: level !== 'beginner'
+                    unlocked: lvlIdx >= 1
                 },
                 {
                     icon: '💎',
                     title: 'Мастер',
-                    unlocked: level === 'advanced'
+                    unlocked: lvlIdx >= 4
                 }
             ];
 

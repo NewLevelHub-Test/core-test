@@ -97,8 +97,7 @@ def create_app(config_name=None):
     from app.routes.admin_routes import admin_bp
     from app.routes.roadmap_routes import roadmap_bp
     from app.routes.chat_routes import chat_bp
-
-
+    from app.routes.onboarding_routes import onboarding_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(user_bp, url_prefix='/api/users')
@@ -111,6 +110,7 @@ def create_app(config_name=None):
     app.register_blueprint(roadmap_bp, url_prefix='/api/roadmap')
     app.register_blueprint(admin_bp, url_prefix='/api/admin')
     app.register_blueprint(chat_bp, url_prefix='/api/chat')
+    app.register_blueprint(onboarding_bp, url_prefix='/api/onboarding')
 
     logging.basicConfig(level=logging.INFO)
 
@@ -170,5 +170,12 @@ def create_app(config_name=None):
         db.session.add(user)
         db.session.commit()
         click.echo(f'Admin user "{username}" created (id={user.id}).')
+
+    @app.cli.command('seed-lessons')
+    def seed_lessons():
+        """Seed 15 topic blocks with lessons and exercises."""
+        from app.seeds import seed_all_lessons
+        seed_all_lessons()
+        click.echo('Lesson seed data created successfully.')
 
     return app

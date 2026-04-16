@@ -561,6 +561,29 @@ const api = {
         });
     },
 
+    async getPlacementTest() {
+        return await this.fetchWithAuth('/onboarding/test', { method: 'GET' });
+    },
+
+    async submitPlacementTest(answers) {
+        return await this.fetchWithAuth('/onboarding/test/submit', {
+            method: 'POST',
+            body: JSON.stringify({ answers }),
+        });
+    },
+
+    async startPlacementGame() {
+        return await this.fetchWithAuth('/onboarding/game/start', {
+            method: 'POST',
+        });
+    },
+
+    async completeOnboarding() {
+        return await this.fetchWithAuth('/onboarding/complete', {
+            method: 'POST',
+        });
+    },
+
     async logoutServer() {
         try {
             await this.fetchWithAuth('/auth/logout', { method: 'POST' });

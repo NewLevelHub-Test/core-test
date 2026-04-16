@@ -179,7 +179,7 @@ class RoadmapService:
             })
 
         score = round(correct / total * 100) if total > 0 else 0
-        passed = score >= 60
+        passed = correct == total
 
         task.quiz_score = score
         task.quiz_passed = passed
