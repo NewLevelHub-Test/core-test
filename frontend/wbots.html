@@ -675,7 +675,13 @@
         </div>
     </div>
 
+    <script src="state.js"></script>
     <script src="api.js"></script>
+    <script>
+        if (!window.roChessApi || !window.roChessApi.isAuthenticated()) {
+            window.location.href = 'index.html';
+        }
+    </script>
     <script>
         let board = null;
         let game = new Chess();

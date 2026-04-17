@@ -28,7 +28,7 @@ const state = {
         localStorage.removeItem(this.KEYS.USER);
         localStorage.removeItem(this.KEYS.ACCESS_TOKEN);
         localStorage.removeItem(this.KEYS.REFRESH_TOKEN);
-        window.location.href = 'h1.html';
+        window.location.href = 'index.html';
     }
 };
 

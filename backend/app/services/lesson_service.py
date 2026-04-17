@@ -80,12 +80,23 @@ class LessonService:
         return {'exercises': safe}, 200
 
     @staticmethod
-    def check_exercise(user_id, exercise_id, user_move):
+    def check_exercise(user_id, exercise_id, user_move, uci='', from_sq='', to_sq=''):
         exercise = Exercise.query.get(exercise_id)
         if not exercise:
             return {'error': 'Упражнение не найдено'}, 404
 
-        is_correct = user_move == exercise.correct_move
+        correct = (exercise.correct_move or '').strip().lower()
+        uci_from_squares = f"{from_sq}{to_sq}".strip().lower() if from_sq and to_sq else ''
+        uci_move = (uci or '').strip().lower()
+        san_move = (user_move or '').strip()
+
+        is_correct = (
+            (uci_move and uci_move == correct) or
+            (uci_from_squares and uci_from_squares == correct) or
+            (san_move and san_move.lower() == correct) or
+            (san_move and san_move.lower().replace('+', '').replace('#', '') ==
+             correct.replace('+', '').replace('#', ''))
+        )
 
         progress = Progress.query.filter_by(
             user_id=user_id, exercise_id=exercise_id

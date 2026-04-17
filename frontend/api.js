@@ -10,7 +10,7 @@ function resolveBaseUrl() {
 
 const API_CONFIG = {
     BASE_URL: resolveBaseUrl(),
-    AUTH_PAGE: 'h1.html'
+    AUTH_PAGE: 'index.html'
 };
 
 const api = {
@@ -585,7 +585,7 @@ const api = {
             await this.fetchWithAuth('/auth/logout', { method: 'POST' });
         } catch (e) {}
         window.roChessState.logout();
-        window.location.href = 'h1.html';
+        window.location.href = 'index.html';
     },
 
     logout() {

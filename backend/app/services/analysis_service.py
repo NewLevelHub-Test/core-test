@@ -240,10 +240,17 @@ class AnalysisService:
                     loss = eval_score - prev_eval_white
                 loss = max(0, loss)
 
-                is_blunder = loss > 1.5
-                is_mistake = loss > 0.8 and not is_blunder
+                board_after = chess.Board(fen_after)
+                is_terminal = board_after.is_checkmate() or board_after.is_stalemate() or board_after.is_game_over()
 
-                if is_blunder or is_mistake:
+                if is_terminal and best is None:
+                    is_blunder = False
+                    is_mistake = False
+                else:
+                    is_blunder = loss > 1.5
+                    is_mistake = loss > 0.8 and not is_blunder
+
+                if (is_blunder or is_mistake) and best is not None:
                     blunders.append({
                         'move_number': idx,
                         'move_played': move.get('notation'),
@@ -414,6 +421,9 @@ class AnalysisService:
 
                 move.evaluation = eval_score
 
+                board_after = chess.Board(move.fen_after)
+                is_terminal = board_after.is_checkmate() or board_after.is_stalemate() or board_after.is_game_over()
+
                 is_white_move = (move.color == 'white')
                 if is_white_move:
                     loss = prev_eval_white - eval_score
@@ -422,13 +432,17 @@ class AnalysisService:
 
                 loss = max(0, loss)
 
-                is_blunder = loss > 1.5
-                is_mistake = loss > 0.8 and not is_blunder
+                if is_terminal and best is None:
+                    is_blunder = False
+                    is_mistake = False
+                else:
+                    is_blunder = loss > 1.5
+                    is_mistake = loss > 0.8 and not is_blunder
 
                 move.is_blunder = is_blunder
                 move.is_mistake = is_mistake
 
-                if is_blunder or is_mistake:
+                if (is_blunder or is_mistake) and best is not None:
                     blunders.append({
                         'move': move,
                         'loss': loss,
@@ -456,7 +470,8 @@ class AnalysisService:
             templates = CATEGORY_EXPLANATIONS.get(category, ["Хорошая попытка! В следующий раз получится лучше."])
             random_advice = random.choice(templates)
 
-            friendly_explanation = f"{random_advice} (Лучше было пойти: {km['best_move']})"
+            best_text = km['best_move'] or '—'
+            friendly_explanation = f"{random_advice} (Лучше было пойти: {best_text})"
 
             topic = Topic.query.filter(Topic.name.ilike(f'%{category}%')).first()
 

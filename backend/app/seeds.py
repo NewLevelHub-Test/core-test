@@ -58,7 +58,7 @@ TOPICS_DATA = [
                     {"fen": "8/8/8/8/3R4/8/8/8 w - - 0 1", "description": "Ладья на d4 контролирует вертикаль d и горизонталь 4"},
                 ],
                 "exercises": [
-                    {"fen": "8/8/8/8/3R4/8/8/3k4 w - - 0 1", "correct_move": "d4d1", "hint": "Ладья атакует короля по вертикали", "explanation": "Ладья даёт шах с d1", "difficulty": "pawn"},
+                    {"fen": "6k1/8/8/8/8/8/3R4/6K1 w - - 0 1", "correct_move": "d2d8", "hint": "Ладья может дать шах на последней горизонтали", "explanation": "Лd8+ — ладья даёт шах по 8-й горизонтали", "difficulty": "pawn"},
                 ],
             },
             {
@@ -73,7 +73,7 @@ TOPICS_DATA = [
                     {"fen": "8/8/8/8/3N4/8/8/8 w - - 0 1", "description": "Конь на d4 может пойти на 8 полей"},
                 ],
                 "exercises": [
-                    {"fen": "8/8/8/8/3N4/8/8/7k w - - 0 1", "correct_move": "d4f3", "hint": "Конь может атаковать короля, прыгнув на f3", "explanation": "Kf3+ — шах конём с поля f3", "difficulty": "pawn"},
+                    {"fen": "6k1/8/8/3N4/8/8/8/6K1 w - - 0 1", "correct_move": "d5f6", "hint": "Конь может дать шах прыгнув на f6", "explanation": "Кf6+ — шах конём, конь атакует g8 и e8", "difficulty": "pawn"},
                 ],
             },
         ],
@@ -94,7 +94,7 @@ TOPICS_DATA = [
                     {"fen": "r1bqkb1r/pppppppp/2n2n2/8/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3", "description": "Развитие фигур в начале партии"},
                 ],
                 "exercises": [
-                    {"fen": "r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4", "correct_move": "f3e5", "hint": "Конь может взять незащищённую пешку", "explanation": "Кxe5 — конь забирает центральную пешку", "difficulty": "pawn"},
+                    {"fen": "r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4", "correct_move": "f3g5", "hint": "Конь атакует слабый пункт f7", "explanation": "Кg5 — нападение на f7, слабый пункт в позиции чёрных", "difficulty": "pawn"},
                 ],
             },
         ],
@@ -231,7 +231,7 @@ TOPICS_DATA = [
                     {"fen": "rn1qkbnr/ppp1pppp/8/3p4/4P1b1/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3", "description": "Слон g4 связывает коня f3 с ферзём d1"},
                 ],
                 "exercises": [
-                    {"fen": "rn1qkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKB1R w KQkq - 0 2", "correct_move": "f1b5", "hint": "Слон может связать коня с королём", "explanation": "Сb5 — связка коня c6 с королём", "difficulty": "bishop"},
+                    {"fen": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3", "correct_move": "f1b5", "hint": "Слон может связать коня c6 с королём", "explanation": "Сb5 — связка коня c6 с королём e8", "difficulty": "bishop"},
                 ],
             },
         ],

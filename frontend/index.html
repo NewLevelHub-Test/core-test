@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GM Legends — Шахматная платформа</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Nunito', sans-serif; }
+        .roblox-font { font-family: 'Montserrat', sans-serif; }
+        .hero-bg {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 40%, #334155 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-bg::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(99,102,241,0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(16,185,129,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 60% 80%, rgba(245,158,11,0.08) 0%, transparent 40%);
+        }
+        .glass-card {
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .feature-card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(12px);
+            border-radius: 28px;
+            border: 2px solid white;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.06), 0 6px 0 #e2e8f0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .feature-card:hover { transform: translateY(-6px); box-shadow: 0 25px 50px rgba(0,0,0,0.1), 0 6px 0 #e2e8f0; }
+        .btn-glow {
+            background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 8px 0 #047857, 0 16px 40px rgba(16,185,129,0.3);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .btn-glow:hover { transform: scale(1.04) translateY(-2px); box-shadow: 0 10px 0 #047857, 0 20px 50px rgba(16,185,129,0.4); }
+        .btn-glow:active { transform: translateY(6px); box-shadow: 0 2px 0 #047857; }
+        .btn-outline {
+            border: 2px solid rgba(255,255,255,0.3);
+            transition: all 0.2s ease;
+        }
+        .btn-outline:hover { border-color: #10b981; background: rgba(16,185,129,0.1); }
+        .level-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .chess-piece-float {
+            position: absolute;
+            font-size: 60px;
+            opacity: 0.06;
+            animation: float 15s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(10deg); }
+        }
+        .fade-in { animation: fadeIn 0.8s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+        .stagger-4 { animation-delay: 0.4s; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+<script src="state.js"></script>
+<script src="api.js"></script>
+<script>
+    if (window.roChessApi && window.roChessApi.isAuthenticated()) {
+        window.location.href = 'Dashboard.html';
+    }
+</script>
+
+<!-- HERO -->
+<section class="hero-bg min-h-screen flex flex-col relative">
+    <div class="chess-piece-float" style="top:10%;left:5%;">♔</div>
+    <div class="chess-piece-float" style="top:60%;left:85%;animation-delay:-5s;">♛</div>
+    <div class="chess-piece-float" style="top:30%;left:70%;animation-delay:-8s;font-size:45px;">♞</div>
+    <div class="chess-piece-float" style="top:75%;left:15%;animation-delay:-12s;font-size:50px;">♜</div>
+
+    <!-- NAV -->
+    <nav class="relative z-10 flex items-center justify-between px-6 md:px-12 py-5">
+        <div class="flex items-center gap-3">
+            <img src="gml.png" alt="GM Legends" class="h-10 md:h-12 rounded-xl shadow-lg">
+            <span class="roblox-font text-white font-black text-lg md:text-xl tracking-tight italic">GM LEGENDS</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="h1.html" class="btn-outline text-white font-bold px-5 py-2.5 rounded-xl text-sm">
+                Войти
+            </a>
+            <a href="h1.html?register=1" class="btn-glow text-white font-black px-6 py-2.5 rounded-xl text-sm uppercase tracking-wide">
+                Регистрация
+            </a>
+        </div>
+    </nav>
+
+    <!-- HERO CONTENT -->
+    <div class="flex-1 flex items-center justify-center px-6 md:px-12 relative z-10">
+        <div class="max-w-4xl text-center fade-in">
+            <div class="inline-flex items-center gap-2 glass-card rounded-full px-5 py-2 mb-8">
+                <span class="text-emerald-400 text-sm font-bold">♟</span>
+                <span class="text-slate-300 text-xs font-bold uppercase tracking-widest">Умная шахматная платформа</span>
+            </div>
+            <h1 class="roblox-font text-white text-4xl sm:text-5xl md:text-7xl font-black italic uppercase leading-tight mb-6 tracking-tight">
+                Стань <span class="text-emerald-400">гроссмейстером</span> с ИИ-тренером
+            </h1>
+            <p class="text-slate-300 text-lg md:text-xl font-bold max-w-2xl mx-auto mb-10 leading-relaxed">
+                Персональная дорожная карта обучения, анализ партий через Stockfish + GPT, интерактивные уроки и игра с ботами любого уровня.
+            </p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href="h1.html?register=1" class="btn-glow text-white font-black px-10 py-4 rounded-2xl text-base uppercase tracking-wider roblox-font">
+                    Начать бесплатно
+                </a>
+                <a href="#features" class="text-slate-400 hover:text-white font-bold text-sm uppercase tracking-wider transition-colors flex items-center gap-2">
+                    Узнать больше <span class="text-lg">↓</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCROLL HINT -->
+    <div class="relative z-10 flex justify-center pb-8">
+        <div class="w-6 h-10 rounded-full border-2 border-white/20 flex justify-center pt-2">
+            <div class="w-1 h-3 bg-white/40 rounded-full animate-bounce"></div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="bg-gradient-to-b from-slate-50 to-white py-20 md:py-28 px-6 md:px-12">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-16 fade-in">
+            <p class="text-indigo-500 font-black uppercase text-xs tracking-[0.3em] mb-3">Возможности</p>
+            <h2 class="roblox-font text-slate-800 text-3xl md:text-4xl font-black italic uppercase tracking-tight">
+                Всё для роста в шахматах
+            </h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            <div class="feature-card p-7 fade-in stagger-1">
+                <div class="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center text-3xl mb-5 border border-white shadow-inner">🎯</div>
+                <h3 class="roblox-font text-slate-800 font-black uppercase text-sm tracking-wider mb-3">Тест уровня</h3>
+                <p class="text-slate-500 font-bold text-sm leading-relaxed">
+                    При регистрации — тест из 10 вопросов и пробная партия с ботом. Система точно определит ваш уровень от «Пешки» до «Ферзя».
+                </p>
+            </div>
+
+            <div class="feature-card p-7 fade-in stagger-2">
+                <div class="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center text-3xl mb-5 border border-white shadow-inner">🗺️</div>
+                <h3 class="roblox-font text-slate-800 font-black uppercase text-sm tracking-wider mb-3">Дорожная карта</h3>
+                <p class="text-slate-500 font-bold text-sm leading-relaxed">
+                    ИИ строит персональный план на 12 недель с уроками и тестами. Контент адаптируется под ваш уровень.
+                </p>
+            </div>
+
+            <div class="feature-card p-7 fade-in stagger-3">
+                <div class="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center text-3xl mb-5 border border-white shadow-inner">🤖</div>
+                <h3 class="roblox-font text-slate-800 font-black uppercase text-sm tracking-wider mb-3">Анализ с ИИ</h3>
+                <p class="text-slate-500 font-bold text-sm leading-relaxed">
+                    Stockfish + GPT разбирают каждую партию: ошибки, сильные стороны, рекомендации и оценка уровня.
+                </p>
+            </div>
+
+            <div class="feature-card p-7 fade-in stagger-1">
+                <div class="w-14 h-14 bg-rose-50 rounded-2xl flex items-center justify-center text-3xl mb-5 border border-white shadow-inner">♟️</div>
+                <h3 class="roblox-font text-slate-800 font-black uppercase text-sm tracking-wider mb-3">Игра с ботами</h3>
+                <p class="text-slate-500 font-bold text-sm leading-relaxed">
+                    Три уровня сложности — от новичка до легенды. Тренируйтесь в любое время с умным оппонентом.
+                </p>
+            </div>
+
+            <div class="feature-card p-7 fade-in stagger-2">
+                <div class="w-14 h-14 bg-violet-50 rounded-2xl flex items-center justify-center text-3xl mb-5 border border-white shadow-inner">📚</div>
+                <h3 class="roblox-font text-slate-800 font-black uppercase text-sm tracking-wider mb-3">15 тем с уроками</h3>
+                <p class="text-slate-500 font-bold text-sm leading-relaxed">
+                    От базовых правил до эндшпильной техники. Теория, примеры на доске и практические задания с проверкой.
+                </p>
+            </div>
+
+            <div class="feature-card p-7 fade-in stagger-3">
+                <div class="w-14 h-14 bg-cyan-50 rounded-2xl flex items-center justify-center text-3xl mb-5 border border-white shadow-inner">💬</div>
+                <h3 class="roblox-font text-slate-800 font-black uppercase text-sm tracking-wider mb-3">ИИ-тренер</h3>
+                <p class="text-slate-500 font-bold text-sm leading-relaxed">
+                    Общайтесь с ИИ-тренером в чате — задавайте вопросы по стратегии, тактике и конкретным позициям.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- LEVELS -->
+<section class="bg-white py-20 md:py-28 px-6 md:px-12">
+    <div class="max-w-4xl mx-auto text-center">
+        <p class="text-emerald-500 font-black uppercase text-xs tracking-[0.3em] mb-3">Система уровней</p>
+        <h2 class="roblox-font text-slate-800 text-3xl md:text-4xl font-black italic uppercase tracking-tight mb-12">
+            5 уровней мастерства
+        </h2>
+        <div class="flex flex-wrap justify-center gap-4">
+            <div class="level-badge bg-slate-100 text-slate-600 border-2 border-slate-200">♟ Пешка</div>
+            <div class="level-badge bg-blue-50 text-blue-600 border-2 border-blue-200">♞ Конь</div>
+            <div class="level-badge bg-violet-50 text-violet-600 border-2 border-violet-200">♗ Слон</div>
+            <div class="level-badge bg-amber-50 text-amber-600 border-2 border-amber-200">♜ Ладья</div>
+            <div class="level-badge bg-emerald-50 text-emerald-600 border-2 border-emerald-200">♛ Ферзь</div>
+        </div>
+        <p class="text-slate-400 font-bold text-sm mt-8 max-w-lg mx-auto leading-relaxed">
+            Пройдите тест при регистрации, и система подберёт ваш стартовый уровень. Растите от «Пешки» до «Ферзя»!
+        </p>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="hero-bg py-20 md:py-28 px-6 md:px-12 relative">
+    <div class="chess-piece-float" style="top:20%;left:80%;font-size:80px;animation-delay:-3s;">♚</div>
+    <div class="chess-piece-float" style="top:60%;left:10%;font-size:40px;animation-delay:-7s;">♝</div>
+    <div class="max-w-3xl mx-auto text-center relative z-10">
+        <h2 class="roblox-font text-white text-3xl md:text-5xl font-black italic uppercase tracking-tight mb-6">
+            Готовы начать?
+        </h2>
+        <p class="text-slate-300 font-bold text-lg mb-10 max-w-xl mx-auto">
+            Присоединяйтесь к GM Legends и начните свой путь к шахматному мастерству уже сегодня.
+        </p>
+        <a href="h1.html?register=1" class="btn-glow inline-block text-white font-black px-12 py-5 rounded-2xl text-lg uppercase tracking-wider roblox-font">
+            Создать аккаунт
+        </a>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-slate-900 py-10 px-6 md:px-12">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <img src="gml.png" alt="GM Legends" class="h-8 rounded-lg opacity-80">
+            <span class="roblox-font text-slate-400 font-black text-sm italic">GM LEGENDS</span>
+        </div>
+        <p class="text-slate-500 text-xs font-bold">&copy; 2026 GM Legends. Все права защищены.</p>
+    </div>
+</footer>
+
+<!-- AUTH REQUIRED MODAL -->
+<div id="auth-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl">
+        <div class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-5 border border-white shadow-inner">🔒</div>
+        <h3 class="roblox-font text-slate-800 font-black uppercase text-lg mb-3">Требуется вход</h3>
+        <p class="text-slate-500 font-bold text-sm mb-6 leading-relaxed">
+            Для доступа к этому разделу необходимо войти в аккаунт или зарегистрироваться.
+        </p>
+        <div class="flex flex-col gap-3">
+            <a href="h1.html" class="btn-glow text-white font-black py-3 px-8 rounded-xl text-sm uppercase tracking-wide block">
+                Войти / Регистрация
+            </a>
+            <button onclick="document.getElementById('auth-modal').classList.add('hidden')" class="text-slate-400 font-bold text-sm hover:text-slate-600 transition-colors">
+                Закрыть
+            </button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

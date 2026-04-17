@@ -43,12 +43,17 @@ def get_exercises(lesson_id):
 def check_exercise(lesson_id, exercise_id):
     user_id = get_jwt_identity()
     data = request.get_json() or {}
-    move = data.get('move')
-    
-    if not move or not isinstance(move, str):
+    move = data.get('move', '')
+    uci = data.get('uci', '')
+    from_sq = data.get('from', '')
+    to_sq = data.get('to', '')
+
+    if not move and not uci and not (from_sq and to_sq):
         return jsonify({'error': 'Ход должен быть строкой'}), 400
-        
-    result, status = LessonService.check_exercise(user_id, exercise_id, move)
+
+    result, status = LessonService.check_exercise(
+        user_id, exercise_id, move, uci=uci, from_sq=from_sq, to_sq=to_sq
+    )
     return jsonify(result), status
 
 @lesson_bp.route('/<int:lesson_id>/complete', methods=['POST'])

@@ -480,6 +480,11 @@
 
     <script src="state.js"></script>
     <script src="api.js"></script>
+    <script>
+        if (window.roChessApi && window.roChessApi.isAuthenticated()) {
+            window.location.href = 'Dashboard.html';
+        }
+    </script>
 
     <script>
         const loginSection = document.getElementById('login-section');
@@ -605,6 +610,10 @@
 
         toRegisterBtn.addEventListener('click', showRegister);
         toLoginBtn.addEventListener('click', showLogin);
+
+        if (new URLSearchParams(window.location.search).get('register') === '1') {
+            showRegister();
+        }
 
         function validateLoginFields() {
             clearLoginErrors();

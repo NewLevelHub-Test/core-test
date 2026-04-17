@@ -119,7 +119,7 @@
     const api = window.roChessApi;
 
     if (!api || !api.isAuthenticated()) {
-        window.location.href = 'h1.html';
+        window.location.href = 'index.html';
         return;
     }
 
@@ -132,6 +132,15 @@
     const urlParams = new URLSearchParams(window.location.search);
     const step = urlParams.get('step');
     const gameId = urlParams.get('game_id');
+
+    document.getElementById('btn-go-dashboard').addEventListener('click', () => {
+        window.location.href = 'Dashboard.html';
+    });
+
+    document.getElementById('btn-skip-game').addEventListener('click', () => {
+        showStep('step-loading');
+        completeOnboarding();
+    });
 
     if (step === 'after_game') {
         showStep('step-loading');
@@ -236,20 +245,15 @@
     }
 
     document.getElementById('btn-start-game').addEventListener('click', async () => {
-        try {
-            const data = await api.startPlacementGame();
-            if (data.game && data.game.id) {
-                window.location.href = 'wbots.html?placement=true&game_id=' + data.game.id;
-            }
-        } catch (e) {
-            alert('Ошибка создания партии: ' + (e.message || e));
-        }
-    });
-
-    document.getElementById('btn-skip-game').addEventListener('click', () => {
-        showStep('step-loading');
-        completeOnboarding();
-    });
+                 try {
+                     const data = await api.startPlacementGame();
+                     if (data.game && data.game.id) {
+                         window.location.href = 'wbots.html?placement=true&game_id=' + data.game.id;
+                     }
+                 } catch (e) {
+                     alert('Ошибка создания партии: ' + (e.message || e));
+                 }
+             });
 
     async function completeOnboarding() {
         document.getElementById('loading-title').textContent = 'Определяем уровень...';
@@ -286,10 +290,6 @@
             showStep('step-test-result');
         }
     }
-
-    document.getElementById('btn-go-dashboard').addEventListener('click', () => {
-        window.location.href = 'Dashboard.html';
-    });
 
 })();
 </script>
